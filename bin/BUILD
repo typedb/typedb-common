@@ -31,7 +31,7 @@ assemble_targz(
     permissions = {
         "grakn": "0755",
     },
-    visibility = ["//server:__pkg__", "//console:__pkg__", "//:__pkg__"]
+    visibility = ["//visibility:public"]
 )
 
 assemble_targz(
@@ -39,7 +39,7 @@ assemble_targz(
     additional_files = {
         "//bin:grakn.bat": 'grakn.bat',
     },
-    visibility = ["//server:__pkg__", "//console:__pkg__", "//:__pkg__"]
+    visibility = ["//visibility:public"]
 )
 
 assemble_apt(
