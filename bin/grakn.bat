@@ -53,8 +53,8 @@ goto exiterror
 :startconsole
 
 set "G_CP=%GRAKN_HOME%\console\conf\;%GRAKN_HOME%\console\services\lib\*"
-if exist .\console\services\lib\io-grakn-core-grakn-console-*.jar (
-  java %CONSOLE_JAVAOPTS% -cp "%G_CP%" -Dgrakn.dir="%GRAKN_HOME%" grakn.core.console.GraknConsole %*
+if exist .\console\services\lib\io-grakn-console-grakn-console-*.jar (
+  java %CONSOLE_JAVAOPTS% -cp "%G_CP%" -Dgrakn.dir="%GRAKN_HOME%" grakn.console.GraknConsole %*
   goto exit
 ) else (
   echo Grakn Core Console is not included in this Grakn distribution^.

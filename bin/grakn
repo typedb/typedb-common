@@ -54,7 +54,7 @@ elif [ "$1" = "console" ]; then
     if [ -f "${CONSOLE_JAR_FILENAME}" ]; then
         SERVICE_LIB_CP="console/services/lib/*"
         CLASSPATH="${GRAKN_HOME}/${SERVICE_LIB_CP}:${GRAKN_HOME}/console/conf/"
-        java ${CONSOLE_JAVAOPTS} -cp "${CLASSPATH}" -Dgrakn.dir="${GRAKN_HOME}" grakn.core.console.GraknConsole "$@"
+        java ${CONSOLE_JAVAOPTS} -cp "${CLASSPATH}" -Dgrakn.dir="${GRAKN_HOME}" grakn.console.GraknConsole "$@"
     else
         echo "Grakn Core Console is not included in this Grakn distribution."
         echo "You may want to install Grakn Core Console or Grakn Core (all)."
