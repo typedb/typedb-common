@@ -80,7 +80,7 @@ jobs:
       - apt-wait
       - install-bazel-linux-rbe
       - checkout
-      - run: sudo apt install rpm
+      - run: sudo apt-get update && sudo apt-get install rpm
       - run: echo 0.0.0_$CIRCLE_SHA1 > VERSION && cat VERSION
       - run: |
           export DEPLOY_RPM_USERNAME=$REPO_GRAKN_USERNAME
@@ -145,7 +145,7 @@ jobs:
       - apt-wait
       - install-bazel-linux-rbe
       - checkout
-      - run: sudo apt install rpm
+      - run: sudo apt-get update && sudo apt-get install rpm
       - run: cat VERSION
       - run: |
           export DEPLOY_RPM_USERNAME=$REPO_GRAKN_USERNAME
