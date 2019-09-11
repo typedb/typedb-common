@@ -1,4 +1,4 @@
-Name: grakn-core-bin
+Name: grakn-bin
 Version: devel
 Release: 1
 Summary: Grakn Core (bin)
@@ -6,7 +6,7 @@ URL: https://grakn.ai
 License: Apache License, v2.0
 AutoReqProv: no
 
-Source0: {_grakn-core-bin-rpm-tar.tar.gz}
+Source0: {_grakn-bin-rpm-tar.tar.gz}
 
 Requires: java-1.8.0-openjdk-headless
 Requires: which
@@ -20,7 +20,7 @@ Grakn Core (server) - description
 
 %install
 mkdir -p %{buildroot}
-tar -xvf {_grakn-core-bin-rpm-tar.tar.gz} -C %{buildroot}
+tar -xvf {_grakn-bin-rpm-tar.tar.gz} -C %{buildroot}
 
 %files
 

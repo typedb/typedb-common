@@ -44,7 +44,7 @@ assemble_targz(
 
 assemble_apt(
     name = "assemble-linux-apt",
-    package_name = "grakn-core-bin",
+    package_name = "grakn-bin",
     maintainer = "Grakn Labs <community@grakn.ai>",
     description = "Grakn Core (binaries)",
     version_file = "//:VERSION",
@@ -73,10 +73,10 @@ deploy_apt(
 
 assemble_rpm(
     name = "assemble-linux-rpm",
-    package_name = "grakn-core-bin",
+    package_name = "grakn-bin",
     installation_dir = "/opt/grakn/core/",
     version_file = "//:VERSION",
-    spec_file = "//config/rpm:grakn-core-bin.spec",
+    spec_file = "//config/rpm:grakn-bin.spec",
     empty_dirs = [
         "var/log/grakn/",
     ],
