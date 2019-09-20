@@ -77,9 +77,11 @@ graknlabs_build_tools_ci_pip_install()
 # Load Distribution dependencies #
 ##################################
 
-# TODO: rename the macro we load here to deploy_github_dependencies
-load("@graknlabs_bazel_distribution//github:dependencies.bzl", "github_dependencies_for_deployment")
-github_dependencies_for_deployment()
+load("@graknlabs_bazel_distribution//github:dependencies.bzl", "tcnksm_ghr")
+tcnksm_ghr()
+
+load("@graknlabs_bazel_distribution//common:dependencies.bzl", "bazelbuild_rules_pkg")
+bazelbuild_rules_pkg()
 
 
 #####################################
