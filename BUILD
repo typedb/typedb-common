@@ -18,6 +18,16 @@
 
 exports_files(["VERSION"], visibility = ["//visibility:public"])
 load("@graknlabs_bazel_distribution//github:rules.bzl", "deploy_github")
+load("@graknlabs_build_tools//distribution/maven:rules.bzl", "deploy_maven", "assemble_maven")
+load("@graknlabs_build_tools//checkstyle:rules.bzl", "checkstyle_test")
+
+
+java_library(
+    name = "common",
+    srcs = glob(["util/*.java"]),
+    visibility = ["//visibility:public"],
+    tags = ["maven_coordinates=io.grakn.common:grakn-common:{pom_version}"],
+)
 
 deploy_github(
     name = "deploy-github",
@@ -25,4 +35,26 @@ deploy_github(
     title = "Grakn Common",
     title_append_version = True,
     release_description = "//:RELEASE_TEMPLATE.md",
+)
+
+assemble_maven(
+    name = "assemble-maven",
+    target = ":common",
+    package = "common",
+    workspace_refs = "@graknlabs_common_workspace_refs//:refs.json",
+    project_name = "Grakn Common",
+    project_description = "Grakn Common classes and tools",
+    project_url = "https://github.com/graknlabs/common",
+    scm_url = "https://github.com/graknlabs/common",
+)
+
+deploy_maven(
+    name = "deploy-maven",
+    target = ":assemble-maven",
+)
+
+
+checkstyle_test(
+    name = "checkstyle",
+    targets = [":common"],
 )
