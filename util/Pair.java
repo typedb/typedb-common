@@ -18,7 +18,7 @@
  */
 
 
-package util;
+package grakn.common.util;
 
 import java.util.AbstractMap;
 
