@@ -24,7 +24,7 @@ load("@graknlabs_build_tools//checkstyle:rules.bzl", "checkstyle_test")
 
 java_library(
     name = "common",
-    srcs = glob(["**/*.java"]),
+    srcs = glob(["util/*.java"]),
     visibility = ["//visibility:public"],
     tags = ["maven_coordinates=io.grakn.common:grakn-common:{pom_version}"],
 )
