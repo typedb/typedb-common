@@ -91,3 +91,9 @@ bazelbuild_rules_pkg()
 # TODO: Figure out why this cannot be loaded at earlier at the top of the file
 load("@com_github_google_bazel_common//:workspace_defs.bzl", "google_common_workspace_rules")
 google_common_workspace_rules()
+
+# Generate a JSON document of commit hashes of all external workspace dependencies
+load("@graknlabs_bazel_distribution//common:rules.bzl", "workspace_refs")
+workspace_refs(
+    name = "graknlabs_common_workspace_refs"
+)
