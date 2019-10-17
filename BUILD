@@ -19,6 +19,13 @@
 exports_files(["VERSION"], visibility = ["//visibility:public"])
 load("@graknlabs_bazel_distribution//github:rules.bzl", "deploy_github")
 
+java_library(
+    name = "common",
+    srcs = glob(["**/*.java"]),
+    visibility = ["//visibility:public"],
+    tags = ["maven_coordinates=io.grakn.common:grakn-common:{pom_version}"],
+)
+
 deploy_github(
     name = "deploy-github",
     deployment_properties = "//:deployment.properties",
