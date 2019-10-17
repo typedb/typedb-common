@@ -260,11 +260,11 @@ workflows:
             branches:
               only: common-release-branch
       - deploy-maven-release:
-        filters:
-          branches:
-            only: client-java-release-branch
-        requires:
-          - deploy-approval
+          filters:
+            branches:
+              only: client-java-release-branch
+          requires:
+            - deploy-approval
       - deploy-apt:
           filters:
             branches:
