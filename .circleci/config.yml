@@ -190,7 +190,7 @@ jobs:
     machine: true
     steps:
       - checkout
-      - run: git push --delete origin common-release-branch
+      - run: git push --delete https://$REPO_GITHUB_TOKEN@github.com/graknlabs/common common-release-branch
 
 workflows:
   common:
