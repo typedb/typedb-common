@@ -40,7 +40,8 @@ commands:
 
 jobs:
   build:
-    machine: true
+    machine: 
+      image: ubuntu-1604:201903-01
     working_directory: ~/common
     steps:
       - install-bazel-linux-rbe
@@ -51,7 +52,8 @@ jobs:
       - run: bazel run @graknlabs_build_tools//unused_deps -- list
 
   build-checkstyle:
-    machine: true
+    machine: 
+      image: ubuntu-1604:201903-01
     working_directory: ~/common
     steps:
       - install-bazel-linux-rbe
@@ -61,7 +63,8 @@ jobs:
           command: bazel test $(bazel query 'kind(checkstyle_test, //...)')
 
   build-analysis:
-    machine: true
+    machine: 
+      image: ubuntu-1604:201903-01
     working_directory: ~/common
     steps:
       - install-bazel-linux-rbe
@@ -72,7 +75,8 @@ jobs:
             --project-key graknlabs_common --branch=$CIRCLE_BRANCH --commit-id=$CIRCLE_SHA1
 
   deploy-maven-snapshot:
-    machine: true
+    machine: 
+      image: ubuntu-1604:201903-01
     working_directory: ~/common
     steps:
       - checkout
@@ -83,7 +87,8 @@ jobs:
           bazel run --define version=$(git rev-parse HEAD) //:deploy-maven -- snapshot
 
   deploy-apt-snapshot:
-    machine: true
+    machine: 
+      image: ubuntu-1604:201903-01
     working_directory: ~/common
     steps:
       - install-bazel-linux-rbe
@@ -94,7 +99,8 @@ jobs:
           bazel run --define version=$(git rev-parse HEAD) //bin:deploy-apt -- snapshot
 
   deploy-rpm-snapshot:
-    machine: true
+    machine: 
+      image: ubuntu-1604:201903-01
     working_directory: ~/common
     steps:
       - install-bazel-linux-rbe
@@ -106,7 +112,8 @@ jobs:
           bazel run --define version=$(git rev-parse HEAD) //bin:deploy-rpm -- snapshot
 
   sync-dependencies-snapshot:
-    machine: true
+    machine: 
+      image: ubuntu-1604:201903-01
     steps:
       - install-bazel-linux-rbe
       - checkout
@@ -117,7 +124,8 @@ jobs:
           --targets grakn:master console:master
 
   release-approval:
-    machine: true
+    machine: 
+      image: ubuntu-1604:201903-01
     steps:
       - install-bazel-linux-rbe
       - checkout
@@ -127,7 +135,8 @@ jobs:
           bazel run @graknlabs_build_tools//ci:release-approval
 
   deploy-github:
-    machine: true
+    machine: 
+      image: ubuntu-1604:201903-01
     working_directory: ~/common
     steps:
       - install-bazel-linux-rbe
@@ -141,7 +150,8 @@ jobs:
           bazel run --define version=$(cat VERSION) //:deploy-github -- $CIRCLE_SHA1
 
   deploy-maven-release:
-    machine: true
+    machine: 
+      image: ubuntu-1604:201903-01
     working_directory: ~/common
     steps:
       - install-bazel-linux-rbe
@@ -152,7 +162,8 @@ jobs:
           bazel run --define version=$(cat VERSION) //:deploy-maven -- release
 
   deploy-apt:
-    machine: true
+    machine: 
+      image: ubuntu-1604:201903-01
     working_directory: ~/common
     steps:
       - install-bazel-linux-rbe
@@ -164,7 +175,8 @@ jobs:
           bazel run --define version=$(cat VERSION) //bin:deploy-apt -- release
 
   deploy-rpm:
-    machine: true
+    machine: 
+      image: ubuntu-1604:201903-01
     working_directory: ~/common
     steps:
       - install-bazel-linux-rbe
@@ -176,7 +188,8 @@ jobs:
           bazel run --define version=$(cat VERSION) //bin:deploy-rpm -- release
 
   sync-dependencies-release:
-    machine: true
+    machine: 
+      image: ubuntu-1604:201903-01
     steps:
       - install-bazel-linux-rbe
       - checkout
@@ -187,7 +200,8 @@ jobs:
           --targets grakn:master console:master
 
   release-cleanup:
-    machine: true
+    machine: 
+      image: ubuntu-1604:201903-01
     steps:
       - checkout
       - run: git push --delete https://$REPO_GITHUB_TOKEN@github.com/graknlabs/common common-release-branch
