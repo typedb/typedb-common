@@ -18,7 +18,7 @@
 exports_files(["VERSION"], visibility = ["//visibility:public"])
 load("@graknlabs_bazel_distribution//github:rules.bzl", "deploy_github")
 load("@graknlabs_dependencies//distribution/maven:rules.bzl", "deploy_maven", "assemble_maven")
-load("@graknlabs_dependencies//tools/checkstyle:rules.bzl", "checkstyle_test")
+load("@graknlabs_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
 
 
 java_library(
