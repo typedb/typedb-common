@@ -33,7 +33,7 @@ commands:
       command:
         type: string
     steps:
-      - run: bazel run @graknlabs_dependencies//tools/bazelrun:rbe -- << parameters.command >>
+      - run: bazel run @graknlabs_dependencies//tool/bazelrun:rbe -- << parameters.command >>
 
 jobs:
   build:
@@ -43,10 +43,10 @@ jobs:
     steps:
       - install-bazel
       - checkout
-      - run: bazel run @graknlabs_dependencies//tools/checkstyle:test-coverage
+      - run: bazel run @graknlabs_dependencies//tool/checkstyle:test-coverage
       - run-bazel:
           command: bazel build //...
-      - run: bazel run @graknlabs_dependencies//tools/unuseddeps:unused-deps -- list
+      - run: bazel run @graknlabs_dependencies//tool/unuseddeps:unused-deps -- list
 
   build-checkstyle:
     machine: 
@@ -55,7 +55,7 @@ jobs:
     steps:
       - install-bazel
       - checkout
-      - run: bazel run @graknlabs_dependencies//tools/checkstyle:test-coverage
+      - run: bazel run @graknlabs_dependencies//tool/checkstyle:test-coverage
       - run-bazel:
           command: bazel test $(bazel query 'kind(checkstyle_test, //...)')
 
@@ -68,7 +68,7 @@ jobs:
       - checkout
       - run: |
           SONARCLOUD_CODE_ANALYSIS_CREDENTIAL=$SONARCLOUD_CREDENTIAL \
-            bazel run @graknlabs_dependencies//tools/sonarcloud:code-analysis -- \
+            bazel run @graknlabs_dependencies//tool/sonarcloud:code-analysis -- \
             --project-key graknlabs_common --branch=$CIRCLE_BRANCH --commit-id=$CIRCLE_SHA1
 
   deploy-maven-snapshot:
@@ -116,7 +116,7 @@ jobs:
       - checkout
       - run: |
           export SYNC_DEPENDENCIES_TOKEN=$REPO_GITHUB_TOKEN
-          bazel run @graknlabs_dependencies//tools/sync:dependencies -- \
+          bazel run @graknlabs_dependencies//tool/sync:dependencies -- \
           --source common@$CIRCLE_SHA1 \
           --targets grakn:master console:master
 
@@ -129,7 +129,7 @@ jobs:
       - run: |
           export RELEASE_APPROVAL_USERNAME=$REPO_GITHUB_USERNAME
           export RELEASE_APPROVAL_TOKEN=$REPO_GITHUB_TOKEN
-          bazel run @graknlabs_dependencies//tools/release:approval
+          bazel run @graknlabs_dependencies//tool/release:approval
 
   deploy-github:
     machine: 
@@ -141,7 +141,7 @@ jobs:
       - run: |
           pip install certifi
           export RELEASE_NOTES_TOKEN=$REPO_GITHUB_TOKEN
-          bazel run @graknlabs_dependencies//tools/release:create-notes -- common $(cat VERSION) ./RELEASE_TEMPLATE.md
+          bazel run @graknlabs_dependencies//tool/release:create-notes -- common $(cat VERSION) ./RELEASE_TEMPLATE.md
       - run: |
           export DEPLOY_GITHUB_TOKEN=$REPO_GITHUB_TOKEN
           bazel run --define version=$(cat VERSION) //:deploy-github -- $CIRCLE_SHA1
@@ -192,7 +192,7 @@ jobs:
       - checkout
       - run: |
           export SYNC_DEPENDENCIES_TOKEN=$REPO_GITHUB_TOKEN
-          bazel run @graknlabs_dependencies//tools/sync:dependencies -- \
+          bazel run @graknlabs_dependencies//tool/sync:dependencies -- \
           --source common@$(cat VERSION) \
           --targets grakn:master console:master
 
