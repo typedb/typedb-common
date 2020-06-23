@@ -17,7 +17,7 @@
 
 version: 2.1
 commands:
-  bazel-install:
+  install-bazel:
     steps:
       - run: |
           mkdir install
@@ -28,7 +28,7 @@ commands:
           bash ./rbe.sh
           cd ..
           rm -rf install
-  bazel-run-rbe:
+  run-bazel:
     parameters:
       command:
         type: string
@@ -41,10 +41,10 @@ jobs:
       image: ubuntu-1604:201903-01
     working_directory: ~/common
     steps:
-      - bazel-install
+      - install-bazel
       - checkout
       - run: bazel run @graknlabs_dependencies//tools/checkstyle:test-coverage
-      - bazel-run-rbe:
+      - run-bazel:
           command: bazel build //...
       - run: bazel run @graknlabs_dependencies//tools/unuseddeps:unused-deps -- list
 
@@ -53,10 +53,10 @@ jobs:
       image: ubuntu-1604:201903-01
     working_directory: ~/common
     steps:
-      - bazel-install
+      - install-bazel
       - checkout
       - run: bazel run @graknlabs_dependencies//tools/checkstyle:test-coverage
-      - bazel-run-rbe:
+      - run-bazel:
           command: bazel test $(bazel query 'kind(checkstyle_test, //...)')
 
   build-analysis:
@@ -64,7 +64,7 @@ jobs:
       image: ubuntu-1604:201903-01
     working_directory: ~/common
     steps:
-      - bazel-install
+      - install-bazel
       - checkout
       - run: |
           SONARCLOUD_CODE_ANALYSIS_CREDENTIAL=$SONARCLOUD_CREDENTIAL \
@@ -77,7 +77,7 @@ jobs:
     working_directory: ~/common
     steps:
       - checkout
-      - bazel-install
+      - install-bazel
       - run: |
           export DEPLOY_MAVEN_USERNAME=$REPO_GRAKN_USERNAME
           export DEPLOY_MAVEN_PASSWORD=$REPO_GRAKN_PASSWORD
@@ -88,7 +88,7 @@ jobs:
       image: ubuntu-1604:201903-01
     working_directory: ~/common
     steps:
-      - bazel-install
+      - install-bazel
       - checkout
       - run: |
           export DEPLOY_APT_USERNAME=$REPO_GRAKN_USERNAME
@@ -100,7 +100,7 @@ jobs:
       image: ubuntu-1604:201903-01
     working_directory: ~/common
     steps:
-      - bazel-install
+      - install-bazel
       - checkout
       - run: sudo apt-get update && sudo apt-get install rpm
       - run: |
@@ -112,7 +112,7 @@ jobs:
     machine: 
       image: ubuntu-1604:201903-01
     steps:
-      - bazel-install
+      - install-bazel
       - checkout
       - run: |
           export SYNC_DEPENDENCIES_TOKEN=$REPO_GITHUB_TOKEN
@@ -124,7 +124,7 @@ jobs:
     machine: 
       image: ubuntu-1604:201903-01
     steps:
-      - bazel-install
+      - install-bazel
       - checkout
       - run: |
           export RELEASE_APPROVAL_USERNAME=$REPO_GITHUB_USERNAME
@@ -136,7 +136,7 @@ jobs:
       image: ubuntu-1604:201903-01
     working_directory: ~/common
     steps:
-      - bazel-install
+      - install-bazel
       - checkout
       - run: |
           pip install certifi
@@ -151,7 +151,7 @@ jobs:
       image: ubuntu-1604:201903-01
     working_directory: ~/common
     steps:
-      - bazel-install
+      - install-bazel
       - checkout
       - run: |
           export DEPLOY_MAVEN_USERNAME=$REPO_GRAKN_USERNAME
@@ -163,7 +163,7 @@ jobs:
       image: ubuntu-1604:201903-01
     working_directory: ~/common
     steps:
-      - bazel-install
+      - install-bazel
       - checkout
       - run: cat VERSION
       - run: |
@@ -176,7 +176,7 @@ jobs:
       image: ubuntu-1604:201903-01
     working_directory: ~/common
     steps:
-      - bazel-install
+      - install-bazel
       - checkout
       - run: sudo apt-get update && sudo apt-get install rpm
       - run: |
@@ -188,7 +188,7 @@ jobs:
     machine: 
       image: ubuntu-1604:201903-01
     steps:
-      - bazel-install
+      - install-bazel
       - checkout
       - run: |
           export SYNC_DEPENDENCIES_TOKEN=$REPO_GITHUB_TOKEN
