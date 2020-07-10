@@ -32,13 +32,13 @@ def grakn_test(grakn_artifact = None,
     location = "$(location {})".format(grakn_artifact) if grakn_artifact != None else "none"
 
     native.java_test(
-        deps = deps + [
+        deps = depset(deps + [
             "@graknlabs_common//test/server:grakn-setup",
-        ],
-        classpath_resources = classpath_resources + [
+        ]).to_list(),
+        classpath_resources = depset(classpath_resources + [
             "@graknlabs_common//test/server:logback",
-        ],
-        data = new_data,
+        ]).to_list(),
+        data = depset(new_data).to_list(),
         args = [
             type,
             location,
