@@ -1,0 +1,10 @@
+@maven//:commons_io_commons_io
+@maven//:commons_io_commons_io_2_3
+@maven//:junit_junit
+@maven//:junit_junit_4_12
+@maven//:org_hamcrest_hamcrest_core
+@maven//:org_hamcrest_hamcrest_core_1_3
+@maven//:org_slf4j_slf4j_api
+@maven//:org_slf4j_slf4j_api_1_7_28
+@maven//:org_zeroturnaround_zt_exec
+@maven//:org_zeroturnaround_zt_exec_1_10
