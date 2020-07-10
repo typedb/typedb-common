@@ -24,8 +24,10 @@ def grakn_test(grakn_artifact = None,
                type = "grakn-core",
                **kwargs):
 
+    new_data = [] + data
+
     if grakn_artifact != None:
-        data += [grakn_artifact]
+        new_data += [grakn_artifact]
 
     location = "$(location {})".format(grakn_artifact) if grakn_artifact != None else "none"
 
@@ -36,7 +38,7 @@ def grakn_test(grakn_artifact = None,
         classpath_resources = classpath_resources + [
             "@graknlabs_common//test/server:logback",
         ],
-        data = data,
+        data = new_data,
         args = [
             type,
             location,
