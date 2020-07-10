@@ -27,6 +27,8 @@ def grakn_test(grakn_artifact = None,
     if grakn_artifact != None:
         data += grakn_artifact
 
+    location = "$(location {})".format(grakn_artifact) if grakn_artifact != None else "none"
+
     native.java_test(
         deps = deps + [
             "@graknlabs_common//test/server:grakn-setup",
@@ -37,7 +39,7 @@ def grakn_test(grakn_artifact = None,
         data = data,
         args = [
             type,
-            "$(location {})".format(grakn_artifact),
+            location,
         ],
         **kwargs
     )
