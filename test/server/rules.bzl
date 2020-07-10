@@ -25,7 +25,7 @@ def grakn_test(grakn_artifact = None,
                **kwargs):
 
     if grakn_artifact != None:
-        data += grakn_artifact
+        data += [grakn_artifact]
 
     location = "$(location {})".format(grakn_artifact) if grakn_artifact != None else "none"
 
