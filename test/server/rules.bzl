@@ -17,12 +17,15 @@
 # under the License.
 #
 
-def grakn_test(grakn_artifact,
+def grakn_test(grakn_artifact = None,
                deps = [],
                classpath_resources = [],
                data = [],
                type = "grakn-core",
                **kwargs):
+
+    if grakn_artifact != None:
+        data += grakn_artifact
 
     native.java_test(
         deps = deps + [
@@ -31,9 +34,7 @@ def grakn_test(grakn_artifact,
         classpath_resources = classpath_resources + [
             "@graknlabs_common//test/server:logback",
         ],
-        data = data + [
-            grakn_artifact,
-        ],
+        data = data,
         args = [
             type,
             "$(location {})".format(grakn_artifact),
