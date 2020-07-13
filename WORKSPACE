@@ -20,7 +20,7 @@ workspace(name = "graknlabs_common")
 ################################
 # Load @graknlabs_dependencies #
 ################################
-load("//dependencies/graknlabs:dependencies.bzl", "graknlabs_dependencies")
+load("//dependencies/graknlabs:repositories.bzl", "graknlabs_dependencies")
 graknlabs_dependencies()
 
 # Load Antlr
@@ -50,6 +50,13 @@ node_grpc_compile()
 load("@graknlabs_dependencies//builder/java:deps.bzl", java_deps = "deps")
 java_deps()
 load("@graknlabs_dependencies//library/maven:rules.bzl", "maven")
+
+# Load Kotlin
+load("@graknlabs_dependencies//builder/kotlin:deps.bzl", kotlin_deps = "deps")
+kotlin_deps()
+load("@io_bazel_rules_kotlin//kotlin:kotlin.bzl", "kotlin_repositories", "kt_register_toolchains")
+kotlin_repositories()
+kt_register_toolchains()
 
 # Load NodeJS
 load("@graknlabs_dependencies//builder/nodejs:deps.bzl", nodejs_deps = "deps")
@@ -127,6 +134,16 @@ bazelbuild_rules_pkg()
 
 load("@rules_pkg//:deps.bzl", "rules_pkg_dependencies")
 rules_pkg_dependencies()
+
+##########################
+# Load @graknlabs_common #
+##########################
+load("//dependencies/maven:artifacts.bzl", graknlabs_common_artifacts = "artifacts")
+
+###############
+# Load @maven #
+###############
+maven(graknlabs_common_artifacts)
 
 #########################
 # Create Workspace Refs #
