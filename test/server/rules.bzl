@@ -21,7 +21,6 @@ def grakn_test(grakn_artifact = None,
                deps = [],
                classpath_resources = [],
                data = [],
-               type = "grakn-core",
                **kwargs):
 
     new_data = [] + data
@@ -40,7 +39,6 @@ def grakn_test(grakn_artifact = None,
         ]).to_list(),
         data = depset(new_data).to_list(),
         args = [
-            type,
             location,
         ],
         **kwargs
