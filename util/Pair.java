@@ -16,44 +16,33 @@
  *
  */
 
-
 package grakn.common.util;
 
 import java.util.AbstractMap;
 
-/**
- *
- * <p>
- * Convenience pair class wrapping a SimpleImmutableEntry object.
- * </p>
- *
- * @param <K> key type
- * @param <V> value type
- *
- *
- */
-public class Pair<K, V> {
+public class Pair<T, U> {
 
-    private final AbstractMap.SimpleImmutableEntry<K, V> data;
+    private final AbstractMap.SimpleImmutableEntry<T, U> data;
 
-    public Pair(K key, V value){
+    public Pair(T key, U value) {
         data = new AbstractMap.SimpleImmutableEntry<>(key, value);
     }
 
-    @Override
-    public int hashCode(){ return data.hashCode();}
+    public T first() { return data.getKey();}
+
+    public U second() { return data.getValue();}
 
     @Override
-    public String toString(){ return data.toString();}
+    public String toString() { return data.toString();}
 
     @Override
-    public boolean equals(Object obj){
+    public boolean equals(Object obj) {
         if (obj == null || this.getClass() != obj.getClass()) return false;
         if (obj == this) return true;
         Pair p = (Pair) obj;
         return data.equals(p.data);
     }
 
-    public K first(){ return data.getKey();}
-    public V second(){ return data.getValue();}
+    @Override
+    public int hashCode() { return data.hashCode();}
 }
