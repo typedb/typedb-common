@@ -19,6 +19,7 @@
 package grakn.common.util;
 
 import java.util.Objects;
+import java.util.function.Function;
 
 public class Either<T, U> {
 
@@ -54,6 +55,11 @@ public class Either<T, U> {
 
     public U second() {
         return second;
+    }
+
+    public <V> V apply(Function<T, V> firstFn, Function<U, V> secondFn) {
+        if (isFirst()) return firstFn.apply(first);
+        else return secondFn.apply(second);
     }
 
     @Override
