@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package grakn.common.util;
+package grakn.common.collection;
 
 import java.util.ArrayList;
 import java.util.Arrays;

@@ -13,23 +13,24 @@
  *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- *
  */
 
-package grakn.common.util;
+package grakn.common.collection;
 
 import java.util.Objects;
 
-public class Pair<FIRST, SECOND> {
+public class Triple<FIRST, SECOND, THRID> {
 
     private final FIRST first;
     private final SECOND second;
+    private final THRID third;
     private final int hash;
 
-    public Pair(FIRST first, SECOND second) {
+    public Triple(FIRST first, SECOND second, THRID third) {
         this.first = first;
         this.second = second;
-        this.hash = Objects.hash(this.first, this.second);
+        this.third = third;
+        this.hash = Objects.hash(this.first, this.second, this.third);
     }
 
     public FIRST first() {
@@ -40,20 +41,24 @@ public class Pair<FIRST, SECOND> {
         return second;
     }
 
+    public THRID third() {
+        return third;
+    }
+
     @Override
     public String toString() {
-        return String.format("Pair: {%s, %s}", first.toString(), second.toString());
+        return String.format("Triple: {%s, %s, %s", first.toString(), second.toString(), third.toString());
     }
 
-    @Override
     public boolean equals(Object obj) {
-        if (obj == null || this.getClass() != obj.getClass()) return false;
         if (obj == this) return true;
-        Pair that = (Pair) obj;
-        return Objects.equals(this.first, that.first) && Objects.equals(this.second, that.second);
+        if (obj == null || obj.getClass() != this.getClass()) return false;
+        Triple<?, ?, ?> other = (Triple) obj;
+        return (Objects.equals(this.first, other.first) &&
+                Objects.equals(this.second, other.second) &&
+                Objects.equals(this.third, other.third));
     }
 
-    @Override
     public int hashCode() {
         return hash;
     }

@@ -16,7 +16,7 @@
  *
  */
 
-package grakn.common.util;
+package grakn.common.collection;
 
 import java.util.Objects;
 import java.util.function.Function;

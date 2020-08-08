@@ -23,7 +23,10 @@ load("@graknlabs_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
 
 java_library(
     name = "common",
-    srcs = glob(["concurrent/*.java", "test/server/*.java", "util/*.java"]),
+    runtime_deps = [
+        "//collection:collection",
+        "//concurrent:concurrent",
+    ],
     visibility = ["//visibility:public"],
     tags = ["maven_coordinates=io.grakn.common:grakn-common:{pom_version}"],
 )
@@ -51,7 +54,6 @@ deploy_maven(
     name = "deploy-maven",
     target = ":assemble-maven",
 )
-
 
 checkstyle_test(
     name = "checkstyle",
