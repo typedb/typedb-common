@@ -57,6 +57,20 @@ public class Collections {
         return java.util.Collections.unmodifiableList(list);
     }
 
+    public static <T> List<T> list(Collection<T>... collections) {
+        List<T> combined = new ArrayList<>();
+        for (Collection<T> collection : collections) {
+            combined.addAll(collection);
+        }
+        return java.util.Collections.unmodifiableList(combined);
+    }
+    
+    public static <T> List<T> list(Collection<T> collection, T... array) {
+        List<T> combined = new ArrayList<>(collection);
+        combined.addAll(Arrays.asList(array));
+        return java.util.Collections.unmodifiableList(combined);
+    }
+
     public static <A, B> Pair<A, B> pair(A first, B second) {
         return new Pair<>(first, second);
     }
