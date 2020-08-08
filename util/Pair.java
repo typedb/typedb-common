@@ -18,31 +18,43 @@
 
 package grakn.common.util;
 
-import java.util.AbstractMap;
+import java.util.Objects;
 
-public class Pair<T, U> {
+public class Pair<FIRST, SECOND> {
 
-    private final AbstractMap.SimpleImmutableEntry<T, U> data;
+    private final FIRST first;
+    private final SECOND second;
+    private final int hash;
 
-    public Pair(T key, U value) {
-        data = new AbstractMap.SimpleImmutableEntry<>(key, value);
+    public Pair(FIRST first, SECOND second) {
+        this.first = first;
+        this.second = second;
+        this.hash = Objects.hash(this.first, this.second);
     }
 
-    public T first() { return data.getKey();}
+    public FIRST first() {
+        return first;
+    }
 
-    public U second() { return data.getValue();}
+    public SECOND second() {
+        return second;
+    }
 
     @Override
-    public String toString() { return data.toString();}
+    public String toString() {
+        return String.format("Pair: {%s, %s}", first.toString(), second.toString());
+    }
 
     @Override
     public boolean equals(Object obj) {
         if (obj == null || this.getClass() != obj.getClass()) return false;
         if (obj == this) return true;
-        Pair p = (Pair) obj;
-        return data.equals(p.data);
+        Pair that = (Pair) obj;
+        return Objects.equals(this.first, that.first) && Objects.equals(this.second, that.second);
     }
 
     @Override
-    public int hashCode() { return data.hashCode();}
+    public int hashCode() {
+        return hash;
+    }
 }

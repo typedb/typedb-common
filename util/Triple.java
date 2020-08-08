@@ -19,34 +19,40 @@ package grakn.common.util;
 
 import java.util.Objects;
 
-public class Triple<A, B, C> {
+public class Triple<FIRST, SECOND, THRID> {
 
-    private A first;
-    private B second;
-    private C third;
+    private final FIRST first;
+    private final SECOND second;
+    private final THRID third;
+    private final int hash;
 
-    public Triple(A first, B second, C third) {
+    public Triple(FIRST first, SECOND second, THRID third) {
         this.first = first;
         this.second = second;
         this.third = third;
+        this.hash = Objects.hash(this.first, this.second, this.third);
     }
 
-    public A first() {
+    public FIRST first() {
         return first;
     }
 
-    public B second() {
+    public SECOND second() {
         return second;
     }
 
-    public C third() {
+    public THRID third() {
         return third;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("Triple: {%s, %s, %s", first.toString(), second.toString(), third.toString());
     }
 
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-
         Triple<?, ?, ?> other = (Triple) obj;
         return (Objects.equals(this.first, other.first) &&
                 Objects.equals(this.second, other.second) &&
@@ -54,14 +60,6 @@ public class Triple<A, B, C> {
     }
 
     public int hashCode() {
-        int h = 1;
-        h *= 1000003;
-        h ^= this.first.hashCode();
-        h *= 1000003;
-        h ^= this.second.hashCode();
-        h *= 1000003;
-        h ^= this.third.hashCode();
-
-        return h;
+        return hash;
     }
 }

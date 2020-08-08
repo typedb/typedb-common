@@ -21,13 +21,13 @@ package grakn.common.util;
 import java.util.Objects;
 import java.util.function.Function;
 
-public class Either<T, U> {
+public class Either<FIRST, SECOND> {
 
-    private final T first;
-    private final U second;
+    private final FIRST first;
+    private final SECOND second;
     private final int hash;
 
-    private Either(T first, U second) {
+    private Either(FIRST first, SECOND second) {
         this.first = first;
         this.second = second;
         this.hash = Objects.hash(first, second);
@@ -49,15 +49,15 @@ public class Either<T, U> {
         return second != null;
     }
 
-    public T first() {
+    public FIRST first() {
         return first;
     }
 
-    public U second() {
+    public SECOND second() {
         return second;
     }
 
-    public <V> V apply(Function<T, V> firstFn, Function<U, V> secondFn) {
+    public <V> V apply(Function<FIRST, V> firstFn, Function<SECOND, V> secondFn) {
         if (isFirst()) return firstFn.apply(first);
         else return secondFn.apply(second);
     }
