@@ -44,5 +44,4 @@ checkstyle_test(
     targets = [
         ":grakn-setup",
     ],
-    license_type = "apache",
 )

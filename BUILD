@@ -28,7 +28,10 @@ java_library(
         "//concurrent:concurrent",
     ],
     visibility = ["//visibility:public"],
-    tags = ["maven_coordinates=io.grakn.common:grakn-common:{pom_version}"],
+    tags = [
+        "maven_coordinates=io.grakn.common:grakn-common:{pom_version}",
+        "checkstyle_ignore",
+    ],
 )
 
 deploy_github(
@@ -53,9 +56,4 @@ assemble_maven(
 deploy_maven(
     name = "deploy-maven",
     target = ":assemble-maven",
-)
-
-checkstyle_test(
-    name = "checkstyle",
-    targets = [":common"],
 )
