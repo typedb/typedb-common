@@ -170,18 +170,12 @@ workflows:
             - build
             - build-analysis
             - build-checkstyle
-      - sync-dependencies-snapshot:
-          filters:
-            branches:
-              only: master
-          requires:
-            - deploy-maven-snapshot
       - release-approval:
           filters:
             branches:
               only: master
           requires:
-            - sync-dependencies-snapshot
+            - deploy-maven-snapshot
 
   common-release:
     jobs:
@@ -202,15 +196,9 @@ workflows:
               only: common-release-branch
           requires:
             - deploy-approval
-      - sync-dependencies-release:
-          filters:
-            branches:
-              only: common-release-branch
-          requires:
-            - deploy-maven-release
       - release-cleanup:
           filters:
             branches:
               only: common-release-branch
           requires:
-            - sync-dependencies-release
+            - deploy-maven-release
