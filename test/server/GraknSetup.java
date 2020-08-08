@@ -23,10 +23,8 @@ import org.apache.commons.io.FileUtils;
 import org.zeroturnaround.exec.ProcessExecutor;
 import org.zeroturnaround.exec.StartedProcess;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -49,7 +47,7 @@ public class GraknSetup {
     public static GraknSetup bootup() throws InterruptedException, IOException, TimeoutException {
         if (DISTRIBUTION_FILE == null) {
             throw new IllegalArgumentException("No grakn distribution path specified on the command line\n" +
-                    "Check your test rule, it is recommended to use the `grakn_test` rule from @graknlabs_common");
+                                                       "Check your test rule, it is recommended to use the `grakn_test` rule from @graknlabs_common");
         }
 
         return bootup(DISTRIBUTION_FILE);
@@ -78,7 +76,7 @@ public class GraknSetup {
     private final File GRAKN_DISTRIBUTION_FILE;
     private final Path GRAKN_TARGET_DIRECTORY;
     private final String GRAKN_DISTRIBUTION_FORMAT;
-    private final int port = ThreadLocalRandom.current().nextInt(40000,60000);
+    private final int port = ThreadLocalRandom.current().nextInt(40000, 60000);
     private final Path tmpDir;
 
     private ProcessExecutor executor;
@@ -139,10 +137,10 @@ public class GraknSetup {
         System.out.println("Unarchiving Grakn Core distribution");
         if (GRAKN_DISTRIBUTION_FORMAT.equals(TAR)) {
             executor.command("tar", "-xf", GRAKN_DISTRIBUTION_FILE.toString(),
-                    "-C", GRAKN_TARGET_DIRECTORY.getParent().toString()).execute();
+                             "-C", GRAKN_TARGET_DIRECTORY.getParent().toString()).execute();
         } else {
             executor.command("unzip", "-q", GRAKN_DISTRIBUTION_FILE.toString(),
-                    "-d", GRAKN_TARGET_DIRECTORY.getParent().toString()).execute();
+                             "-d", GRAKN_TARGET_DIRECTORY.getParent().toString()).execute();
         }
         executor = executor.directory(GRAKN_TARGET_DIRECTORY.toFile());
 
@@ -167,8 +165,8 @@ public class GraknSetup {
             System.out.println("Database directory will be at " + tmpDir.toAbsolutePath());
 
             graknProcess = executor.command("./grakn", "server",
-                    "--database-port", Integer.toString(port),
-                    "--database-directory", tmpDir.toAbsolutePath().toString()).start();
+                                            "--database-port", Integer.toString(port),
+                                            "--database-directory", tmpDir.toAbsolutePath().toString()).start();
 
             Thread.sleep(5000);
             assertTrue("Grakn Core failed to start", graknProcess.getProcess().isAlive());

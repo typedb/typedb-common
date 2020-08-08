@@ -49,8 +49,8 @@ public class Triple<A, B, C> {
 
         Triple<?, ?, ?> other = (Triple) obj;
         return (Objects.equals(this.first, other.first) &&
-                    Objects.equals(this.second, other.second) &&
-                    Objects.equals(this.third, other.third));
+                Objects.equals(this.second, other.second) &&
+                Objects.equals(this.third, other.third));
     }
 
     public int hashCode() {

@@ -31,7 +31,7 @@ public class Collections {
     @SafeVarargs
     public static <K, V> Map<K, V> map(Pair<K, V>... pairs) {
         Map<K, V> map = new HashMap<>();
-        for(Pair<K, V> tuple : pairs) {
+        for (Pair<K, V> tuple : pairs) {
             map.put(tuple.first(), tuple.second());
         }
         return java.util.Collections.unmodifiableMap(map);
@@ -64,7 +64,7 @@ public class Collections {
         }
         return java.util.Collections.unmodifiableList(combined);
     }
-    
+
     public static <T> List<T> list(Collection<T> collection, T... array) {
         List<T> combined = new ArrayList<>(collection);
         combined.addAll(Arrays.asList(array));
