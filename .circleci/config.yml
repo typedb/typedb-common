@@ -157,15 +157,21 @@ workflows:
       - build-checkstyle:
           filters:
             branches:
-              only: master
+              only:
+                - master
+                - release-branch-0.2.3
       - build-analysis:
           filters:
             branches:
-              only: master
+              only:
+                - master
+                - release-branch-0.2.3
       - deploy-maven-snapshot:
           filters:
             branches:
-              only: master
+              only:
+                - master
+                - release-branch-0.2.3
           requires:
             - build
             - build-analysis
@@ -173,13 +179,17 @@ workflows:
       - sync-dependencies-snapshot:
           filters:
             branches:
-              only: master
+              only:
+                - master
+                - release-branch-0.2.3
           requires:
             - deploy-maven-snapshot
       - release-approval:
           filters:
             branches:
-              only: master
+              only:
+                - master
+                - release-branch-0.2.3
           requires:
             - sync-dependencies-snapshot
 
