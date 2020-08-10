@@ -7,8 +7,4 @@ public interface GraknRunner {
     int port();
 
     String address();
-
-    void start() throws Exception;
-
-    void stop() throws Exception;
 }

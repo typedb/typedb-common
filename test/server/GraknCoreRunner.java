@@ -122,7 +122,6 @@ public class GraknCoreRunner implements GraknRunner {
         return host() + ":" + port();
     }
 
-    @Override
     public void start() throws InterruptedException, IOException, TimeoutException {
         try {
             System.out.println("Starting Grakn Core database server at " + GRAKN_TARGET_DIRECTORY.toAbsolutePath().toString());
@@ -142,7 +141,6 @@ public class GraknCoreRunner implements GraknRunner {
         }
     }
 
-    @Override
     public void stop() throws InterruptedException, IOException, TimeoutException {
         if (graknProcess != null) {
             try {
