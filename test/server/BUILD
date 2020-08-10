@@ -22,8 +22,8 @@ load("@graknlabs_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
 java_library(
     name = "grakn-setup",
     srcs = [
-        "GraknSetup.java",
-        "GraknCoreDistributionRunner.java",
+        "GraknSingleton.java",
+        "GraknCoreRunner.java",
         "GraknRunner.java",
     ],
     deps = [

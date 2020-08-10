@@ -15,7 +15,7 @@ import java.util.concurrent.TimeoutException;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-public class GraknCoreDistributionRunner implements GraknRunner {
+public class GraknCoreRunner implements GraknRunner {
 
     private static final String[] ARGS = System.getProperty("sun.java.command").split(" ");
     private static final File DISTRIBUTION_FILE = ARGS.length > 1 ? new File(ARGS[1]) : null;
@@ -32,11 +32,11 @@ public class GraknCoreDistributionRunner implements GraknRunner {
     private ProcessExecutor executor;
     private StartedProcess graknProcess;
 
-    public GraknCoreDistributionRunner() throws InterruptedException, TimeoutException, IOException {
+    public GraknCoreRunner() throws InterruptedException, TimeoutException, IOException {
         this(DISTRIBUTION_FILE);
     }
 
-    public GraknCoreDistributionRunner(File distributionFile) throws InterruptedException, TimeoutException, IOException {
+    public GraknCoreRunner(File distributionFile) throws InterruptedException, TimeoutException, IOException {
         System.out.println("Constructing a Grakn Core runner");
 
         if (!distributionFile.exists()) {

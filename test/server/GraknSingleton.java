@@ -17,10 +17,7 @@
 
 package grakn.common.test.server;
 
-import java.io.IOException;
-import java.util.concurrent.TimeoutException;
-
-public class GraknSetup {
+public class GraknSingleton {
 
     private static GraknRunner graknRunner;
 
@@ -30,27 +27,5 @@ public class GraknSetup {
 
     public static GraknRunner getGraknRunner() {
         return graknRunner;
-    }
-
-    public static GraknCoreDistributionRunner usingCore() throws InterruptedException, IOException, TimeoutException {
-        GraknCoreDistributionRunner coreRunner = new GraknCoreDistributionRunner();
-        setGraknRunner(coreRunner);
-        return coreRunner;
-    }
-
-    public static void bootup() throws Exception {
-        if (graknRunner != null) {
-            graknRunner.start();
-        } else {
-            throw new IllegalStateException("No GraknRunner setup");
-        }
-    }
-
-    public static void shutdown() throws Exception {
-        if (graknRunner != null) {
-            graknRunner.stop();
-        } else {
-            throw new IllegalStateException("No GraknRunner setup");
-        }
     }
 }
