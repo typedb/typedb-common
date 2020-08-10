@@ -23,7 +23,8 @@ java_library(
     name = "grakn-setup",
     srcs = [
         "GraknSetup.java",
-        "GraknCoreSetup.java",
+        "GraknCoreDistributionRunner.java",
+        "GraknRunner.java",
     ],
     deps = [
         "@maven//:commons_io_commons_io",

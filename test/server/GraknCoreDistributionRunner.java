@@ -1,20 +1,3 @@
-/*
- * Copyright (C) 2020 Grakn Labs
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- */
-
 package grakn.common.test.server;
 
 import org.apache.commons.io.FileUtils;
@@ -32,48 +15,13 @@ import java.util.concurrent.TimeoutException;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-public class GraknCoreSetup implements GraknSetup {
+public class GraknCoreDistributionRunner implements GraknRunner {
 
     private static final String[] ARGS = System.getProperty("sun.java.command").split(" ");
     private static final File DISTRIBUTION_FILE = ARGS.length > 1 ? new File(ARGS[1]) : null;
 
     private static final String TAR = ".tar.gz";
     private static final String ZIP = ".zip";
-
-    private static GraknSetup graknRunner;
-
-    public static GraknSetup bootup() throws InterruptedException, IOException, TimeoutException {
-        if (DISTRIBUTION_FILE == null) {
-            throw new IllegalArgumentException("No grakn distribution path specified on the command line\n" +
-                    "Check your test rule, it is recommended to use the `grakn_test` rule from @graknlabs_common");
-        }
-
-        return bootup(DISTRIBUTION_FILE);
-    }
-
-    public static GraknSetup bootup(File distributionFile) throws InterruptedException, TimeoutException, IOException {
-        if (!distributionFile.exists()) {
-            throw new IllegalArgumentException("Grakn distribution file is missing from " + distributionFile.getAbsolutePath());
-        }
-
-        checkAndDeleteExistingDistribution(distributionFile);
-        graknRunner = new GraknCoreSetup(distributionFile);
-        graknRunner.start();
-        return graknRunner;
-    }
-
-    public static void setInstance(GraknSetup instance) {
-        graknRunner = instance;
-    }
-
-    public static GraknSetup instance() {
-        return graknRunner;
-    }
-
-    public static void shutdown() throws InterruptedException, TimeoutException, IOException {
-        graknRunner.stop();
-        graknRunner = null;
-    }
 
     private final File GRAKN_DISTRIBUTION_FILE;
     private final Path GRAKN_TARGET_DIRECTORY;
@@ -84,8 +32,18 @@ public class GraknCoreSetup implements GraknSetup {
     private ProcessExecutor executor;
     private StartedProcess graknProcess;
 
-    public GraknCoreSetup(File distributionFile) throws InterruptedException, TimeoutException, IOException {
+    public GraknCoreDistributionRunner() throws InterruptedException, TimeoutException, IOException {
+        this(DISTRIBUTION_FILE);
+    }
+
+    public GraknCoreDistributionRunner(File distributionFile) throws InterruptedException, TimeoutException, IOException {
         System.out.println("Constructing a Grakn Core runner");
+
+        if (!distributionFile.exists()) {
+            throw new IllegalArgumentException("Grakn distribution file is missing from " + distributionFile.getAbsolutePath());
+        }
+
+        checkAndDeleteExistingDistribution(distributionFile);
 
         GRAKN_DISTRIBUTION_FILE = distributionFile;
         GRAKN_DISTRIBUTION_FORMAT = distributionFormat(distributionFile);

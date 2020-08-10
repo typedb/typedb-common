@@ -17,35 +17,40 @@
 
 package grakn.common.test.server;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 
-public interface GraknSetup {
+public class GraknSetup {
 
-    static GraknSetup bootup() throws InterruptedException, TimeoutException, IOException {
-        return GraknCoreSetup.bootup();
+    private static GraknRunner graknRunner;
+
+    public static void setGraknRunner(GraknRunner instance) {
+        graknRunner = instance;
     }
 
-    static GraknSetup bootup(File distributionFile) throws InterruptedException, TimeoutException, IOException {
-        return GraknCoreSetup.bootup(distributionFile);
+    public static GraknRunner getGraknRunner() {
+        return graknRunner;
     }
 
-    static GraknSetup instance() {
-        return GraknCoreSetup.instance();
+    public static GraknCoreDistributionRunner usingCore() throws InterruptedException, IOException, TimeoutException {
+        GraknCoreDistributionRunner coreRunner = new GraknCoreDistributionRunner();
+        setGraknRunner(coreRunner);
+        return coreRunner;
     }
 
-    static void shutdown() throws InterruptedException, IOException, TimeoutException {
-        GraknCoreSetup.shutdown();
+    public static void bootup() throws Exception {
+        if (graknRunner != null) {
+            graknRunner.start();
+        } else {
+            throw new IllegalStateException("No GraknRunner setup");
+        }
     }
 
-    String host();
-
-    int port();
-
-    String address();
-
-    void start() throws InterruptedException, IOException, TimeoutException;
-
-    void stop() throws InterruptedException, IOException, TimeoutException;
+    public static void shutdown() throws Exception {
+        if (graknRunner != null) {
+            graknRunner.stop();
+        } else {
+            throw new IllegalStateException("No GraknRunner setup");
+        }
+    }
 }
