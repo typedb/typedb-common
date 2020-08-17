@@ -64,13 +64,12 @@ sonarcloud_dependencies()
 load("@graknlabs_dependencies//tool/unuseddeps:deps.bzl", unuseddeps_deps = "deps")
 unuseddeps_deps()
 
-
 load("@graknlabs_dependencies//distribution:deps.bzl", distribution_deps = "deps")
 distribution_deps()
+
 ######################################
 # Load @graknlabs_bazel_distribution #
 ######################################
-
 load("//dependencies/graknlabs:repositories.bzl", "graknlabs_bazel_distribution")
 graknlabs_bazel_distribution()
 
