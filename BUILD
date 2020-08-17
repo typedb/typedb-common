@@ -17,7 +17,8 @@
 
 exports_files(["VERSION"], visibility = ["//visibility:public"])
 load("@graknlabs_bazel_distribution//github:rules.bzl", "deploy_github")
-load("@graknlabs_dependencies//distribution/maven:rules.bzl", "deploy_maven", "assemble_maven")
+load("@graknlabs_bazel_distribution//maven:rules.bzl", "assemble_maven", "deploy_maven")
+load("@graknlabs_dependencies//library/maven:artifacts.bzl", "maven_overrides", maven_overrides_org = "artifacts")
 load("@graknlabs_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
 
 
@@ -47,6 +48,7 @@ assemble_maven(
     target = ":common",
     package = "common",
     workspace_refs = "@graknlabs_common_workspace_refs//:refs.json",
+    version_overrides = maven_overrides(maven_overrides_org),
     project_name = "Grakn Common",
     project_description = "Grakn Common classes and tools",
     project_url = "https://github.com/graknlabs/common",
@@ -56,6 +58,7 @@ assemble_maven(
 deploy_maven(
     name = "deploy-maven",
     target = ":assemble-maven",
+    deployment_properties = "@graknlabs_dependencies//distribution:deployment.properties",
 )
 
 checkstyle_test(
