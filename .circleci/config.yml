@@ -210,19 +210,19 @@ workflows:
             branches:
               only:
                 - master
-                - release-branch-0.2.4
+                - 0.2.4
       - build-analysis:
           filters:
             branches:
               only:
                 - master
-                - release-branch-0.2.4
+                - 0.2.4
       - deploy-maven-snapshot:
           filters:
             branches:
               only:
                 - master
-                - release-branch-0.2.4
+                - 0.2.4
           requires:
             - build
             - build-analysis
@@ -230,7 +230,9 @@ workflows:
       - deploy-apt-snapshot:
           filters:
             branches:
-              only: master
+              only:
+                - master
+                - 0.2.4
           requires:
             - build
             - build-analysis
@@ -238,7 +240,9 @@ workflows:
       - deploy-rpm-snapshot:
           filters:
             branches:
-              only: master
+              only:
+                - master
+                - 0.2.4
           requires:
             - build
             - build-analysis
@@ -248,7 +252,7 @@ workflows:
             branches:
               only:
                 - master
-                - release-branch-0.2.4
+                - 0.2.4
           requires:
             - deploy-maven-snapshot
             - deploy-apt-snapshot
@@ -258,7 +262,7 @@ workflows:
             branches:
               only:
                 - master
-                - release-branch-0.2.4
+                - 0.2.4
           requires:
             - sync-dependencies-snapshot
 
