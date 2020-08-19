@@ -83,19 +83,19 @@ jobs:
   deploy-apt-snapshot:
     machine:
       image: ubuntu-1604:201903-01
-    working_directory: ~/dependencies
+    working_directory: ~/common
     steps:
       - checkout
       - install-bazel
       - run: |
           export DEPLOY_APT_USERNAME=$REPO_GRAKN_USERNAME
           export DEPLOY_APT_PASSWORD=$REPO_GRAKN_PASSWORD
-          bazel run --define version=$(git rev-parse HEAD) //distribution/apt:deploy-apt -- snapshot
+          bazel run --define version=$(git rev-parse HEAD) //binary:deploy-apt -- snapshot
 
   deploy-rpm-snapshot:
     machine:
       image: ubuntu-1604:201903-01
-    working_directory: ~/dependencies
+    working_directory: ~/common
     steps:
       - checkout
       - install-bazel
@@ -103,7 +103,7 @@ jobs:
       - run: |
           export DEPLOY_RPM_USERNAME=$REPO_GRAKN_USERNAME
           export DEPLOY_RPM_PASSWORD=$REPO_GRAKN_PASSWORD
-          bazel run --define version=$(git rev-parse HEAD) //distribution/rpm:deploy-rpm -- snapshot
+          bazel run --define version=$(git rev-parse HEAD) //binary:deploy-rpm -- snapshot
 
   # ----- TODO update for common -----
 
@@ -231,6 +231,22 @@ workflows:
             - build
             - build-analysis
             - build-checkstyle
+      - deploy-apt-snapshot:
+          filters:
+            branches:
+              only: master
+          requires:
+            - build
+            - build-analysis
+            - build-checkstyle
+      - deploy-rpm-snapshot:
+          filters:
+            branches:
+              only: master
+          requires:
+            - build
+            - build-analysis
+            - build-checkstyle
       - sync-dependencies-snapshot:
           filters:
             branches:
@@ -239,6 +255,8 @@ workflows:
                 - release-branch-0.2.3
           requires:
             - deploy-maven-snapshot
+            - deploy-apt-snapshot
+            - deploy-rpm-snapshot
       - release-approval:
           filters:
             branches:
