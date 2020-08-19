@@ -106,8 +106,6 @@ assemble_targz(
     visibility = ["//visibility:public"]
 )
 
-
-
 deploy_apt(
     name = "deploy-apt",
     target = ":assemble-linux-apt",
