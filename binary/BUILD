@@ -19,7 +19,6 @@
 load("@graknlabs_bazel_distribution//apt:rules.bzl", "assemble_apt", "deploy_apt")
 load("@graknlabs_bazel_distribution//rpm:rules.bzl", "assemble_rpm", "deploy_rpm")
 load("@graknlabs_bazel_distribution//common:rules.bzl", "assemble_targz")
-load("@graknlabs_bazel_distribution//common:rules.bzl", "assemble_targz")
 
 exports_files(["grakn", "grakn.bat", "grakn-docker.sh"])
 
@@ -47,7 +46,7 @@ assemble_apt(
     package_name = "grakn-bin",
     maintainer = "Grakn Labs <community@grakn.ai>",
     description = "Grakn Core (binaries)",
-    archives = ["//distribution:assemble-bash-targz"],
+    archives = [":assemble-bash-targz"],
     installation_dir = "/opt/grakn/core/",
     empty_dirs = [
         "var/log/grakn/",
@@ -72,7 +71,7 @@ assemble_rpm(
     empty_dirs = [
         "var/log/grakn/",
     ],
-    archives = ["//distribution:assemble-bash-targz"],
+    archives = [":assemble-bash-targz"],
     permissions = {
         "var/log/grakn/": "0777",
     },
@@ -82,38 +81,14 @@ assemble_rpm(
     },
 )
 
-
-load("@graknlabs_bazel_distribution//common:rules.bzl", "assemble_targz")
-
-exports_files(["deployment.bzl"], visibility = ["//visibility:public"])
-
-assemble_targz(
-    name = "assemble-bash-targz",
-    additional_files = {
-        "//binary:grakn": 'grakn',
-    },
-    permissions = {
-        "grakn": "0755",
-    },
-    visibility = ["//visibility:public"]
-)
-
-assemble_targz(
-    name = "assemble-bat-targz",
-    additional_files = {
-        "//binary:grakn.bat": 'grakn.bat',
-    },
-    visibility = ["//visibility:public"]
-)
-
 deploy_apt(
     name = "deploy-apt",
     target = ":assemble-linux-apt",
-    deployment_properties = "//distribution:deployment.properties",
+    deployment_properties = "@graknlabs_dependencies//distribution:deployment.properties",
 )
 
 deploy_rpm(
     name = "deploy-rpm",
     target = ":assemble-linux-rpm",
-    deployment_properties = "//distribution:deployment.properties",
+    deployment_properties = "@graknlabs_dependencies//distribution:deployment.properties",
 )
