@@ -78,8 +78,6 @@ jobs:
           export DEPLOY_MAVEN_PASSWORD=$REPO_GRAKN_PASSWORD
           bazel run --define version=$(git rev-parse HEAD) //:deploy-maven -- snapshot
 
-  # ----- TODO update for common -----
-
   deploy-apt-snapshot:
     machine:
       image: ubuntu-1604:201903-01
@@ -104,8 +102,6 @@ jobs:
           export DEPLOY_RPM_USERNAME=$REPO_GRAKN_USERNAME
           export DEPLOY_RPM_PASSWORD=$REPO_GRAKN_PASSWORD
           bazel run --define version=$(git rev-parse HEAD) //binary:deploy-rpm -- snapshot
-
-  # ----- TODO update for common -----
 
   sync-dependencies-snapshot:
     machine: 
@@ -214,19 +210,19 @@ workflows:
             branches:
               only:
                 - master
-                - release-branch-0.2.3
+                - release-branch-0.2.4
       - build-analysis:
           filters:
             branches:
               only:
                 - master
-                - release-branch-0.2.3
+                - release-branch-0.2.4
       - deploy-maven-snapshot:
           filters:
             branches:
               only:
                 - master
-                - release-branch-0.2.3
+                - release-branch-0.2.4
           requires:
             - build
             - build-analysis
@@ -252,7 +248,7 @@ workflows:
             branches:
               only:
                 - master
-                - release-branch-0.2.3
+                - release-branch-0.2.4
           requires:
             - deploy-maven-snapshot
             - deploy-apt-snapshot
@@ -262,7 +258,7 @@ workflows:
             branches:
               only:
                 - master
-                - release-branch-0.2.3
+                - release-branch-0.2.4
           requires:
             - sync-dependencies-snapshot
 
