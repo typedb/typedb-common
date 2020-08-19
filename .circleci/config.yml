@@ -288,13 +288,13 @@ workflows:
       - deploy-apt:
           filters:
             branches:
-              only: dependencies-release-branch
+              only: common-release-branch
           requires:
             - deploy-approval
       - deploy-rpm:
           filters:
             branches:
-              only: dependencies-release-branch
+              only: common-release-branch
           requires:
             - deploy-approval
       - sync-dependencies-release:
