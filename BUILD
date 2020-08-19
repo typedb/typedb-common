@@ -20,7 +20,8 @@ load("@graknlabs_bazel_distribution//github:rules.bzl", "deploy_github")
 load("@graknlabs_bazel_distribution//maven:rules.bzl", "assemble_maven", "deploy_maven")
 load("@graknlabs_dependencies//library/maven:artifacts.bzl", "maven_overrides", maven_overrides_org = "artifacts")
 load("@graknlabs_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
-
+load("@graknlabs_dependencies//distribution:deployment.bzl", "deployment")
+load("//:deployment.bzl", deployment_github = "deployment")
 
 java_library(
     name = "common",
@@ -37,7 +38,8 @@ java_library(
 
 deploy_github(
     name = "deploy-github",
-    deployment_properties = "//:deployment.properties",
+    organisation = deployment_github['github.organisation'],
+    repository = deployment_github['github.repository'],
     title = "Grakn Common",
     title_append_version = True,
     release_description = "//:RELEASE_TEMPLATE.md",
@@ -58,7 +60,8 @@ assemble_maven(
 deploy_maven(
     name = "deploy-maven",
     target = ":assemble-maven",
-    deployment_properties = "@graknlabs_dependencies//distribution:deployment.properties",
+    snapshot = deployment['maven.snapshot'],
+    release = deployment['maven.snapshot']
 )
 
 checkstyle_test(

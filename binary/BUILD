@@ -19,6 +19,7 @@
 load("@graknlabs_bazel_distribution//apt:rules.bzl", "assemble_apt", "deploy_apt")
 load("@graknlabs_bazel_distribution//rpm:rules.bzl", "assemble_rpm", "deploy_rpm")
 load("@graknlabs_bazel_distribution//common:rules.bzl", "assemble_targz")
+load("@graknlabs_dependencies//distribution:deployment.bzl", "deployment")
 
 exports_files(["grakn", "grakn.bat", "grakn-docker.sh"])
 
@@ -84,11 +85,13 @@ assemble_rpm(
 deploy_apt(
     name = "deploy-apt",
     target = ":assemble-linux-apt",
-    deployment_properties = "@graknlabs_dependencies//distribution:deployment.properties",
+    snapshot = deployment['apt.snapshot'],
+    release = deployment['apt.release']
 )
 
 deploy_rpm(
     name = "deploy-rpm",
     target = ":assemble-linux-rpm",
-    deployment_properties = "@graknlabs_dependencies//distribution:deployment.properties",
+    snapshot = deployment['rpm.snapshot'],
+    release = deployment['rpm.release']
 )
