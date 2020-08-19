@@ -78,6 +78,31 @@ jobs:
           export DEPLOY_MAVEN_PASSWORD=$REPO_GRAKN_PASSWORD
           bazel run --define version=$(git rev-parse HEAD) //:deploy-maven -- snapshot
 
+  deploy-apt-snapshot:
+    machine:
+      image: ubuntu-1604:201903-01
+    working_directory: ~/common
+    steps:
+      - checkout
+      - install-bazel
+      - run: |
+          export DEPLOY_APT_USERNAME=$REPO_GRAKN_USERNAME
+          export DEPLOY_APT_PASSWORD=$REPO_GRAKN_PASSWORD
+          bazel run --define version=$(git rev-parse HEAD) //binary:deploy-apt -- snapshot
+
+  deploy-rpm-snapshot:
+    machine:
+      image: ubuntu-1604:201903-01
+    working_directory: ~/common
+    steps:
+      - checkout
+      - install-bazel
+      - run: sudo apt-get update && sudo apt-get install rpm
+      - run: |
+          export DEPLOY_RPM_USERNAME=$REPO_GRAKN_USERNAME
+          export DEPLOY_RPM_PASSWORD=$REPO_GRAKN_PASSWORD
+          bazel run --define version=$(git rev-parse HEAD) //binary:deploy-rpm -- snapshot
+
   sync-dependencies-snapshot:
     machine: 
       image: ubuntu-1604:201903-01
@@ -88,7 +113,7 @@ jobs:
           export SYNC_DEPENDENCIES_TOKEN=$REPO_GITHUB_TOKEN
           bazel run @graknlabs_dependencies//tool/sync:dependencies -- \
           --source common@$CIRCLE_SHA1 \
-          --targets grakn:master console:master
+          --targets client-java:master cluster:master console:master grakn-2.0:master graql:master verification:master
 
   release-approval:
     machine: 
@@ -128,6 +153,32 @@ jobs:
           export DEPLOY_MAVEN_PASSWORD=$REPO_GRAKN_PASSWORD
           bazel run --define version=$(cat VERSION) //:deploy-maven -- release
 
+  deploy-apt:
+    machine:
+      image: ubuntu-1604:201903-01
+    working_directory: ~/common
+    steps:
+      - checkout
+      - install-bazel
+      - run: cat VERSION
+      - run: |
+          export DEPLOY_APT_USERNAME=$REPO_GRAKN_USERNAME
+          export DEPLOY_APT_PASSWORD=$REPO_GRAKN_PASSWORD
+          bazel run --define version=$(cat VERSION) //binary:deploy-apt -- release
+
+  deploy-rpm:
+    machine:
+      image: ubuntu-1604:201903-01
+    working_directory: ~/common
+    steps:
+      - checkout
+      - install-bazel
+      - run: sudo apt-get update && sudo apt-get install rpm
+      - run: |
+          export DEPLOY_RPM_USERNAME=$REPO_GRAKN_USERNAME
+          export DEPLOY_RPM_PASSWORD=$REPO_GRAKN_PASSWORD
+          bazel run --define version=$(cat VERSION) //binary/rpm:deploy-rpm -- release
+
   sync-dependencies-release:
     machine: 
       image: ubuntu-1604:201903-01
@@ -138,7 +189,7 @@ jobs:
           export SYNC_DEPENDENCIES_TOKEN=$REPO_GITHUB_TOKEN
           bazel run @graknlabs_dependencies//tool/sync:dependencies -- \
           --source common@$(cat VERSION) \
-          --targets grakn:master console:master
+          --targets client-java:master cluster:master console:master grakn-2.0:master graql:master verification:master
 
   release-cleanup:
     machine: 
@@ -159,19 +210,39 @@ workflows:
             branches:
               only:
                 - master
-                - release-branch-0.2.3
+                - 0.2.4
       - build-analysis:
           filters:
             branches:
               only:
                 - master
-                - release-branch-0.2.3
+                - 0.2.4
       - deploy-maven-snapshot:
           filters:
             branches:
               only:
                 - master
-                - release-branch-0.2.3
+                - 0.2.4
+          requires:
+            - build
+            - build-analysis
+            - build-checkstyle
+      - deploy-apt-snapshot:
+          filters:
+            branches:
+              only:
+                - master
+                - 0.2.4
+          requires:
+            - build
+            - build-analysis
+            - build-checkstyle
+      - deploy-rpm-snapshot:
+          filters:
+            branches:
+              only:
+                - master
+                - 0.2.4
           requires:
             - build
             - build-analysis
@@ -181,15 +252,17 @@ workflows:
             branches:
               only:
                 - master
-                - release-branch-0.2.3
+                - 0.2.4
           requires:
             - deploy-maven-snapshot
+            - deploy-apt-snapshot
+            - deploy-rpm-snapshot
       - release-approval:
           filters:
             branches:
               only:
                 - master
-                - release-branch-0.2.3
+                - 0.2.4
           requires:
             - sync-dependencies-snapshot
 
@@ -212,12 +285,26 @@ workflows:
               only: common-release-branch
           requires:
             - deploy-approval
+      - deploy-apt:
+          filters:
+            branches:
+              only: dependencies-release-branch
+          requires:
+            - deploy-approval
+      - deploy-rpm:
+          filters:
+            branches:
+              only: dependencies-release-branch
+          requires:
+            - deploy-approval
       - sync-dependencies-release:
           filters:
             branches:
               only: common-release-branch
           requires:
             - deploy-maven-release
+            - deploy-apt
+            - deploy-rpm
       - release-cleanup:
           filters:
             branches:
