@@ -157,12 +157,10 @@ jobs:
           export DEPLOY_MAVEN_PASSWORD=$REPO_GRAKN_PASSWORD
           bazel run --define version=$(cat VERSION) //:deploy-maven -- release
 
-
-# ----- TODO update for common -----
   deploy-apt:
     machine:
       image: ubuntu-1604:201903-01
-    working_directory: ~/dependencies
+    working_directory: ~/common
     steps:
       - checkout
       - install-bazel
@@ -170,12 +168,12 @@ jobs:
       - run: |
           export DEPLOY_APT_USERNAME=$REPO_GRAKN_USERNAME
           export DEPLOY_APT_PASSWORD=$REPO_GRAKN_PASSWORD
-          bazel run --define version=$(cat VERSION) //distribution/apt:deploy-apt -- release
+          bazel run --define version=$(cat VERSION) //binary:deploy-apt -- release
 
   deploy-rpm:
     machine:
       image: ubuntu-1604:201903-01
-    working_directory: ~/dependencies
+    working_directory: ~/common
     steps:
       - checkout
       - install-bazel
@@ -183,9 +181,7 @@ jobs:
       - run: |
           export DEPLOY_RPM_USERNAME=$REPO_GRAKN_USERNAME
           export DEPLOY_RPM_PASSWORD=$REPO_GRAKN_PASSWORD
-          bazel run --define version=$(cat VERSION) //distribution/rpm:deploy-rpm -- release
-
-# end ----- TODO update for common -----
+          bazel run --define version=$(cat VERSION) //binary/rpm:deploy-rpm -- release
 
   sync-dependencies-release:
     machine: 
@@ -271,12 +267,26 @@ workflows:
               only: common-release-branch
           requires:
             - deploy-approval
+      - deploy-apt:
+          filters:
+            branches:
+              only: dependencies-release-branch
+          requires:
+            - deploy-approval
+      - deploy-rpm:
+          filters:
+            branches:
+              only: dependencies-release-branch
+          requires:
+            - deploy-approval
       - sync-dependencies-release:
           filters:
             branches:
               only: common-release-branch
           requires:
             - deploy-maven-release
+            - deploy-apt
+            - deploy-rpm
       - release-cleanup:
           filters:
             branches:
