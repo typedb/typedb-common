@@ -78,6 +78,35 @@ jobs:
           export DEPLOY_MAVEN_PASSWORD=$REPO_GRAKN_PASSWORD
           bazel run --define version=$(git rev-parse HEAD) //:deploy-maven -- snapshot
 
+  # ----- TODO update for common -----
+
+  deploy-apt-snapshot:
+    machine:
+      image: ubuntu-1604:201903-01
+    working_directory: ~/dependencies
+    steps:
+      - checkout
+      - install-bazel
+      - run: |
+          export DEPLOY_APT_USERNAME=$REPO_GRAKN_USERNAME
+          export DEPLOY_APT_PASSWORD=$REPO_GRAKN_PASSWORD
+          bazel run --define version=$(git rev-parse HEAD) //distribution/apt:deploy-apt -- snapshot
+
+  deploy-rpm-snapshot:
+    machine:
+      image: ubuntu-1604:201903-01
+    working_directory: ~/dependencies
+    steps:
+      - checkout
+      - install-bazel
+      - run: sudo apt-get update && sudo apt-get install rpm
+      - run: |
+          export DEPLOY_RPM_USERNAME=$REPO_GRAKN_USERNAME
+          export DEPLOY_RPM_PASSWORD=$REPO_GRAKN_PASSWORD
+          bazel run --define version=$(git rev-parse HEAD) //distribution/rpm:deploy-rpm -- snapshot
+
+  # ----- TODO update for common -----
+
   sync-dependencies-snapshot:
     machine: 
       image: ubuntu-1604:201903-01
@@ -88,7 +117,7 @@ jobs:
           export SYNC_DEPENDENCIES_TOKEN=$REPO_GITHUB_TOKEN
           bazel run @graknlabs_dependencies//tool/sync:dependencies -- \
           --source common@$CIRCLE_SHA1 \
-          --targets grakn:master console:master
+          --targets client-java:master cluster:master console:master grakn-2.0:master graql:master verification:master
 
   release-approval:
     machine: 
@@ -128,6 +157,36 @@ jobs:
           export DEPLOY_MAVEN_PASSWORD=$REPO_GRAKN_PASSWORD
           bazel run --define version=$(cat VERSION) //:deploy-maven -- release
 
+
+# ----- TODO update for common -----
+  deploy-apt:
+    machine:
+      image: ubuntu-1604:201903-01
+    working_directory: ~/dependencies
+    steps:
+      - checkout
+      - install-bazel
+      - run: cat VERSION
+      - run: |
+          export DEPLOY_APT_USERNAME=$REPO_GRAKN_USERNAME
+          export DEPLOY_APT_PASSWORD=$REPO_GRAKN_PASSWORD
+          bazel run --define version=$(cat VERSION) //distribution/apt:deploy-apt -- release
+
+  deploy-rpm:
+    machine:
+      image: ubuntu-1604:201903-01
+    working_directory: ~/dependencies
+    steps:
+      - checkout
+      - install-bazel
+      - run: sudo apt-get update && sudo apt-get install rpm
+      - run: |
+          export DEPLOY_RPM_USERNAME=$REPO_GRAKN_USERNAME
+          export DEPLOY_RPM_PASSWORD=$REPO_GRAKN_PASSWORD
+          bazel run --define version=$(cat VERSION) //distribution/rpm:deploy-rpm -- release
+
+# end ----- TODO update for common -----
+
   sync-dependencies-release:
     machine: 
       image: ubuntu-1604:201903-01
@@ -138,7 +197,7 @@ jobs:
           export SYNC_DEPENDENCIES_TOKEN=$REPO_GITHUB_TOKEN
           bazel run @graknlabs_dependencies//tool/sync:dependencies -- \
           --source common@$(cat VERSION) \
-          --targets grakn:master console:master
+          --targets client-java:master cluster:master console:master grakn-2.0:master graql:master verification:master
 
   release-cleanup:
     machine: 
