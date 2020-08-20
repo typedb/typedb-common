@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 #
 # Copyright (C) 2020 Grakn Labs
 #
@@ -15,11 +16,29 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
+function cleanup() {
+    echo 'Caught an exit signal'
+    trap - SIGINT SIGTERM
+    kill $(pidof tail)
+    ./grakn server stop
+    exit
+}
 
-def graknlabs_dependencies():
-    git_repository(
-        name = "graknlabs_dependencies",
-        remote = "https://github.com/graknlabs/dependencies",
-        commit = "2680ead7ed779bf2835953852789dfeb3f25d7a5", # sync-marker: do not remove this comment, this is used for sync-dependencies by @graknlabs_dependencies
-    )
+trap cleanup SIGINT SIGTERM
+
+pushd grakn-core-all-linux &>/dev/null
+./grakn server start
+tail -f logs/grakn.log &
+
+while sleep 60; do
+  jps | grep -q Grakn$
+  GRAKN_STATUS=$?
+  jps | grep -q GraknStorage$
+  GRAKN_STORAGE_STATUS=$?
+  # If the greps above find anything, they exit with 0 status
+  # If they are not both 0, then something is wrong
+  if [ $GRAKN_STATUS -ne 0 -o $GRAKN_STORAGE_STATUS -ne 0 ]; then
+    echo "One of the processes (Server/Storage) has already exited."
+    exit 1
+  fi
+done
