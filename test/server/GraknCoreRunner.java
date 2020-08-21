@@ -26,7 +26,7 @@ public class GraknCoreRunner implements GraknRunner {
     private final File GRAKN_DISTRIBUTION_FILE;
     private final Path GRAKN_TARGET_DIRECTORY;
     private final String GRAKN_DISTRIBUTION_FORMAT;
-    private final int port = ThreadLocalRandom.current().nextInt(40000, 60000);
+    private final int port;
     private final Path tmpDir;
 
     private ProcessExecutor executor;
@@ -37,6 +37,14 @@ public class GraknCoreRunner implements GraknRunner {
     }
 
     public GraknCoreRunner(File distributionFile) throws InterruptedException, TimeoutException, IOException {
+        this(ThreadLocalRandom.current().nextInt(40000, 60000), distributionFile);
+    }
+
+    public GraknCoreRunner(int port) throws InterruptedException, TimeoutException, IOException {
+        this(port, DISTRIBUTION_FILE);
+    }
+
+    public GraknCoreRunner(int port, File distributionFile) throws InterruptedException, TimeoutException, IOException {
         System.out.println("Constructing a Grakn Core runner");
 
         if (!distributionFile.exists()) {
@@ -49,6 +57,7 @@ public class GraknCoreRunner implements GraknRunner {
         GRAKN_DISTRIBUTION_FORMAT = distributionFormat(distributionFile);
         GRAKN_TARGET_DIRECTORY = distributionTarget(distributionFile);
 
+        this.port = port;
         tmpDir = Files.createTempDirectory("grakn_core_test");
 
         this.executor = new ProcessExecutor()
