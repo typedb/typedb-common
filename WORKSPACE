@@ -20,96 +20,81 @@ workspace(name = "graknlabs_common")
 ################################
 # Load @graknlabs_dependencies #
 ################################
+
 load("//dependencies/graknlabs:repositories.bzl", "graknlabs_dependencies")
 graknlabs_dependencies()
 
-# Load Bazel
+# Load //builder/bazel
 load("@graknlabs_dependencies//builder/bazel:deps.bzl", "bazel_toolchain")
 bazel_toolchain()
 
-# Load Java
+# Load //builder/java
 load("@graknlabs_dependencies//builder/java:deps.bzl", java_deps = "deps")
 java_deps()
-load("@graknlabs_dependencies//library/maven:rules.bzl", "maven")
 
-# Load Kotlin
+# Load //builder/kotlin
 load("@graknlabs_dependencies//builder/kotlin:deps.bzl", kotlin_deps = "deps")
 kotlin_deps()
 load("@io_bazel_rules_kotlin//kotlin:kotlin.bzl", "kotlin_repositories", "kt_register_toolchains")
 kotlin_repositories()
 kt_register_toolchains()
 
-# Load Python
+# Load //builder/python
 load("@graknlabs_dependencies//builder/python:deps.bzl", python_deps = "deps")
 python_deps()
-load("@rules_python//python:pip.bzl", "pip_repositories", "pip3_import")
+load("@rules_python//python:pip.bzl", "pip_repositories")
 pip_repositories()
-pip3_import(
-    name = "graknlabs_dependencies_ci_pip",
-    requirements = "@graknlabs_dependencies//tool:requirements.txt",
-)
-load("@graknlabs_dependencies_ci_pip//:requirements.bzl",
-graknlabs_dependencies_ci_pip_install = "pip_install")
-graknlabs_dependencies_ci_pip_install()
 
-# Load Checkstyle
+# Load //tool/checkstyle
 load("@graknlabs_dependencies//tool/checkstyle:deps.bzl", checkstyle_deps = "deps")
 checkstyle_deps()
 
-# Load Sonarcloud
-load("@graknlabs_dependencies//tool/sonarcloud:deps.bzl", "sonarcloud_dependencies")
-sonarcloud_dependencies()
-
-# Load Unused Deps
+# Load //tool/unuseddeps
 load("@graknlabs_dependencies//tool/unuseddeps:deps.bzl", unuseddeps_deps = "deps")
 unuseddeps_deps()
 
-#####################################################################
-# Load @graknlabs_bazel_distribution (from @graknlabs_dependencies) #
-#####################################################################
-load("@graknlabs_dependencies//dependencies/graknlabs:repositories.bzl", "graknlabs_bazel_distribution")
+# Load //tool/sonarcloud
+load("@graknlabs_dependencies//tool/sonarcloud:deps.bzl", "sonarcloud_dependencies")
+sonarcloud_dependencies()
+
+######################################
+# Load @graknlabs_bazel_distribution #
+######################################
+
+load("@graknlabs_dependencies//distribution:deps.bzl", "graknlabs_bazel_distribution")
 graknlabs_bazel_distribution()
 
-pip3_import(
-    name = "graknlabs_bazel_distribution_pip",
-    requirements = "@graknlabs_bazel_distribution//pip:requirements.txt",
-)
-load("@graknlabs_bazel_distribution_pip//:requirements.bzl",
-graknlabs_bazel_distribution_pip_install = "pip_install")
-graknlabs_bazel_distribution_pip_install()
-
-load("@graknlabs_bazel_distribution//github:dependencies.bzl", "tcnksm_ghr")
-tcnksm_ghr()
-
-load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
-git_repository(
-    name = "io_bazel_skydoc",
-    remote = "https://github.com/graknlabs/skydoc.git",
-    branch = "experimental-skydoc-allow-dep-on-bazel-tools",
-)
-
-load("@io_bazel_skydoc//:setup.bzl", "skydoc_repositories")
-skydoc_repositories()
-
-load("@graknlabs_bazel_distribution//common:dependencies.bzl", "bazelbuild_rules_pkg")
-bazelbuild_rules_pkg()
-#
+# Load //common
+load("@graknlabs_bazel_distribution//common:deps.bzl", "rules_pkg")
+rules_pkg()
 load("@rules_pkg//:deps.bzl", "rules_pkg_dependencies")
 rules_pkg_dependencies()
 
-##########################
-# Load @graknlabs_common #
-##########################
+# Load //pip
+load("@graknlabs_bazel_distribution//pip:deps.bzl", pip_deps = "deps")
+pip_deps()
+
+# Load //github
+load("@graknlabs_bazel_distribution//github:deps.bzl", github_deps = "deps")
+github_deps()
+
+################################
+# Load @graknlabs dependencies #
+################################
+
 load("//dependencies/maven:artifacts.bzl", graknlabs_common_artifacts = "artifacts")
 
-###############
-# Load @maven #
-###############
+############################
+# Load @maven dependencies #
+############################
+
+load("@graknlabs_dependencies//library/maven:rules.bzl", "maven")
 maven(graknlabs_common_artifacts)
 
-#########################
-# Create Workspace Refs #
-#########################
+#############################################
+# Generate @graknlabs_common_workspace_refs #
+#############################################
+
 load("@graknlabs_bazel_distribution//common:rules.bzl", "workspace_refs")
 workspace_refs(
     name = "graknlabs_common_workspace_refs"
