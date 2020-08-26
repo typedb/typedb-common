@@ -73,6 +73,7 @@ checkstyle_test(
 filegroup(
     name = "ci",
     data = [
+        "@graknlabs_dependencies//library/maven:update",
         "@graknlabs_dependencies//tool/bazelrun:rbe",
         "@graknlabs_dependencies//tool/checkstyle:test-coverage",
         "@graknlabs_dependencies//tool/release:approval",
