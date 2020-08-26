@@ -45,6 +45,13 @@ python_deps()
 load("@rules_python//python:pip.bzl", "pip_repositories")
 pip_repositories()
 
+# Load //tool/common
+load("@graknlabs_dependencies//tool/common:deps.bzl", "graknlabs_dependencies_ci_pip",
+graknlabs_dependencies_tool_maven_artifacts = "maven_artifacts")
+graknlabs_dependencies_ci_pip()
+load("@graknlabs_dependencies_ci_pip//:requirements.bzl", "pip_install")
+pip_install()
+
 # Load //tool/checkstyle
 load("@graknlabs_dependencies//tool/checkstyle:deps.bzl", checkstyle_deps = "deps")
 checkstyle_deps()
