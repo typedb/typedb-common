@@ -18,7 +18,8 @@
 exports_files(["VERSION"], visibility = ["//visibility:public"])
 load("@graknlabs_bazel_distribution//github:rules.bzl", "deploy_github")
 load("@graknlabs_bazel_distribution//maven:rules.bzl", "assemble_maven", "deploy_maven")
-load("@graknlabs_dependencies//library/maven:artifacts.bzl", "maven_overrides", maven_overrides_org = "artifacts")
+load("@graknlabs_dependencies//distribution/maven:version.bzl", "version")
+load("@graknlabs_dependencies//library/maven:artifacts.bzl", "artifacts")
 load("@graknlabs_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
 load("@graknlabs_dependencies//distribution:deployment.bzl", "deployment")
 load("//:deployment.bzl", deployment_github = "deployment")
@@ -50,7 +51,7 @@ assemble_maven(
     target = ":common",
     package = "common",
     workspace_refs = "@graknlabs_common_workspace_refs//:refs.json",
-    version_overrides = maven_overrides(maven_overrides_org),
+    version_overrides = version(artifacts_org = artifacts, artifacts_repo={}),
     project_name = "Grakn Common",
     project_description = "Grakn Common classes and tools",
     project_url = "https://github.com/graknlabs/common",
