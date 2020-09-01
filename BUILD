@@ -30,6 +30,7 @@ java_library(
         "collection/*.java",
         "concurrent/*.java",
         "exception/*.java",
+        "util/*.java",
     ]),
     visibility = ["//visibility:public"],
     tags = [
