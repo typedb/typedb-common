@@ -53,7 +53,7 @@ elif [ "$1" = "console" ]; then
     if [ -f "${CONSOLE_JAR_FILENAME}" ]; then
         SERVICE_LIB_CP="console/services/lib/*"
         CLASSPATH="${GRAKN_HOME}/${SERVICE_LIB_CP}:${GRAKN_HOME}/console/conf/"
-	# exec replaces current shell process with java so no commands besides this one will ever get executed
+	# exec replaces current shell process with java so no commands after this one will ever get executed
         exec java ${CONSOLE_JAVAOPTS} -cp "${CLASSPATH}" -Dgrakn.dir="${GRAKN_HOME}" grakn.console.GraknConsole "$@"
     else
         echo "Grakn Core Console is not included in this Grakn distribution."
@@ -64,7 +64,7 @@ elif [[ "$1" = "server" ]] || [[ "$1" = "version" ]]; then
     if [[ -f "${SERVER_JAR_FILENAME}" ]]; then
         LIB_CP="server/lib/*"
         CLASSPATH="${GRAKN_HOME}/${LIB_CP}:${GRAKN_HOME}/server/conf/"
-	# exec replaces current shell process with java so no commands besides this one will ever get executed
+	# exec replaces current shell process with java so no commands after this one will ever get executed
         exec java ${GRAKN_DAEMON_JAVAOPTS} -cp "${CLASSPATH}" -Dgrakn.dir="${GRAKN_HOME}" -Dgrakn.conf="${GRAKN_HOME}/${GRAKN_CONFIG}" -Dstorage.javaopts="${STORAGE_JAVAOPTS}" -Dserver.javaopts="${SERVER_JAVAOPTS}" grakn.core.server.GraknServer "${@:2}"
     else
         echo "Grakn Core Server is not included in this Grakn distribution."
