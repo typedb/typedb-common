@@ -75,6 +75,7 @@ checkstyle_test(
 filegroup(
     name = "ci",
     data = [
+        "@graknlabs_dependencies//image/rbe:ubuntu-1604",
         "@graknlabs_dependencies//library/maven:update",
         "@graknlabs_dependencies//tool/bazelrun:rbe",
         "@graknlabs_dependencies//tool/checkstyle:test-coverage",

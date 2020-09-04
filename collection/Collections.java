@@ -37,6 +37,10 @@ public class Collections {
         return java.util.Collections.unmodifiableMap(map);
     }
 
+    public static <K, V> Map<K, V> map(Map<K, V> map) {
+        return java.util.Collections.unmodifiableMap(map);
+    }
+
     @SafeVarargs
     public static <T> Set<T> set(T... elements) {
         return set(Arrays.asList(elements));
