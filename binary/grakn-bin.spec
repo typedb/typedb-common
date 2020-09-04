@@ -3,7 +3,7 @@ Version: devel
 Release: 1
 Summary: Grakn Core (bin)
 URL: https://grakn.ai
-License: Apache License, v2.0
+License: AGPL License, v3.0
 AutoReqProv: no
 
 Source0: {_grakn-bin-rpm-tar.tar.gz}

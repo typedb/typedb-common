@@ -15,4 +15,12 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
+load("@graknlabs_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
+
 exports_files(["artifacts.bzl"])
+
+checkstyle_test(
+    name = "checkstyle",
+    files = ["BUILD", "artifacts.bzl", "update.sh"],
+    license_type = "agpl",
+)

@@ -69,7 +69,7 @@ deploy_maven(
 checkstyle_test(
     name = "checkstyle",
     targets = [":common"],
-    files = ["BUILD", "deployment.bzl"],
+    files = ["BUILD", "deployment.bzl", ".grabl/automation.yml"],
     license_type = "agpl",
 )
 
