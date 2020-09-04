@@ -46,5 +46,6 @@ checkstyle_test(
     targets = [
         ":grakn-setup",
     ],
+    files = ["BUILD"],
     license_type = "agpl",
 )

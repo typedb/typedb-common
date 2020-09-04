@@ -20,6 +20,7 @@ load("@graknlabs_bazel_distribution//apt:rules.bzl", "assemble_apt", "deploy_apt
 load("@graknlabs_bazel_distribution//rpm:rules.bzl", "assemble_rpm", "deploy_rpm")
 load("@graknlabs_bazel_distribution//common:rules.bzl", "assemble_targz")
 load("@graknlabs_dependencies//distribution:deployment.bzl", "deployment")
+load("@graknlabs_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
 
 exports_files(["grakn", "grakn.bat", "grakn-docker.sh"])
 
@@ -94,4 +95,10 @@ deploy_rpm(
     target = ":assemble-linux-rpm",
     snapshot = deployment['rpm.snapshot'],
     release = deployment['rpm.release']
+)
+
+checkstyle_test(
+    name = "checkstyle",
+    files = ["BUILD"],
+    license_type = "agpl",
 )
