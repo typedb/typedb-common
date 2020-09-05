@@ -9,7 +9,7 @@
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Affero General Public License for more det@graknlabs_dependencies//tool/checkstyle:rules.bzlails.
+# GNU Affero General Public License for more details.
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
@@ -69,6 +69,8 @@ deploy_maven(
 checkstyle_test(
     name = "checkstyle",
     targets = [":common"],
+    files = ["BUILD", "deployment.bzl", ".grabl/automation.yml"],
+    license_type = "agpl",
 )
 
 # CI targets that are not declared in any BUILD file, but are called externally
