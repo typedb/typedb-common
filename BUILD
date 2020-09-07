@@ -68,8 +68,14 @@ deploy_maven(
 
 checkstyle_test(
     name = "checkstyle",
-    targets = [":common"],
-    files = ["BUILD", "deployment.bzl", ".grabl/automation.yml"],
+    include = glob([
+        "*",
+        ".grabl/automation.yml",
+        "collection/*",
+        "concurrent/*",
+        "exception/*",
+        "util/*",
+    ]),
     license_type = "agpl",
 )
 
@@ -84,7 +90,6 @@ filegroup(
         "@graknlabs_dependencies//tool/release:approval",
         "@graknlabs_dependencies//tool/release:create-notes",
         "@graknlabs_dependencies//tool/sonarcloud:code-analysis",
-        "@graknlabs_dependencies//tool/sync:dependencies",
         "@graknlabs_dependencies//tool/unuseddeps:unused-deps",
     ]
 )

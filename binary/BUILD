@@ -99,6 +99,6 @@ deploy_rpm(
 
 checkstyle_test(
     name = "checkstyle",
-    files = ["BUILD"],
+    include = glob(["*"]),
     license_type = "agpl",
 )

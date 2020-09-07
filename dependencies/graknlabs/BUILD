@@ -19,6 +19,6 @@ load("@graknlabs_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
 
 checkstyle_test(
     name = "checkstyle",
-    files = ["BUILD"],
+    include = glob(["*"]),
     license_type = "agpl",
 )

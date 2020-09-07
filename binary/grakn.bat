@@ -1,6 +1,4 @@
-@echo off
 REM
-REM GRAKN.AI - THE KNOWLEDGE GRAPH
 REM Copyright (C) 2020 Grakn Labs
 REM
 REM This program is free software: you can redistribute it and/or modify
@@ -16,6 +14,8 @@ REM
 REM You should have received a copy of the GNU Affero General Public License
 REM along with this program.  If not, see <https://www.gnu.org/licenses/>.
 REM
+
+@echo off
 
 SET "GRAKN_HOME=%cd%"
 
