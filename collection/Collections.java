@@ -46,6 +46,13 @@ public class Collections {
         return set(Arrays.asList(elements));
     }
 
+    @SafeVarargs
+    public static <T> Set<T> set(Collection<T>... collections) {
+        Set<T> set = new HashSet<>();
+        for (Collection<T> collection : collections) set.addAll(collection);
+        return java.util.Collections.unmodifiableSet(set);
+    }
+
     public static <T> Set<T> set(Collection<T> elements) {
         Set<T> set = new HashSet<>(elements);
         return java.util.Collections.unmodifiableSet(set);
