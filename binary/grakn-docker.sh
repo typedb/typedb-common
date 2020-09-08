@@ -1,4 +1,3 @@
-#!/usr/bin/env bash
 #
 # Copyright (C) 2020 Grakn Labs
 #
@@ -15,6 +14,8 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+
+#!/usr/bin/env bash
 
 function cleanup() {
     echo 'Caught an exit signal'

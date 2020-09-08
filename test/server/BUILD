@@ -41,9 +41,6 @@ filegroup(
 
 checkstyle_test(
     name = "checkstyle",
-    targets = [
-        ":grakn-setup",
-    ],
-    files = ["BUILD"],
+    include = glob(["*"]),
     license_type = "agpl",
 )

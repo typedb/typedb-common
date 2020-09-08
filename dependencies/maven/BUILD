@@ -21,6 +21,7 @@ exports_files(["artifacts.bzl"])
 
 checkstyle_test(
     name = "checkstyle",
-    files = ["BUILD", "artifacts.bzl", "update.sh"],
+    include = glob(["*"]),
+    exclude = ["artifacts.snapshot"],
     license_type = "agpl",
 )
