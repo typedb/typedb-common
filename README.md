@@ -1,5 +1,5 @@
 # Grakn Common
 
-[![CircleCI](https://circleci.com/gh/graknlabs/common/tree/master.svg?style=shield)](https://circleci.com/gh/graknlabs/common/tree/master)
+[![Grabl](https://grabl.io/api/status/graknlabs/common/badge.svg)](https://grabl.io/graknlabs/common)
 
 Grakn Labs common libraries and scripts reused across @graknlabs repositories.
