@@ -19,6 +19,7 @@
 package grakn.common.collection;
 
 import java.util.Objects;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class Either<FIRST, SECOND> {
@@ -55,6 +56,14 @@ public class Either<FIRST, SECOND> {
 
     public SECOND second() {
         return second;
+    }
+
+    public void ifFirst(Consumer<FIRST> function) {
+        if (isFirst()) function.accept(first);
+    }
+
+    public void ifSecond(Consumer<SECOND> function) {
+        if (isSecond()) function.accept(second);
     }
 
     public <V> V apply(Function<FIRST, V> firstFn, Function<SECOND, V> secondFn) {
