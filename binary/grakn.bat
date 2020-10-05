@@ -66,7 +66,7 @@ if exist .\console\services\lib\io-grakn-console-grakn-console-*.jar (
 :startserver
 
 set "G_CP=%GRAKN_HOME%\server\conf\;%GRAKN_HOME%\server\lib\common\*;%GRAKN_HOME%\server\lib\prod\*"
-if exist .\server\services\lib\io-grakn-core-grakn-server-*.jar (
+if exist .\server\lib\common\io-grakn-core-grakn-server-*.jar (
   java %GRAKN_DAEMON_JAVAOPTS% -cp "%G_CP%" -Dgrakn.dir="%GRAKN_HOME%" -Dgrakn.conf="%GRAKN_HOME%\%GRAKN_CONFIG%" -Dstorage.javaopts="%STORAGE_JAVAOPTS%" -Dserver.javaopts="%SERVER_JAVAOPTS%" grakn.core.server.GraknServer %*
   goto exit
 ) else (
