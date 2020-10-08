@@ -60,7 +60,7 @@ public class Collections {
 
     @SafeVarargs
     public static <T> List<T> list(T... elements) {
-        return list(Arrays.asList(elements));
+        return java.util.Collections.unmodifiableList(Arrays.asList(elements));
     }
 
     public static <T> List<T> list(Collection<T> elements) {
