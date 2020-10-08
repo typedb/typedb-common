@@ -35,7 +35,8 @@ if "%1" == "" goto missingargument
 
 if "%1" == "console" goto startconsole
 
-if "%1" == "server" goto startserver
+if "%1" == "server"  goto startserver
+if "%1" == "version" goto startserver
 
 echo   Invalid argument: %1. Possible commands are:
 echo   Server:          grakn server [--help]
@@ -64,9 +65,9 @@ if exist .\console\services\lib\io-grakn-console-grakn-console-*.jar (
 
 :startserver
 
-set "G_CP=%GRAKN_HOME%\server\conf\;%GRAKN_HOME%\server\services\lib\*"
-if exist .\server\services\lib\io-grakn-core-grakn-server-*.jar (
-  java %GRAKN_DAEMON_JAVAOPTS% -cp "%G_CP%" -Dgrakn.dir="%GRAKN_HOME%" -Dgrakn.conf="%GRAKN_HOME%\%GRAKN_CONFIG%" -Dstorage.javaopts="%STORAGE_JAVAOPTS%" -Dserver.javaopts="%SERVER_JAVAOPTS%" grakn.core.daemon.GraknDaemon %*
+set "G_CP=%GRAKN_HOME%\server\conf\;%GRAKN_HOME%\server\lib\common\*;%GRAKN_HOME%\server\lib\prod\*"
+if exist .\server\lib\common\io-grakn-core-grakn-server-*.jar (
+  java %GRAKN_DAEMON_JAVAOPTS% -cp "%G_CP%" -Dgrakn.dir="%GRAKN_HOME%" -Dgrakn.conf="%GRAKN_HOME%\%GRAKN_CONFIG%" -Dstorage.javaopts="%STORAGE_JAVAOPTS%" -Dserver.javaopts="%SERVER_JAVAOPTS%" grakn.core.server.GraknServer %*
   goto exit
 ) else (
   echo Grakn Core Server is not included in this Grakn distribution^.
