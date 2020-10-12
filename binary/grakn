@@ -62,11 +62,13 @@ elif [ "$1" = "console" ]; then
     fi
 elif [[ "$1" = "server" ]] || [[ "$1" = "version" ]]; then
     if [[ -f "${SERVER_JAR_FILENAME}" ]]; then
-        while [[ "$#" -gt 0 ]]; do
-            case $1 in
-                --debug) DEBUG=yes; shift ;;
+        IDX=0
+        while [[ "${@:IDX}" ]]; do
+            case ${@:IDX} in
+                --debug) DEBUG=yes;
+                break;
             esac
-            shift
+            IDX=$((IDX+1))
         done
         LIB_COMMON="server/lib/common/*"
         CLASSPATH="${GRAKN_HOME}/server/conf/:${GRAKN_HOME}/${LIB_COMMON}"
