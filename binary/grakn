@@ -74,9 +74,8 @@ elif [[ "$1" = "server" ]] || [[ "$1" = "version" ]]; then
         CLASSPATH="${GRAKN_HOME}/server/conf/:${GRAKN_HOME}/${LIB_COMMON}"
         # exec replaces current shell process with java so no commands after these ones will ever get executed
         if [ $DEBUG ]; then
-            echo "Running Grakn Core Server in debug mode."
             CLASSPATH="${CLASSPATH}:${GRAKN_HOME}/server/lib/dev/*"
-            exec java ${GRAKN_DAEMON_JAVAOPTS} -ea -cp "${CLASSPATH}" -Dgrakn.dir="${GRAKN_HOME}" -Dgrakn.conf="${GRAKN_HOME}/${GRAKN_CONFIG}" -Dstorage.javaopts="${STORAGE_JAVAOPTS}" -Dserver.javaopts="${SERVER_JAVAOPTS}" grakn.core.server.GraknServer "${@:2}"
+            exec java ${GRAKN_DAEMON_JAVAOPTS} -ea -cp "${CLASSPATH}" -Dgrakn.dir="${GRAKN_HOME}" -Dgrakn.conf="${GRAKN_HOME}/${GRAKN_CONFIG}" -Dstorage.javaopts="${STORAGE_JAVAOPTS}" -Dserver.javaopts="${SERVER_JAVAOPTS}" -Dlogback.configurationFile=logback-debug.xml grakn.core.server.GraknServer "${@:2}"
         else
             CLASSPATH="${CLASSPATH}:${GRAKN_HOME}/server/lib/prod/*"
             exec java ${GRAKN_DAEMON_JAVAOPTS} -cp "${CLASSPATH}" -Dgrakn.dir="${GRAKN_HOME}" -Dgrakn.conf="${GRAKN_HOME}/${GRAKN_CONFIG}" -Dstorage.javaopts="${STORAGE_JAVAOPTS}" -Dserver.javaopts="${SERVER_JAVAOPTS}" grakn.core.server.GraknServer "${@:2}"
@@ -92,4 +91,3 @@ else
     echo "  Console:         grakn console [--help]"
     exit 1
 fi
-
