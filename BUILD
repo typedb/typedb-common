@@ -29,9 +29,15 @@ java_library(
     srcs = glob([
         "collection/*.java",
         "concurrent/*.java",
+        "concurrent/actor/*.java",
+        "concurrent/actor/eventloop/*.java",
         "exception/*.java",
         "util/*.java",
     ]),
+    deps = [
+        "@maven//:com_google_code_findbugs_jsr305",
+        "@maven//:org_slf4j_slf4j_api"
+    ],
     visibility = ["//visibility:public"],
     tags = [
         "maven_coordinates=io.grakn.common:grakn-common:{pom_version}",
@@ -73,6 +79,8 @@ checkstyle_test(
         ".grabl/automation.yml",
         "collection/*",
         "concurrent/*",
+        "concurrent/actor/*.java",
+        "concurrent/actor/eventloop/*.java",
         "exception/*",
         "util/*",
     ]),

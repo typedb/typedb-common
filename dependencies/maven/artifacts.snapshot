@@ -1,3 +1,5 @@
+@maven//:com_google_code_findbugs_jsr305
+@maven//:com_google_code_findbugs_jsr305_2_0_2
 @maven//:commons_io_commons_io
 @maven//:commons_io_commons_io_2_3
 @maven//:junit_junit

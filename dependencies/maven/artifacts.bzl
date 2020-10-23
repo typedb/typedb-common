@@ -16,8 +16,9 @@
 #
 
 artifacts = [
+  "com.google.code.findbugs:jsr305",
   "commons-io:commons-io",
   "junit:junit",
   "org.slf4j:slf4j-api",
-  "org.zeroturnaround:zt-exec"
+  "org.zeroturnaround:zt-exec",
 ]
