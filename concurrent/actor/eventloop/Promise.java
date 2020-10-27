@@ -64,30 +64,22 @@ public abstract class Promise<V> {
 
     @CheckReturnValue
     public static <V> Promise<V> compute(final EventLoop eventLoop, final Supplier<V> job) {
-        if (EventLoopThreadChecker.isOnThread(eventLoop)) {
-            return new Precomputed<>(job.get());
-        } else {
-            final Computed<V> promise = new Computed<>();
-            eventLoop.submit(() -> {
-                final V v = job.get();
-                promise.complete(v);
-            });
-            return promise;
-        }
+        final Computed<V> promise = new Computed<>();
+        eventLoop.submit(() -> {
+            final V v = job.get();
+            promise.complete(v);
+        });
+        return promise;
     }
 
     @CheckReturnValue
     public static <V> Promise<V> computeAsync(final EventLoop eventLoop, final Supplier<Promise<V>> jobAsync) {
-        if (EventLoopThreadChecker.isOnThread(eventLoop)) {
-            return jobAsync.get();
-        } else {
-            final Computed<V> promise = new Computed<>();
-            eventLoop.submit(() -> {
-                Promise<V> otherP = jobAsync.get();
-                otherP.thenDefer(v -> promise.complete(v));
-            });
-            return promise;
-        }
+        final Computed<V> promise = new Computed<>();
+        eventLoop.submit(() -> {
+            Promise<V> otherP = jobAsync.get();
+            otherP.thenDefer(v -> promise.complete(v));
+        });
+        return promise;
     }
 
     @CheckReturnValue

@@ -64,7 +64,6 @@ public class EventLoopSingleThreaded implements EventLoop {
         LOG.debug("Starting EventLoop");
         state = State.RUNNING;
         try {
-            EventLoopThreadChecker.setThreadEventLoop(this);
             while (state == State.RUNNING) {
                 // TODO review performance, might want to batch some events from the regular queue before checking timers
                 long currentTime = GlobalSystem.time();
