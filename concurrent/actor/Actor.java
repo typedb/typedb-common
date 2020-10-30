@@ -25,6 +25,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class Actor<STATE extends Actor.State<STATE>> {
+    private static String ERROR_SELF_ACTOR_IS_NULL = "The self actor should always be non-null.";
     private static String ERROR_STATE_IS_NULL = "Cannot process actor message when the state hasn't been setup. Are you calling the method from state constructor?";
 
     public static abstract class State<STATE extends State<STATE>> {
@@ -42,6 +43,11 @@ public class Actor<STATE extends Actor.State<STATE>> {
 
         protected <CHILD_STATE extends State<CHILD_STATE>> Actor<CHILD_STATE> child(Function<Actor<CHILD_STATE>, CHILD_STATE> stateConstructor) {
             return child(self.eventLoop, stateConstructor);
+        }
+
+        protected Actor<STATE> self() {
+            assert this.self != null : ERROR_SELF_ACTOR_IS_NULL;
+            return this.self;
         }
     }
 
