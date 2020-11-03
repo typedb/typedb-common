@@ -17,7 +17,14 @@
 
 package grakn.common.concurrent.actor;
 
+import grakn.common.concurrent.actor.eventloop.Promise;
+
+import javax.annotation.CheckReturnValue;
+import java.util.function.Consumer;
+import java.util.function.Function;
+
 import grakn.common.concurrent.actor.eventloop.EventLoop;
+import grakn.common.concurrent.actor.eventloop.EventLoopGroup;
 import grakn.common.concurrent.actor.eventloop.Promise;
 
 import javax.annotation.CheckReturnValue;
@@ -35,14 +42,8 @@ public class Actor<STATE extends Actor.State<STATE>> {
             this.self = self;
         }
 
-        protected <CHILD_STATE extends State<CHILD_STATE>> Actor<CHILD_STATE> child(EventLoop eventLoop, Function<Actor<CHILD_STATE>, CHILD_STATE> stateConstructor) {
-            Actor<CHILD_STATE> actor = new Actor<>(eventLoop);
-            actor.state = stateConstructor.apply(actor);
-            return actor;
-        }
-
         protected <CHILD_STATE extends State<CHILD_STATE>> Actor<CHILD_STATE> child(Function<Actor<CHILD_STATE>, CHILD_STATE> stateConstructor) {
-            return child(self.eventLoop, stateConstructor);
+            return Actor.root(self.eventLoopGroup, stateConstructor);
         }
 
         protected Actor<STATE> self() {
@@ -52,14 +53,16 @@ public class Actor<STATE extends Actor.State<STATE>> {
     }
 
     public STATE state;
+    private final EventLoopGroup eventLoopGroup;
     private final EventLoop eventLoop;
 
-    private Actor(EventLoop eventLoop) {
-        this.eventLoop = eventLoop;
+    private Actor(EventLoopGroup eventLoopGroup) {
+        this.eventLoopGroup = eventLoopGroup;
+        this.eventLoop = eventLoopGroup.assignEventLoop();
     }
 
-    public static <ROOT_STATE extends State<ROOT_STATE>> Actor<ROOT_STATE> root(EventLoop eventLoop, Function<Actor<ROOT_STATE>, ROOT_STATE> stateConstructor) {
-        Actor<ROOT_STATE> actor = new Actor<>(eventLoop);
+    public static <ROOT_STATE extends State<ROOT_STATE>> Actor<ROOT_STATE> root(EventLoopGroup eventLoopGroup, Function<Actor<ROOT_STATE>, ROOT_STATE> stateConstructor) {
+        Actor<ROOT_STATE> actor = new Actor<>(eventLoopGroup);
         actor.state = stateConstructor.apply(actor);
         return actor;
     }
