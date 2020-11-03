@@ -26,8 +26,16 @@ public class NamedThreadFactory implements ThreadFactory {
     private final AtomicLong index = new AtomicLong(0);
     private final String prefix;
 
+    public NamedThreadFactory(String prefix) {
+        this.prefix = prefix + "::";
+    }
+
     public NamedThreadFactory(Class<?> clazz, String function) {
-        this.prefix = clazz.getSimpleName() + "::" + function + "::";
+        this(clazz.getSimpleName() + "::" + function);
+    }
+
+    public static NamedThreadFactory create(String prefix) {
+        return new NamedThreadFactory(prefix);
     }
 
     public static NamedThreadFactory create(Class<?> clazz, String function) {
