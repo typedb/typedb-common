@@ -51,7 +51,7 @@ public class Actor<STATE extends Actor.State<STATE>> {
         }
     }
 
-    private STATE state;
+    public STATE state;
     private final EventLoop eventLoop;
 
     private Actor(EventLoop eventLoop) {
@@ -86,12 +86,6 @@ public class Actor<STATE extends Actor.State<STATE>> {
     public <ANSWER> Promise<ANSWER> ask(Function<STATE, ANSWER> job) {
         assert state != null : ERROR_STATE_IS_NULL;
         return Promise.compute(eventLoop, () -> job.apply(state));
-    }
-
-    @CheckReturnValue
-    public <ANSWER> Promise<ANSWER> askAsync(Function<STATE, Promise<ANSWER>> jobAsync) {
-        assert state != null : ERROR_STATE_IS_NULL;
-        return Promise.computeAsync(eventLoop, () -> jobAsync.apply(state));
     }
 
     public EventLoop.ScheduledJob schedule(long millis, Consumer<STATE> job) {
