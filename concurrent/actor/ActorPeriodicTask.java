@@ -39,12 +39,20 @@ public class ActorPeriodicTask<STATE extends Actor.State<STATE>> {
         timer = null;
     }
 
-    public void start() {
+    public void schedule() {
+        schedule(true);
+    }
+
+    public void reschedule() {
         stop();
         schedule(true);
     }
 
-    public void once() {
+    public void scheduleOnce() {
+        schedule(false);
+    }
+
+    public void rescheduleOnce() {
         stop();
         schedule(false);
     }
