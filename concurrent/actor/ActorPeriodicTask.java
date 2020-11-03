@@ -19,14 +19,10 @@ package grakn.common.concurrent.actor;
 
 import grakn.common.concurrent.actor.eventloop.EventLoop;
 import grakn.common.concurrent.actor.eventloop.GlobalSystem;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.function.Consumer;
 
 public class ActorPeriodicTask<STATE extends Actor.State<STATE>> {
-    private static final Logger LOG = LoggerFactory.getLogger(ActorPeriodicTask.class);
-
     private final Actor<STATE> actor;
     private final int timeoutMs;
     private final int variationMs;
@@ -43,21 +39,22 @@ public class ActorPeriodicTask<STATE extends Actor.State<STATE>> {
         timer = null;
     }
 
-    public void restart() {
-        stop();
-        start();
+    public void schedule() {
+        schedule(true);
     }
 
-    public void once() {
+    public void reschedule() {
         stop();
-        long expireAt = calculateExpireAtMillis();
-        final long taskVersion = ++version;
-        timer = actor.schedule(
-                expireAt,
-                state -> {
-                    if (taskVersion != version) return;
-                    onTimeout.accept(state);
-                });
+        schedule(true);
+    }
+
+    public void scheduleOnce() {
+        schedule(false);
+    }
+
+    public void rescheduleOnce() {
+        stop();
+        schedule(false);
     }
 
     public void stop() {
@@ -72,7 +69,7 @@ public class ActorPeriodicTask<STATE extends Actor.State<STATE>> {
         return currentMillis + timeoutMs + variationMs;
     }
 
-    private void start() {
+    private void schedule(boolean repeat) {
         long expireAt = calculateExpireAtMillis();
         final long taskVersion = ++version;
         timer = actor.schedule(
@@ -80,7 +77,7 @@ public class ActorPeriodicTask<STATE extends Actor.State<STATE>> {
                 state -> {
                     if (taskVersion != version) return;
                     onTimeout.accept(state);
-                    start(); // TODO find a better way to do this
+                    if (repeat) schedule(true);
                 });
     }
 }
