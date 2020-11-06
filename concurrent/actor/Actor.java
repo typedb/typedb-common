@@ -17,17 +17,11 @@
 
 package grakn.common.concurrent.actor;
 
-import grakn.common.concurrent.actor.eventloop.Promise;
-
-import javax.annotation.CheckReturnValue;
-import java.util.function.Consumer;
-import java.util.function.Function;
-
 import grakn.common.concurrent.actor.eventloop.EventLoop;
 import grakn.common.concurrent.actor.eventloop.EventLoopGroup;
-import grakn.common.concurrent.actor.eventloop.Promise;
 
 import javax.annotation.CheckReturnValue;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -69,26 +63,21 @@ public class Actor<STATE extends Actor.State<STATE>> {
 
     public void tell(Consumer<STATE> job) {
         assert state != null : ERROR_STATE_IS_NULL;
-        // assign it to a variable to suppress @CheckReturnValue deliberately
-        Promise<Object> compute = Promise.compute(eventLoop, () -> {
-            job.accept(state);
-            return null;
-        });
+        eventLoop.submit(() -> job.accept(state));
     }
 
     @CheckReturnValue
-    public Promise<Void> order(Consumer<STATE> job) {
+    public <ANSWER> CompletableFuture<ANSWER> ask(Function<STATE, ANSWER> job) {
         assert state != null : ERROR_STATE_IS_NULL;
-        return Promise.compute(eventLoop, () -> {
-            job.accept(state);
-            return null;
+        CompletableFuture<ANSWER> future = new CompletableFuture<>();
+        eventLoop.submit(() -> {
+            try {
+                future.complete(job.apply(state));
+            } catch (Exception e) {
+                future.completeExceptionally(e);
+            }
         });
-    }
-
-    @CheckReturnValue
-    public <ANSWER> Promise<ANSWER> ask(Function<STATE, ANSWER> job) {
-        assert state != null : ERROR_STATE_IS_NULL;
-        return Promise.compute(eventLoop, () -> job.apply(state));
+        return future;
     }
 
     public EventLoop.ScheduledJob schedule(long millis, Consumer<STATE> job) {
