@@ -38,6 +38,12 @@ public class EventLoopGroup {
         return eventLoop;
     }
 
+    public synchronized void await() throws InterruptedException {
+        for (int i = 0; i < eventLoops.length; i++) {
+            eventLoops[i].await();
+        }
+    }
+
     public synchronized void stop() throws InterruptedException {
         for (int i = 0; i < eventLoops.length; i++) {
             eventLoops[i].stop();

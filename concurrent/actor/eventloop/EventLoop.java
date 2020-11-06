@@ -53,6 +53,10 @@ public class EventLoop {
         return new ScheduledJob(millis, job);
     }
 
+    public void await() throws InterruptedException {
+        thread.join();
+    }
+
     public void stop() throws InterruptedException {
         submit(() -> state = State.STOPPED);
         thread.join();
