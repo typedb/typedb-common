@@ -1,0 +1,1 @@
+node ./node_modules/.bin/cucumber-js ./external/graknlabs_behaviour/**/*.feature -require-module ts-node/register --require './**/*.ts'

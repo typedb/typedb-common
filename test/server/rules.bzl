@@ -15,7 +15,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-def grakn_test(grakn_artifact = None,
+def grakn_java_test(grakn_artifact = None,
                deps = [],
                classpath_resources = [],
                data = [],
@@ -42,3 +42,14 @@ def grakn_test(grakn_artifact = None,
         **kwargs
     )
 
+def grakn_node_test (name = "", feature_label = "@graknlabs_behaviour//"):
+    native.sh_test (
+        name = name,
+        data = [
+            "//:node_modules",
+            "//:package.json",
+            ":behaviour",
+            feature_label,
+        ],
+        srcs = ["cucumber_test.sh"],
+    )
