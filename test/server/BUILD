@@ -17,6 +17,8 @@
 
 load("@graknlabs_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
 
+exports_files(["cucumber_test.sh"])
+
 java_library(
     name = "grakn-setup",
     srcs = [

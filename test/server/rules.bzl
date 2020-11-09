@@ -51,5 +51,5 @@ def grakn_node_test (name = "", feature_label = "@graknlabs_behaviour//"):
             ":behaviour",
             feature_label,
         ],
-        srcs = ["cucumber_test.sh"],
+        srcs = ["@graknlabs_common//test/server:cucumber_test.sh"],
     )
