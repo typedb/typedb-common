@@ -67,6 +67,14 @@ public class Actor<STATE extends Actor.State<STATE>> {
     }
 
     @CheckReturnValue
+    public CompletableFuture<Void> order(Consumer<STATE> job) {
+        return ask(state -> {
+            job.accept(state);
+            return null;
+        });
+    }
+
+    @CheckReturnValue
     public <ANSWER> CompletableFuture<ANSWER> ask(Function<STATE, ANSWER> job) {
         assert state != null : ERROR_STATE_IS_NULL;
         CompletableFuture<ANSWER> future = new CompletableFuture<>();
