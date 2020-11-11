@@ -32,8 +32,8 @@ import java.util.concurrent.TransferQueue;
 public class EventLoop {
     private static final Logger LOG = LoggerFactory.getLogger(EventLoop.class);
 
-    private final TransferQueue<Runnable> eventQueue = new LinkedTransferQueue<>();
-    private final LogicalTimerQueue<Runnable> timerQueue = new LogicalTimerQueue<>();
+    private final TransferQueue<Runnable> jobs = new LinkedTransferQueue<>();
+    private final LogicalTimerQueue<Runnable> scheduledJobs = new LogicalTimerQueue<>();
     private final Thread thread;
 
     private State state;
@@ -46,11 +46,11 @@ public class EventLoop {
     }
 
     public void submit(Runnable job) {
-        eventQueue.offer(job);
+        jobs.offer(job);
     }
 
-    public EventLoop.ScheduledJob submit(long millis, Runnable job) {
-        return new ScheduledJob(millis, job);
+    public EventLoop.ScheduledJob submit(long delayMs, Runnable job) {
+        return new ScheduledJob(delayMs, job);
     }
 
     public void await() throws InterruptedException {
@@ -69,32 +69,32 @@ public class EventLoop {
             while (state == State.RUNNING) {
                 // TODO review performance, might want to batch some events from the regular queue before checking timers
                 long currentTime = GlobalSystem.time();
-                Runnable runnable = timerQueue.poll(currentTime);
-                if (runnable != null) {
-                    runnable.run();
+                Runnable scheduledJob = scheduledJobs.poll(currentTime);
+                if (scheduledJob != null) {
+                    scheduledJob.run();
                 } else {
-                    Runnable event = eventQueue.poll(timerQueue.timeToNext(currentTime), TimeUnit.MILLISECONDS);
+                    Runnable event = jobs.poll(scheduledJobs.timeToNext(currentTime), TimeUnit.MILLISECONDS);
                     if (event != null) {
                         event.run();
                     }
                 }
             }
-        } catch (Exception ex) {
-            LOG.error("EventLoop error", ex);
+        } catch (Exception e) {
+            LOG.error("EventLoop error", e);
         }
         state = State.STOPPED;
         LOG.debug("Stopped EventLoop");
     }
 
     public class ScheduledJob {
-        private LogicalTimerQueue<Runnable>.LogicalTimedItem timer;
+        private LogicalTimerQueue<Runnable>.LogicalTimedItem job;
 
-        ScheduledJob(long millis, Runnable runnable) {
-            submit(() -> timer = timerQueue.offer(millis, runnable));
+        ScheduledJob(long deadlineMs, Runnable job) {
+            submit(() -> this.job = scheduledJobs.offer(deadlineMs, job));
         }
 
         public void cancel() {
-            submit(() -> timer.cancel());
+            submit(() -> job.cancel());
         }
     }
 }
