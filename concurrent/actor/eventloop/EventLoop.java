@@ -79,8 +79,8 @@ public class EventLoop {
                     }
                 }
             }
-        } catch (Exception ex) {
-            LOG.error("EventLoop error", ex);
+        } catch (Exception e) {
+            LOG.error("EventLoop error", e);
         }
         state = State.STOPPED;
         LOG.debug("Stopped EventLoop");
@@ -89,8 +89,8 @@ public class EventLoop {
     public class ScheduledJob {
         private LogicalTimerQueue<Runnable>.LogicalTimedItem job;
 
-        ScheduledJob(long delayMs, Runnable job) {
-            submit(() -> this.job = scheduledJobs.offer(delayMs, job));
+        ScheduledJob(long deadlineMs, Runnable job) {
+            submit(() -> this.job = scheduledJobs.offer(deadlineMs, job));
         }
 
         public void cancel() {

@@ -72,9 +72,9 @@ public class Actor<STATE extends Actor.State<STATE>> {
         return future;
     }
 
-    public EventLoop.ScheduledJob schedule(long frequencyMs, Consumer<STATE> job) {
+    public EventLoop.ScheduledJob schedule(long deadlineMs, Consumer<STATE> job) {
         assert state != null : ERROR_STATE_IS_NULL;
-        return eventLoop.submit(frequencyMs, () -> job.accept(state));
+        return eventLoop.submit(deadlineMs, () -> job.accept(state));
     }
 
     public static abstract class State<STATE extends State<STATE>> {
@@ -82,10 +82,6 @@ public class Actor<STATE extends Actor.State<STATE>> {
 
         protected State(Actor<STATE> self) {
             this.self = self;
-        }
-
-        protected <CHILD_STATE extends State<CHILD_STATE>> Actor<CHILD_STATE> child(Function<Actor<CHILD_STATE>, CHILD_STATE> stateConstructor) {
-            return Actor.create(self.eventLoopGroup, stateConstructor);
         }
 
         protected Actor<STATE> self() {
