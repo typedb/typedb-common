@@ -54,7 +54,7 @@ elif [ "$1" = "console" ]; then
         SERVICE_LIB_CP="console/services/lib/*"
         CLASSPATH="${GRAKN_HOME}/${SERVICE_LIB_CP}:${GRAKN_HOME}/console/conf/"
     # exec replaces current shell process with java so no commands after this one will ever get executed
-        exec java ${CONSOLE_JAVAOPTS} -cp "${CLASSPATH}" -Dgrakn.dir="${GRAKN_HOME}" grakn.console.GraknConsole "$@"
+        exec java ${CONSOLE_JAVAOPTS} -cp "${CLASSPATH}" -Dgrakn.dir="${GRAKN_HOME}" grakn.console.GraknConsole "${@:2}"
     else
         echo "Grakn Core Console is not included in this Grakn distribution."
         echo "You may want to install Grakn Core Console or Grakn Core (all)."
