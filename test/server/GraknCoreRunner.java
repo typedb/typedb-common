@@ -113,14 +113,19 @@ public class GraknCoreRunner implements GraknRunner {
 
     private void unzip() throws IOException, TimeoutException, InterruptedException {
         System.out.println("Unarchiving Grakn Core distribution");
+        Files.createDirectory(GRAKN_TARGET_DIRECTORY);
         if (GRAKN_DISTRIBUTION_FORMAT.equals(TAR)) {
             executor.command("tar", "-xf", GRAKN_DISTRIBUTION_FILE.toString(),
-                    "-C", GRAKN_TARGET_DIRECTORY.getParent().toString()).execute();
+                    "-C", GRAKN_TARGET_DIRECTORY.toString()).execute();
         } else {
             executor.command("unzip", "-q", GRAKN_DISTRIBUTION_FILE.toString(),
-                    "-d", GRAKN_TARGET_DIRECTORY.getParent().toString()).execute();
+                    "-d", GRAKN_TARGET_DIRECTORY.toString()).execute();
         }
-        executor = executor.directory(GRAKN_TARGET_DIRECTORY.toFile());
+        // The Grakn Core archive extracts to a folder inside GRAKN_TARGET_DIRECTORY named
+        // grakn-core-server-{platform}-{version}. We know it's the only folder, so we can retrieve it using Files.list.
+        final Path graknPath = Files.list(GRAKN_TARGET_DIRECTORY).findFirst().get();
+        System.out.println(graknPath);
+        executor = executor.directory(graknPath.toFile());
 
         System.out.println("Grakn Core distribution unarchived");
     }
