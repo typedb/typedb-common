@@ -18,8 +18,8 @@
 def grakn_java_test(name, grakn_artifact_linux, grakn_artifact_mac, deps = [], classpath_resources = [], data = [], **kwargs):
 
     native.genrule(
-        name = "grakn_artifact_selector",
-        outs = ["grakn-core-server.tar.gz"],
+        name = "native-grakn-artifact",
+        outs = ["grakn-core-server-native.tar.gz"],
         srcs = select({
             "@graknlabs_dependencies//util/platform:is_mac": [grakn_artifact_mac],
             "@graknlabs_dependencies//util/platform:is_linux": [grakn_artifact_linux],
@@ -31,7 +31,7 @@ def grakn_java_test(name, grakn_artifact_linux, grakn_artifact_mac, deps = [], c
         name = name,
         deps = depset(deps + ["@graknlabs_common//test/server:grakn-setup"]).to_list(),
         classpath_resources = depset(classpath_resources + ["@graknlabs_common//test/server:logback"]).to_list(),
-        data = depset(data + ["grakn-core-server.tar.gz"]).to_list(),
-        args = ["$(location grakn-core-server.tar.gz)"],
+        data = depset(data + [":native-grakn-artifact"]).to_list(),
+        args = ["$(location :native-grakn-artifact)"],
         **kwargs
     )
