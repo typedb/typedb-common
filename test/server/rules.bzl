@@ -15,30 +15,23 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-def grakn_test(grakn_artifact = None,
-               deps = [],
-               classpath_resources = [],
-               data = [],
-               **kwargs):
+def grakn_java_test(name, grakn_artifact_linux, grakn_artifact_mac, deps = [], classpath_resources = [], data = [], **kwargs):
 
-    new_data = [] + data
-
-    if grakn_artifact != None:
-        new_data += [grakn_artifact]
-
-    location = "$(location {})".format(grakn_artifact) if grakn_artifact != None else "none"
-
-    native.java_test(
-        deps = depset(deps + [
-            "@graknlabs_common//test/server:grakn-setup",
-        ]).to_list(),
-        classpath_resources = depset(classpath_resources + [
-            "@graknlabs_common//test/server:logback",
-        ]).to_list(),
-        data = depset(new_data).to_list(),
-        args = [
-            location,
-        ],
-        **kwargs
+    native.genrule(
+        name = "native-grakn-artifact",
+        outs = ["grakn-core-server-native.tar.gz"],
+        srcs = select({
+            "@graknlabs_dependencies//util/platform:is_mac": [grakn_artifact_mac],
+            "@graknlabs_dependencies//util/platform:is_linux": [grakn_artifact_linux],
+        }, no_match_error = "There is no Grakn Core artifact compatible with this operating system. Supported operating systems are Mac and Linux."),
+        cmd = "read -a srcs <<< '$(SRCS)' && read -a outs <<< '$(OUTS)' && cp $${srcs[0]} $${outs[0]}",
     )
 
+    native.java_test(
+        name = name,
+        deps = depset(deps + ["@graknlabs_common//test/server:grakn-setup"]).to_list(),
+        classpath_resources = depset(classpath_resources + ["@graknlabs_common//test/server:logback"]).to_list(),
+        data = depset(data + [":native-grakn-artifact"]).to_list(),
+        args = ["$(location :native-grakn-artifact)"],
+        **kwargs
+    )
