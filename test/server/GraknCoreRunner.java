@@ -156,7 +156,7 @@ public class GraknCoreRunner implements GraknRunner {
                     "--data", tmpDir.toAbsolutePath().toString()
             ).start();
 
-            Thread.sleep(5000);
+            Thread.sleep(10000);
             assertTrue("Grakn Core failed to start", graknProcess.getProcess().isAlive());
 
             System.out.println("Grakn Core database server started");
