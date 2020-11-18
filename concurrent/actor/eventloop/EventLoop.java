@@ -17,6 +17,8 @@
 
 package grakn.common.concurrent.actor.eventloop;
 
+import grakn.common.collection.Collections;
+import grakn.common.collection.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,6 +26,7 @@ import java.util.concurrent.LinkedTransferQueue;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TransferQueue;
+import java.util.function.Consumer;
 
 // TODO:
 //  This class should be optimised, most specifically, it should probably
@@ -32,9 +35,10 @@ import java.util.concurrent.TransferQueue;
 public class EventLoop {
     private static final Logger LOG = LoggerFactory.getLogger(EventLoop.class);
 
-    private final TransferQueue<Runnable> jobs = new LinkedTransferQueue<>();
-    private final LogicalTimerQueue<Runnable> scheduledJobs = new LogicalTimerQueue<>();
+    private final TransferQueue<Pair<Runnable, Consumer<Exception>>> events = new LinkedTransferQueue<>();
+    private final LogicalTimerQueue<Runnable> timers = new LogicalTimerQueue<>();
     private final Thread thread;
+    private final Consumer<Exception> errorHandler = e -> { LOG.error("An unexpected error has occurred.", e); };
 
     private State state;
     private enum State { READY, RUNNING, STOPPED }
@@ -45,12 +49,12 @@ public class EventLoop {
         thread.start();
     }
 
-    public void submit(Runnable job) {
-        jobs.offer(job);
+    public void submit(Runnable job, Consumer<Exception> onError) {
+        events.offer(Collections.pair(job, onError));
     }
 
-    public EventLoop.ScheduledJob submit(long delayMs, Runnable job) {
-        return new ScheduledJob(delayMs, job);
+    public EventLoop.ScheduledJob submit(long millis, Runnable job, Consumer<Exception> errorHandler) {
+        return new ScheduledJob(millis, job, errorHandler);
     }
 
     public void await() throws InterruptedException {
@@ -58,43 +62,48 @@ public class EventLoop {
     }
 
     public void stop() throws InterruptedException {
-        submit(() -> state = State.STOPPED);
+        submit(() -> state = State.STOPPED, errorHandler);
         thread.join();
     }
 
     private void loop() {
-        LOG.debug("Starting EventLoop");
+        LOG.debug("Started");
         state = State.RUNNING;
-        try {
-            while (state == State.RUNNING) {
-                // TODO review performance, might want to batch some events from the regular queue before checking timers
-                long currentTime = GlobalSystem.time();
-                Runnable scheduledJob = scheduledJobs.poll(currentTime);
-                if (scheduledJob != null) {
-                    scheduledJob.run();
-                } else {
-                    Runnable event = jobs.poll(scheduledJobs.timeToNext(currentTime), TimeUnit.MILLISECONDS);
+
+        while (state == State.RUNNING) {
+            long currentTime = GlobalSystem.time();
+            Runnable runnable = timers.poll(currentTime);
+            if (runnable != null) {
+                runnable.run();
+            } else {
+                try {
+                    Pair<Runnable, Consumer<Exception>> event = events.poll(timers.timeToNext(currentTime), TimeUnit.MILLISECONDS);
                     if (event != null) {
-                        event.run();
+                        try {
+                            event.first().run();
+                        } catch (Exception e) {
+                            event.second().accept(e);
+                        }
                     }
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
                 }
             }
-        } catch (Exception e) {
-            LOG.error("EventLoop error", e);
         }
+
         state = State.STOPPED;
-        LOG.debug("Stopped EventLoop");
+        LOG.debug("stopped");
     }
 
     public class ScheduledJob {
-        private LogicalTimerQueue<Runnable>.LogicalTimedItem job;
+        private LogicalTimerQueue<Runnable>.LogicalTimedItem timer;
 
-        ScheduledJob(long deadlineMs, Runnable job) {
-            submit(() -> this.job = scheduledJobs.offer(deadlineMs, job));
+        ScheduledJob(long millis, Runnable runnable, Consumer<Exception> errorHandler) {
+            submit(() -> timer = timers.offer(millis, runnable), errorHandler);
         }
 
         public void cancel() {
-            submit(() -> job.cancel());
+            submit(() -> timer.cancel(), errorHandler);
         }
     }
 }
