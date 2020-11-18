@@ -35,8 +35,8 @@ import java.util.function.Consumer;
 public class EventLoop {
     private static final Logger LOG = LoggerFactory.getLogger(EventLoop.class);
 
-    private final TransferQueue<Pair<Runnable, Consumer<Exception>>> events = new LinkedTransferQueue<>();
-    private final LogicalTimerQueue<Runnable> timers = new LogicalTimerQueue<>();
+    private final TransferQueue<Pair<Runnable, Consumer<Exception>>> jobs = new LinkedTransferQueue<>();
+    private final LogicalTimerQueue<Runnable> scheduledJobs = new LogicalTimerQueue<>();
     private final Thread thread;
     private final Consumer<Exception> errorHandler = e -> { LOG.error("An unexpected error has occurred.", e); };
 
@@ -50,11 +50,11 @@ public class EventLoop {
     }
 
     public void submit(Runnable job, Consumer<Exception> onError) {
-        events.offer(Collections.pair(job, onError));
+        jobs.offer(Collections.pair(job, onError));
     }
 
-    public EventLoop.ScheduledJob submit(long millis, Runnable job, Consumer<Exception> errorHandler) {
-        return new ScheduledJob(millis, job, errorHandler);
+    public EventLoop.ScheduledJob submit(long scheduleMs, Runnable job, Consumer<Exception> errorHandler) {
+        return new ScheduledJob(scheduleMs, job, errorHandler);
     }
 
     public void await() throws InterruptedException {
@@ -72,17 +72,17 @@ public class EventLoop {
 
         while (state == State.RUNNING) {
             long currentTime = GlobalSystem.time();
-            Runnable runnable = timers.poll(currentTime);
-            if (runnable != null) {
-                runnable.run();
+            Runnable scheduledJob = scheduledJobs.poll(currentTime);
+            if (scheduledJob != null) {
+                scheduledJob.run();
             } else {
                 try {
-                    Pair<Runnable, Consumer<Exception>> event = events.poll(timers.timeToNext(currentTime), TimeUnit.MILLISECONDS);
-                    if (event != null) {
+                    Pair<Runnable, Consumer<Exception>> job = jobs.poll(scheduledJobs.timeToNext(currentTime), TimeUnit.MILLISECONDS);
+                    if (job != null) {
                         try {
-                            event.first().run();
+                            job.first().run();
                         } catch (Exception e) {
-                            event.second().accept(e);
+                            job.second().accept(e);
                         }
                     }
                 } catch (InterruptedException e) {
@@ -98,8 +98,8 @@ public class EventLoop {
     public class ScheduledJob {
         private LogicalTimerQueue<Runnable>.LogicalTimedItem timer;
 
-        ScheduledJob(long millis, Runnable runnable, Consumer<Exception> errorHandler) {
-            submit(() -> timer = timers.offer(millis, runnable), errorHandler);
+        ScheduledJob(long scheduleMs, Runnable job, Consumer<Exception> errorHandler) {
+            submit(() -> timer = scheduledJobs.offer(scheduleMs, job), errorHandler);
         }
 
         public void cancel() {
