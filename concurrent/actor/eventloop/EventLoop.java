@@ -17,7 +17,6 @@
 
 package grakn.common.concurrent.actor.eventloop;
 
-import grakn.common.collection.Collections;
 import grakn.common.collection.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,6 +27,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TransferQueue;
 import java.util.function.Consumer;
 
+import static grakn.common.collection.Collections.pair;
+
 // TODO:
 //  This class should be optimised, most specifically, it should probably
 //  use a separate scheduled timer thread event loop for the whole system to
@@ -36,7 +37,7 @@ public class EventLoop {
     private static final Logger LOG = LoggerFactory.getLogger(EventLoop.class);
 
     private final TransferQueue<Pair<Runnable, Consumer<Exception>>> jobs = new LinkedTransferQueue<>();
-    private final LogicalTimerQueue<Runnable> scheduledJobs = new LogicalTimerQueue<>();
+    private final LogicalTimerQueue<Pair<Runnable, Consumer<Exception>>> scheduledJobs = new LogicalTimerQueue<>();
     private final Thread thread;
     private final Consumer<Exception> errorHandler = e -> { LOG.error("An unexpected error has occurred.", e); };
 
@@ -50,7 +51,7 @@ public class EventLoop {
     }
 
     public void submit(Runnable job, Consumer<Exception> onError) {
-        jobs.offer(Collections.pair(job, onError));
+        jobs.offer(pair(job, onError));
     }
 
     public EventLoop.ScheduledJob submit(long scheduleMs, Runnable job, Consumer<Exception> errorHandler) {
@@ -72,9 +73,13 @@ public class EventLoop {
 
         while (state == State.RUNNING) {
             long currentTime = GlobalSystem.time();
-            Runnable scheduledJob = scheduledJobs.poll(currentTime);
+            Pair<Runnable, Consumer<Exception>> scheduledJob = scheduledJobs.poll(currentTime);
             if (scheduledJob != null) {
-                scheduledJob.run();
+                try {
+                    scheduledJob.first().run();
+                } catch (Exception e) {
+                    scheduledJob.second().accept(e);
+                }
             } else {
                 try {
                     Pair<Runnable, Consumer<Exception>> job = jobs.poll(scheduledJobs.timeToNext(currentTime), TimeUnit.MILLISECONDS);
@@ -96,10 +101,10 @@ public class EventLoop {
     }
 
     public class ScheduledJob {
-        private LogicalTimerQueue<Runnable>.LogicalTimedItem timer;
+        private LogicalTimerQueue<Pair<Runnable, Consumer<Exception>>>.LogicalTimedItem timer;
 
         ScheduledJob(long scheduleMs, Runnable job, Consumer<Exception> errorHandler) {
-            submit(() -> timer = scheduledJobs.offer(scheduleMs, job), errorHandler);
+            submit(() -> timer = scheduledJobs.offer(scheduleMs, pair(job, errorHandler)), errorHandler);
         }
 
         public void cancel() {
