@@ -63,21 +63,22 @@ public class Collections {
         return java.util.Collections.unmodifiableList(Arrays.asList(elements));
     }
 
-    public static <T> List<T> extend(Collection<T> collection, T... array) {
-        List<T> combined = new ArrayList<>(collection);
-        combined.addAll(Arrays.asList(array));
-        return java.util.Collections.unmodifiableList(combined);
-    }
-
-    public static <T> List<T> copy(Collection<T> elements) {
+    public static <T> List<T> list(Collection<T> elements) {
         List<T> list = new ArrayList<>(elements);
         return java.util.Collections.unmodifiableList(list);
     }
 
-    public static <T> List<T> concat(Collection<T>... collections) {
-        List<T> combined = new ArrayList<>();
-        for (Collection<T> collection : collections) {
-            combined.addAll(collection);
+    public static <T> List<T> list(Collection<T> collection1, T item, T... array) {
+        List<T> combined = new ArrayList<>(collection1);
+        combined.add(item);
+        combined.addAll(Arrays.asList(array));
+        return java.util.Collections.unmodifiableList(combined);
+    }
+
+    public static <T> List<T> list(Collection<T> collection, Collection<T>... collections) {
+        List<T> combined = new ArrayList<>(collection);
+        for (Collection<T> c : collections) {
+            combined.addAll(c);
         }
         return java.util.Collections.unmodifiableList(combined);
     }
