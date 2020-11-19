@@ -26,7 +26,7 @@ public class LogicalTimerQueue<V> {
 
     public class LogicalTimedItem implements Comparable<LogicalTimedItem> {
         private final long version;
-        private long expireAtMillis;
+        private final long expireAtMillis;
         private final V value;
         private boolean cancelled = false;
 
