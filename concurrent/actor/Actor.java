@@ -17,14 +17,16 @@
 
 package grakn.common.concurrent.actor;
 
+import grakn.common.collection.Pair;
+
 import javax.annotation.CheckReturnValue;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class Actor<STATE extends Actor.State<STATE>> {
-    private static String ERROR_SELF_ACTOR_IS_NULL = "The self actor should always be non-null.";
-    private static String ERROR_STATE_IS_NULL = "Cannot process actor message when the state hasn't been setup. Are you calling the method from state constructor?";
+    private static final String ERROR_SELF_ACTOR_IS_NULL = "The self actor should always be non-null.";
+    private static final String ERROR_STATE_IS_NULL = "Cannot process actor message when the state hasn't been setup. Are you calling the method from state constructor?";
 
     public STATE state;
     protected final EventLoopGroup eventLoopGroup;
@@ -70,7 +72,7 @@ public class Actor<STATE extends Actor.State<STATE>> {
         return future;
     }
 
-    public EventLoop.ScheduledJob schedule(long deadlineMs, Consumer<STATE> job) {
+    public ScheduledJobQueue<Pair<Runnable, Consumer<Exception>>>.Entry schedule(long deadlineMs, Consumer<STATE> job) {
         assert state != null : ERROR_STATE_IS_NULL;
         return eventLoop.submit(deadlineMs, () -> job.accept(state), state::exception);
     }

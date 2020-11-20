@@ -19,7 +19,7 @@ package grakn.common.concurrent.actor;
 
 import java.util.PriorityQueue;
 
-public class LogicalClockQueue<V> {
+public class ScheduledJobQueue<V> {
     private final PriorityQueue<Entry> queue = new PriorityQueue<>();
     private long queueCounter;
 

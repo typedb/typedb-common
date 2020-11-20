@@ -25,6 +25,7 @@ import java.util.concurrent.LinkedTransferQueue;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TransferQueue;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 import static grakn.common.collection.Collections.pair;
@@ -35,7 +36,7 @@ public class EventLoop {
 
     private final Consumer<Exception> errorHandler = e -> { LOG.error("An unexpected error has occurred.", e); };
     private final TransferQueue<Pair<Runnable, Consumer<Exception>>> jobs = new LinkedTransferQueue<>();
-    private final LogicalClockQueue<Pair<Runnable, Consumer<Exception>>> scheduledJobs = new LogicalClockQueue<>();
+    private final ScheduledJobQueue<Pair<Runnable, Consumer<Exception>>> scheduledJobs = new ScheduledJobQueue<>();
     private final Thread thread;
     private State state;
 
@@ -49,8 +50,10 @@ public class EventLoop {
         jobs.offer(pair(job, onError));
     }
 
-    public EventLoop.ScheduledJob submit(long scheduleMs, Runnable job, Consumer<Exception> errorHandler) {
-        return new ScheduledJob(scheduleMs, job, errorHandler);
+    public ScheduledJobQueue<Pair<Runnable, Consumer<Exception>>>.Entry submit(long scheduleMs, Runnable job, Consumer<Exception> errorHandler) {
+        final AtomicReference<ScheduledJobQueue<Pair<Runnable, Consumer<Exception>>>.Entry> scheduledJob = new AtomicReference<>();
+        submit(() -> scheduledJob.set(scheduledJobs.offer(scheduleMs, pair(job, errorHandler))), errorHandler);
+        return scheduledJob.get();
     }
 
     public void await() throws InterruptedException {
@@ -92,18 +95,6 @@ public class EventLoop {
             job.first().run();
         } catch (Exception e) {
             job.second().accept(e);
-        }
-    }
-
-    public class ScheduledJob {
-        private LogicalClockQueue<Pair<Runnable, Consumer<Exception>>>.Entry entry;
-
-        ScheduledJob(long scheduleMs, Runnable job, Consumer<Exception> errorHandler) {
-            submit(() -> entry = scheduledJobs.offer(scheduleMs, pair(job, errorHandler)), errorHandler);
-        }
-
-        public void cancel() {
-            submit(() -> entry.cancel(), errorHandler);
         }
     }
 }
