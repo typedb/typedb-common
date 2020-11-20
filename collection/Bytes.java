@@ -46,7 +46,7 @@ public class Bytes {
         return bytes;
     }
 
-    public static String bytesToHexString(final byte[] bytes) {
+    public static String bytesToHexString(byte[] bytes) {
         final char[] hexChars = new char[bytes.length * 2];
         for (int j = 0; j < bytes.length; j++) {
             final int v = bytes[j] & 0xFF;
