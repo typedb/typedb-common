@@ -28,7 +28,7 @@ public class Actor<STATE extends Actor.State<STATE>> {
             "Attempting to access the Actor state, but it is not yet setup. Are you trying to send a message to yourself within the constructor?";
 
     public STATE state;
-    protected final EventLoopGroup eventLoopGroup;
+    private final EventLoopGroup eventLoopGroup;
     private final EventLoop eventLoop;
 
     public static <NEW_STATE extends State<NEW_STATE>>
@@ -78,6 +78,10 @@ public class Actor<STATE extends Actor.State<STATE>> {
 
     public EventLoopGroup eventLoopGroup() {
         return eventLoopGroup;
+    }
+
+    public EventLoop eventLoop() {
+        return eventLoop;
     }
 
     public static abstract class State<STATE extends State<STATE>> {
