@@ -59,10 +59,8 @@ public class Collections {
     }
 
     @SafeVarargs
-    public static <T> List<T> list(T element, T... elements) {
-        List<T> list = new ArrayList<>(Arrays.asList(elements));
-        list.add(element);
-        return java.util.Collections.unmodifiableList(list);
+    public static <T> List<T> list(T... elements) {
+        return java.util.Collections.unmodifiableList(Arrays.asList(elements));
     }
 
     public static <T> List<T> list(Collection<T> elements) {
@@ -70,6 +68,7 @@ public class Collections {
         return java.util.Collections.unmodifiableList(list);
     }
 
+    @SafeVarargs
     public static <T> List<T> list(Collection<T> collection1, T item, T... array) {
         List<T> combined = new ArrayList<>(collection1);
         combined.add(item);
@@ -77,6 +76,7 @@ public class Collections {
         return java.util.Collections.unmodifiableList(combined);
     }
 
+    @SafeVarargs
     public static <T> List<T> list(Collection<T> collection, Collection<T>... collections) {
         List<T> combined = new ArrayList<>(collection);
         for (Collection<T> c : collections) {
