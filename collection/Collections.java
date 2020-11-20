@@ -59,8 +59,10 @@ public class Collections {
     }
 
     @SafeVarargs
-    public static <T> List<T> list(T... elements) {
-        return java.util.Collections.unmodifiableList(Arrays.asList(elements));
+    public static <T> List<T> list(T element, T... elements) {
+        List<T> list = new ArrayList<>(Arrays.asList(elements));
+        list.add(element);
+        return java.util.Collections.unmodifiableList(list);
     }
 
     public static <T> List<T> list(Collection<T> elements) {
