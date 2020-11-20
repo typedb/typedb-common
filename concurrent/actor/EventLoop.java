@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package grakn.common.concurrent.actor.eventloop;
+package grakn.common.concurrent.actor;
 
 import grakn.common.collection.Pair;
 import org.slf4j.Logger;
@@ -59,7 +59,7 @@ public class EventLoop {
 
     public void stop() throws InterruptedException {
         submit(() -> state = State.STOPPED, errorHandler);
-        thread.join();
+        await();
     }
 
     private void loop() {

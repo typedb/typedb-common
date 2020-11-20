@@ -17,9 +17,6 @@
 
 package grakn.common.concurrent.actor;
 
-import grakn.common.concurrent.actor.eventloop.EventLoop;
-import grakn.common.concurrent.actor.eventloop.EventLoopGroup;
-
 import javax.annotation.CheckReturnValue;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;

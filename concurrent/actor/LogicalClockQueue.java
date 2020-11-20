@@ -15,17 +15,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package grakn.common.concurrent.actor.eventloop;
+package grakn.common.concurrent.actor;
 
 import java.util.PriorityQueue;
 
 public class LogicalClockQueue<V> {
-    private final PriorityQueue<Entry> timerQueue = new PriorityQueue<>();
+    private final PriorityQueue<Entry> queue = new PriorityQueue<>();
     private long queueCounter;
 
     public Entry offer(long expireAtMs, V value) {
         Entry item = new Entry(expireAtMs, value);
-        timerQueue.add(item);
+        queue.add(item);
         return item;
     }
 
@@ -33,7 +33,7 @@ public class LogicalClockQueue<V> {
         Entry timer = peekToNextReady();
         if (timer == null) return null;
         if (timer.expireAtMs > currentTimeMs) return null;
-        timerQueue.poll();
+        queue.poll();
         return timer.value;
     }
 
@@ -45,8 +45,8 @@ public class LogicalClockQueue<V> {
 
     private Entry peekToNextReady() {
         Entry item;
-        while ((item = timerQueue.peek()) != null && item.isCancelled()) {
-            timerQueue.poll();
+        while ((item = queue.peek()) != null && item.isCancelled()) {
+            queue.poll();
         }
         return item;
     }

@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package grakn.common.concurrent.actor.eventloop;
+package grakn.common.concurrent.actor;
 
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
