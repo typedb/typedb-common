@@ -21,12 +21,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.PriorityQueue;
+import java.util.Random;
 import java.util.concurrent.LinkedTransferQueue;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TransferQueue;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public class EventLoop {
     private static final Logger LOG = LoggerFactory.getLogger(EventLoop.class);
@@ -70,7 +73,7 @@ public class EventLoop {
         state = State.RUNNING;
 
         while (state == State.RUNNING) {
-            long currentTime = EventLoopClock.time();
+            long currentTime = Clock.time();
             Job scheduledJob = scheduledJobs.poll(currentTime);
             if (scheduledJob != null) {
                 scheduledJob.run();
@@ -90,6 +93,26 @@ public class EventLoop {
         LOG.debug("stopped");
     }
 
+    public static class Clock {
+        private static Supplier<Long> getTime = () -> System.currentTimeMillis();
+        private static Random random = ThreadLocalRandom.current();
+
+        private Clock() {}
+
+        public static void set(Supplier<Long> getTime, Random random) {
+            Clock.getTime = getTime;
+            Clock.random = random;
+        }
+
+        public static long time() {
+            return getTime.get();
+        }
+
+        public static Random random() {
+            return random;
+        }
+    }
+    
     public static class Cancellable implements Comparable<Cancellable> {
         private final long version;
         private final long expireAtMs;
