@@ -17,17 +17,15 @@
 
 package grakn.common.concurrent.actor;
 
-import grakn.common.concurrent.actor.eventloop.EventLoop;
-import grakn.common.concurrent.actor.eventloop.EventLoopGroup;
-
 import javax.annotation.CheckReturnValue;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class Actor<STATE extends Actor.State<STATE>> {
-    private static String ERROR_SELF_ACTOR_IS_NULL = "The self actor should always be non-null.";
-    private static String ERROR_STATE_IS_NULL = "Cannot process actor message when the state hasn't been setup. Are you calling the method from state constructor?";
+    private static final String ERROR_ACTOR_SELF_IS_NULL = "self() must not be null.";
+    private static final String ERROR_ACTOR_STATE_NOT_SETUP =
+            "Attempting to access the Actor state, but it is not yet setup. Are you trying to send a message to yourself within the constructor?";
 
     public STATE state;
     protected final EventLoopGroup eventLoopGroup;
@@ -47,7 +45,7 @@ public class Actor<STATE extends Actor.State<STATE>> {
     }
 
     public void tell(Consumer<STATE> job) {
-        assert state != null : ERROR_STATE_IS_NULL;
+        assert state != null : ERROR_ACTOR_STATE_NOT_SETUP;
         eventLoop.submit(() -> job.accept(state), state::exception);
     }
 
@@ -61,7 +59,7 @@ public class Actor<STATE extends Actor.State<STATE>> {
 
     @CheckReturnValue
     public <ANSWER> CompletableFuture<ANSWER> ask(Function<STATE, ANSWER> job) {
-        assert state != null : ERROR_STATE_IS_NULL;
+        assert state != null : ERROR_ACTOR_STATE_NOT_SETUP;
         CompletableFuture<ANSWER> future = new CompletableFuture<>();
         eventLoop.submit(
                 () -> future.complete(job.apply(state)),
@@ -73,8 +71,8 @@ public class Actor<STATE extends Actor.State<STATE>> {
         return future;
     }
 
-    public EventLoop.ScheduledJob schedule(long deadlineMs, Consumer<STATE> job) {
-        assert state != null : ERROR_STATE_IS_NULL;
+    public EventLoop.Cancellable schedule(long deadlineMs, Consumer<STATE> job) {
+        assert state != null : ERROR_ACTOR_STATE_NOT_SETUP;
         return eventLoop.submit(deadlineMs, () -> job.accept(state), state::exception);
     }
 
@@ -92,7 +90,7 @@ public class Actor<STATE extends Actor.State<STATE>> {
         }
 
         protected Actor<STATE> self() {
-            assert this.self != null : ERROR_SELF_ACTOR_IS_NULL;
+            assert this.self != null : ERROR_ACTOR_SELF_IS_NULL;
             return this.self;
         }
     }
