@@ -71,6 +71,14 @@ public class EventLoop {
         await();
     }
 
+    public long time() {
+        return clock.get();
+    }
+
+    public Random random() {
+        return random;
+    }
+
     private void loop() {
         LOG.debug("Started");
         state = State.RUNNING;
