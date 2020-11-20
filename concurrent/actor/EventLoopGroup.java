@@ -19,15 +19,23 @@ package grakn.common.concurrent.actor;
 
 import grakn.common.concurrent.NamedThreadFactory;
 
+import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Supplier;
+
 public class EventLoopGroup {
     private final EventLoop[] eventLoops;
     private int nextIndex;
 
     public EventLoopGroup(int threadCount, String prefix) {
+        this(threadCount, prefix, System::currentTimeMillis, ThreadLocalRandom.current());
+    }
+
+    public EventLoopGroup(int threadCount, String prefix, Supplier<Long> clock, Random random) {
         NamedThreadFactory threadFactory = new NamedThreadFactory(prefix);
         eventLoops = new EventLoop[threadCount];
         for (int i = 0; i < threadCount; i++) {
-            eventLoops[i] = new EventLoop(threadFactory);
+            eventLoops[i] = new EventLoop(threadFactory, clock, random);
         }
         nextIndex = 0;
     }

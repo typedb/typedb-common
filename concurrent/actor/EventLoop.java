@@ -24,7 +24,6 @@ import java.util.PriorityQueue;
 import java.util.Random;
 import java.util.concurrent.LinkedTransferQueue;
 import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TransferQueue;
 import java.util.concurrent.atomic.AtomicReference;
@@ -39,11 +38,15 @@ public class EventLoop {
     private final TransferQueue<Job> jobs = new LinkedTransferQueue<>();
     private final ScheduledJobQueue scheduledJobs = new ScheduledJobQueue();
     private final Thread thread;
+    private final Supplier<Long> clock;
+    private final Random random;
 
-    public EventLoop(ThreadFactory factory) {
-        thread = factory.newThread(this::loop);
-        state = State.READY;
+    public EventLoop(ThreadFactory threadFactory, Supplier<Long> clock, Random random) {
+        thread = threadFactory.newThread(this::loop);
         thread.start();
+        this.clock = clock;
+        this.random = random;
+        state = State.READY;
     }
 
     public void submit(Runnable job, Consumer<Exception> errorHandler) {
@@ -73,13 +76,13 @@ public class EventLoop {
         state = State.RUNNING;
 
         while (state == State.RUNNING) {
-            long currentTime = System.time();
-            Job scheduledJob = scheduledJobs.poll(currentTime);
+            long currentTimeMs = clock.get();
+            Job scheduledJob = scheduledJobs.poll(currentTimeMs);
             if (scheduledJob != null) {
                 scheduledJob.run();
             } else {
                 try {
-                    Job job = jobs.poll(scheduledJobs.timeToNext(currentTime), TimeUnit.MILLISECONDS);
+                    Job job = jobs.poll(scheduledJobs.timeToNext(currentTimeMs), TimeUnit.MILLISECONDS);
                     if (job != null) {
                         job.run();
                     }
@@ -91,26 +94,6 @@ public class EventLoop {
 
         state = State.STOPPED;
         LOG.debug("stopped");
-    }
-
-    public static class System {
-        private static Supplier<Long> getTime = () -> java.lang.System.currentTimeMillis();
-        private static Random random = ThreadLocalRandom.current();
-
-        private System() {}
-
-        public static void set(Supplier<Long> getTime, Random random) {
-            System.getTime = getTime;
-            System.random = random;
-        }
-
-        public static long time() {
-            return getTime.get();
-        }
-
-        public static Random random() {
-            return random;
-        }
     }
 
     public static class Cancellable implements Comparable<Cancellable> {

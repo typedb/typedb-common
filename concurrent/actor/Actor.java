@@ -25,7 +25,7 @@ import java.util.function.Function;
 public class Actor<STATE extends Actor.State<STATE>> {
     private static final String ERROR_ACTOR_SELF_IS_NULL = "self() must not be null.";
     private static final String ERROR_ACTOR_STATE_NOT_SETUP =
-            "Actor state is not yet setup . Are you trying to send a message from state constructor?";
+            "Attempting to access the Actor state, but it is not yet setup. Are you trying to send a message to yourself within the constructor?";
 
     public STATE state;
     protected final EventLoopGroup eventLoopGroup;
