@@ -31,11 +31,10 @@ import java.util.function.Consumer;
 public class EventLoop {
     private static final Logger LOG = LoggerFactory.getLogger(EventLoop.class);
     private enum State { READY, RUNNING, STOPPED }
-    private final Consumer<Exception> errorHandler = e -> { LOG.error("An unexpected error has occurred.", e); };
 
     private State state;
     private final TransferQueue<Job> jobs = new LinkedTransferQueue<>();
-    private final ScheduledJobs scheduledJobs = new ScheduledJobs();
+    private final ScheduledJobQueue scheduledJobs = new ScheduledJobQueue();
     private final Thread thread;
 
     public EventLoop(ThreadFactory factory) {
@@ -44,12 +43,12 @@ public class EventLoop {
         thread.start();
     }
 
-    public void submit(Runnable job, Consumer<Exception> onError) {
-        jobs.offer(new Job(job, onError));
+    public void submit(Runnable job, Consumer<Exception> errorHandler) {
+        jobs.offer(new Job(job, errorHandler));
     }
 
-    public ScheduledJobs.Cancellable submit(long scheduleMs, Runnable job, Consumer<Exception> errorHandler) {
-        final AtomicReference<ScheduledJobs.Cancellable> cancellable = new AtomicReference<>();
+    public EventLoop.Cancellable submit(long scheduleMs, Runnable job, Consumer<Exception> errorHandler) {
+        final AtomicReference<Cancellable> cancellable = new AtomicReference<>();
         submit(() -> cancellable.set(scheduledJobs.offer(scheduleMs, new Job(job, errorHandler))), errorHandler);
         return cancellable.get();
     }
@@ -59,7 +58,10 @@ public class EventLoop {
     }
 
     public void stop() throws InterruptedException {
-        submit(() -> state = State.STOPPED, errorHandler);
+        submit(
+                () -> state = State.STOPPED,
+                e -> LOG.error("An unexpected error has occurred.", e)
+        );
         await();
     }
 
@@ -88,12 +90,63 @@ public class EventLoop {
         LOG.debug("stopped");
     }
 
-    public static class ScheduledJobs {
+    public static class Cancellable implements Comparable<Cancellable> {
+        private final long version;
+        private final long expireAtMs;
+        private final Job job;
+        private boolean cancelled = false;
+
+        public Cancellable(long version, long expireAtMs, Job job) {
+            this.expireAtMs = expireAtMs;
+            this.job = job;
+            this.version = version;
+        }
+
+        @Override
+        public int compareTo(Cancellable other) {
+            if (expireAtMs < other.expireAtMs) {
+                return -1;
+            } else if (expireAtMs > other.expireAtMs) {
+                return 1;
+            } else {
+                return Long.compare(version, other.version);
+            }
+        }
+
+        public void cancel() {
+            cancelled = true;
+        }
+
+        public boolean isCancelled() {
+            return cancelled;
+        }
+    }
+
+    private static class Job {
+        private final Runnable job;
+        private final Consumer<Exception> errorHandler;
+
+        public Job(Runnable job, Consumer<Exception> errorHandler) {
+            this.job = job;
+            this.errorHandler = errorHandler;
+        }
+
+        public void run() {
+            try {
+                job.run();
+            } catch (Exception e) {
+                errorHandler.accept(e);
+            }
+        }
+    }
+
+    private static class ScheduledJobQueue {
         private final PriorityQueue<Cancellable> queue = new PriorityQueue<>();
-        private long counter;
+        private long counter = 0L;
 
         public Cancellable offer(long expireAtMs, Job job) {
-            Cancellable item = new Cancellable(expireAtMs, job);
+            counter++;
+            Cancellable item = new Cancellable(counter, expireAtMs, job);
             queue.add(item);
             return item;
         }
@@ -118,56 +171,6 @@ public class EventLoop {
                 queue.poll();
             }
             return item;
-        }
-
-        public class Cancellable implements Comparable<Cancellable> {
-            private final long version;
-            private final long expireAtMs;
-            private final Job job;
-            private boolean cancelled = false;
-
-            public Cancellable(long expireAtMs, Job job) {
-                this.expireAtMs = expireAtMs;
-                this.job = job;
-                version = counter++;
-            }
-
-            @Override
-            public int compareTo(Cancellable other) {
-                if (expireAtMs < other.expireAtMs) {
-                    return -1;
-                } else if (expireAtMs > other.expireAtMs) {
-                    return 1;
-                } else {
-                    return Long.compare(version, other.version);
-                }
-            }
-
-            public void cancel() {
-                cancelled = true;
-            }
-
-            public boolean isCancelled() {
-                return cancelled;
-            }
-        }
-    }
-
-    private static class Job {
-        private final Runnable job;
-        private final Consumer<Exception> errorHandler;
-
-        public Job(Runnable job, Consumer<Exception> errorHandler) {
-            this.job = job;
-            this.errorHandler = errorHandler;
-        }
-
-        public void run() {
-            try {
-                job.run();
-            } catch (Exception e) {
-                errorHandler.accept(e);
-            }
         }
     }
 }

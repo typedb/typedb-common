@@ -70,7 +70,7 @@ public class Actor<STATE extends Actor.State<STATE>> {
         return future;
     }
 
-    public EventLoop.ScheduledJobs.Cancellable schedule(long deadlineMs, Consumer<STATE> job) {
+    public EventLoop.Cancellable schedule(long deadlineMs, Consumer<STATE> job) {
         assert state != null : ERROR_STATE_IS_NULL;
         return eventLoop.submit(deadlineMs, () -> job.accept(state), state::exception);
     }
