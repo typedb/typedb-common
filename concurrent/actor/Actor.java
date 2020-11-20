@@ -17,8 +17,6 @@
 
 package grakn.common.concurrent.actor;
 
-import grakn.common.collection.Pair;
-
 import javax.annotation.CheckReturnValue;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
@@ -72,7 +70,7 @@ public class Actor<STATE extends Actor.State<STATE>> {
         return future;
     }
 
-    public ScheduledJobQueue<Pair<Runnable, Consumer<Exception>>>.Entry schedule(long deadlineMs, Consumer<STATE> job) {
+    public EventLoop.ScheduledJobs.Cancellable schedule(long deadlineMs, Consumer<STATE> job) {
         assert state != null : ERROR_STATE_IS_NULL;
         return eventLoop.submit(deadlineMs, () -> job.accept(state), state::exception);
     }

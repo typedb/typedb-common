@@ -21,6 +21,7 @@ import grakn.common.collection.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.PriorityQueue;
 import java.util.concurrent.LinkedTransferQueue;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
@@ -36,7 +37,7 @@ public class EventLoop {
 
     private final Consumer<Exception> errorHandler = e -> { LOG.error("An unexpected error has occurred.", e); };
     private final TransferQueue<Pair<Runnable, Consumer<Exception>>> jobs = new LinkedTransferQueue<>();
-    private final ScheduledJobQueue<Pair<Runnable, Consumer<Exception>>> scheduledJobs = new ScheduledJobQueue<>();
+    private final ScheduledJobs scheduledJobs = new ScheduledJobs();
     private final Thread thread;
     private State state;
 
@@ -50,8 +51,8 @@ public class EventLoop {
         jobs.offer(pair(job, onError));
     }
 
-    public ScheduledJobQueue<Pair<Runnable, Consumer<Exception>>>.Entry submit(long scheduleMs, Runnable job, Consumer<Exception> errorHandler) {
-        final AtomicReference<ScheduledJobQueue<Pair<Runnable, Consumer<Exception>>>.Entry> scheduledJob = new AtomicReference<>();
+    public ScheduledJobs.Cancellable submit(long scheduleMs, Runnable job, Consumer<Exception> errorHandler) {
+        final AtomicReference<ScheduledJobs.Cancellable> scheduledJob = new AtomicReference<>();
         submit(() -> scheduledJob.set(scheduledJobs.offer(scheduleMs, pair(job, errorHandler))), errorHandler);
         return scheduledJob.get();
     }
@@ -95,6 +96,71 @@ public class EventLoop {
             job.first().run();
         } catch (Exception e) {
             job.second().accept(e);
+        }
+    }
+
+    public static class ScheduledJobs {
+        private final PriorityQueue<Cancellable> queue = new PriorityQueue<>();
+        private long counter;
+
+        public Cancellable offer(long expireAtMs, Pair<Runnable, Consumer<Exception>> job) {
+            Cancellable item = new Cancellable(expireAtMs, job);
+            queue.add(item);
+            return item;
+        }
+
+        public Pair<Runnable, Consumer<Exception>> poll(long currentTimeMs) {
+            Cancellable timer = peekToNextReady();
+            if (timer == null) return null;
+            if (timer.expireAtMs > currentTimeMs) return null;
+            queue.poll();
+            return timer.job;
+        }
+
+        public long timeToNext(long currentTimeMs) {
+            Cancellable timer = peekToNextReady();
+            if (timer == null) return Long.MAX_VALUE;
+            return timer.expireAtMs - currentTimeMs;
+        }
+
+        private Cancellable peekToNextReady() {
+            Cancellable item;
+            while ((item = queue.peek()) != null && item.isCancelled()) {
+                queue.poll();
+            }
+            return item;
+        }
+
+        public class Cancellable implements Comparable<Cancellable> {
+            private final long version;
+            private final long expireAtMs;
+            private final Pair<Runnable, Consumer<Exception>> job;
+            private boolean cancelled = false;
+
+            public Cancellable(long expireAtMs, Pair<Runnable, Consumer<Exception>> job) {
+                this.expireAtMs = expireAtMs;
+                this.job = job;
+                version = counter++;
+            }
+
+            @Override
+            public int compareTo(Cancellable other) {
+                if (expireAtMs < other.expireAtMs) {
+                    return -1;
+                } else if (expireAtMs > other.expireAtMs) {
+                    return 1;
+                } else {
+                    return Long.compare(version, other.version);
+                }
+            }
+
+            public void cancel() {
+                cancelled = true;
+            }
+
+            public boolean isCancelled() {
+                return cancelled;
+            }
         }
     }
 }
