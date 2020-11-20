@@ -73,7 +73,7 @@ public class EventLoop {
         state = State.RUNNING;
 
         while (state == State.RUNNING) {
-            long currentTime = Clock.time();
+            long currentTime = System.time();
             Job scheduledJob = scheduledJobs.poll(currentTime);
             if (scheduledJob != null) {
                 scheduledJob.run();
@@ -93,15 +93,15 @@ public class EventLoop {
         LOG.debug("stopped");
     }
 
-    public static class Clock {
-        private static Supplier<Long> getTime = () -> System.currentTimeMillis();
+    public static class System {
+        private static Supplier<Long> getTime = () -> java.lang.System.currentTimeMillis();
         private static Random random = ThreadLocalRandom.current();
 
-        private Clock() {}
+        private System() {}
 
         public static void set(Supplier<Long> getTime, Random random) {
-            Clock.getTime = getTime;
-            Clock.random = random;
+            System.getTime = getTime;
+            System.random = random;
         }
 
         public static long time() {
