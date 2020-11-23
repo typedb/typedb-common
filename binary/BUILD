@@ -61,7 +61,7 @@ assemble_apt(
     },
     symlinks = {
         "usr/local/bin/grakn": "/opt/grakn/core/grakn",
-        "opt/grakn/core/logs": "/var/log/grakn/",
+        "opt/grakn/core/server/logs": "/var/log/grakn/",
     },
 )
 
