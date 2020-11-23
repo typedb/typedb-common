@@ -51,6 +51,7 @@ deploy_github(
     title = "Grakn Common",
     title_append_version = True,
     release_description = "//:RELEASE_TEMPLATE.md",
+    draft = False,
 )
 
 assemble_maven(
