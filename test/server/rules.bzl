@@ -15,23 +15,24 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-def grakn_java_test(name, grakn_artifact_linux, grakn_artifact_mac, deps = [], classpath_resources = [], data = [], **kwargs):
-
-    native.genrule(
-        name = "native-grakn-artifact",
-        outs = ["grakn-core-server-native.tar.gz"],
-        srcs = select({
-            "@graknlabs_dependencies//util/platform:is_mac": [grakn_artifact_mac],
-            "@graknlabs_dependencies//util/platform:is_linux": [grakn_artifact_linux],
-        }, no_match_error = "There is no Grakn Core artifact compatible with this operating system. Supported operating systems are Mac and Linux."),
-        cmd = "read -a srcs <<< '$(SRCS)' && read -a outs <<< '$(OUTS)' && cp $${srcs[0]} $${outs[0]}",
-    )
-
+def grakn_java_test(name, native_grakn_artifact, deps = [], classpath_resources = [], data = [], **kwargs):
     native.java_test(
         name = name,
         deps = depset(deps + ["@graknlabs_common//test/server:grakn-setup"]).to_list(),
         classpath_resources = depset(classpath_resources + ["@graknlabs_common//test/server:logback"]).to_list(),
-        data = depset(data + [":native-grakn-artifact"]).to_list(),
-        args = ["$(location :native-grakn-artifact)"],
+        data = depset(data + [native_grakn_artifact]).to_list(),
+        args = ["$(location " + native_grakn_artifact + ")"],
+        **kwargs
+    )
+
+def native_grakn_artifact(name, mac_artifact, linux_artifact, **kwargs):
+    native.genrule(
+        name = name,
+        outs = ["grakn-core-server-native.tar.gz"],
+        srcs = select({
+            "@graknlabs_dependencies//util/platform:is_mac": [mac_artifact],
+            "@graknlabs_dependencies//util/platform:is_linux": [linux_artifact],
+        }, no_match_error = "There is no Grakn Core artifact compatible with this operating system. Supported operating systems are Mac and Linux."),
+        cmd = "read -a srcs <<< '$(SRCS)' && read -a outs <<< '$(OUTS)' && cp $${srcs[0]} $${outs[0]} && echo $${outs[0]}",
         **kwargs
     )
