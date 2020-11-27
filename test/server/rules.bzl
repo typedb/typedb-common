@@ -25,13 +25,14 @@ def grakn_java_test(name, native_grakn_artifact, deps = [], classpath_resources 
         **kwargs
     )
 
-def native_grakn_artifact(name, mac_artifact, linux_artifact, **kwargs):
+def native_grakn_artifact(name, mac_artifact, linux_artifact, windows_artifact, **kwargs):
     native.genrule(
         name = name,
         outs = ["grakn-core-server-native.tar.gz"],
         srcs = select({
             "@graknlabs_dependencies//util/platform:is_mac": [mac_artifact],
             "@graknlabs_dependencies//util/platform:is_linux": [linux_artifact],
+            "@graknlabs_dependencies//util/platform:is_windows": [windows_artifact],
         }, no_match_error = "There is no Grakn Core artifact compatible with this operating system. Supported operating systems are Mac and Linux."),
         cmd = "read -a srcs <<< '$(SRCS)' && read -a outs <<< '$(OUTS)' && cp $${srcs[0]} $${outs[0]} && echo $${outs[0]}",
         **kwargs
