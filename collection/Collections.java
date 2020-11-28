@@ -42,35 +42,43 @@ public class Collections {
     }
 
     @SafeVarargs
-    public static <T> Set<T> set(T... elements) {
-        return set(Arrays.asList(elements));
+    public static <T> Set<T> set(T... items) {
+        return set(Arrays.asList(items));
     }
 
-    @SafeVarargs
-    public static <T> Set<T> set(Collection<T>... collections) {
-        Set<T> set = new HashSet<>();
-        for (Collection<T> collection : collections) set.addAll(collection);
-        return java.util.Collections.unmodifiableSet(set);
-    }
-
-    public static <T> Set<T> set(Collection<T> elements) {
-        Set<T> set = new HashSet<>(elements);
+    public static <T> Set<T> set(Collection<T> collection) {
+        Set<T> set = new HashSet<>(collection);
         return java.util.Collections.unmodifiableSet(set);
     }
 
     @SafeVarargs
-    public static <T> List<T> list(T... elements) {
-        return java.util.Collections.unmodifiableList(Arrays.asList(elements));
+    public static <T> Set<T> set(Collection<T> collection, T item, T... items) {
+        Set<T> combined = new HashSet<>(collection);
+        combined.add(item);
+        combined.addAll(Arrays.asList(items));
+        return java.util.Collections.unmodifiableSet(combined);
     }
 
-    public static <T> List<T> list(Collection<T> elements) {
-        List<T> list = new ArrayList<>(elements);
+    @SafeVarargs
+    public static <T> Set<T> set(Collection<T> collection, Collection<T>... collections) {
+        Set<T> combined = new HashSet<>(collection);
+        for (Collection<T> c : collections) combined.addAll(c);
+        return java.util.Collections.unmodifiableSet(combined);
+    }
+
+    @SafeVarargs
+    public static <T> List<T> list(T... items) {
+        return java.util.Collections.unmodifiableList(Arrays.asList(items));
+    }
+
+    public static <T> List<T> list(Collection<T> collection) {
+        List<T> list = new ArrayList<>(collection);
         return java.util.Collections.unmodifiableList(list);
     }
 
     @SafeVarargs
-    public static <T> List<T> list(Collection<T> collection1, T item, T... array) {
-        List<T> combined = new ArrayList<>(collection1);
+    public static <T> List<T> list(Collection<T> collection, T item, T... array) {
+        List<T> combined = new ArrayList<>(collection);
         combined.add(item);
         combined.addAll(Arrays.asList(array));
         return java.util.Collections.unmodifiableList(combined);
@@ -79,9 +87,7 @@ public class Collections {
     @SafeVarargs
     public static <T> List<T> list(Collection<T> collection, Collection<T>... collections) {
         List<T> combined = new ArrayList<>(collection);
-        for (Collection<T> c : collections) {
-            combined.addAll(c);
-        }
+        for (Collection<T> c : collections) combined.addAll(c);
         return java.util.Collections.unmodifiableList(combined);
     }
 
