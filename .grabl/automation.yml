@@ -71,6 +71,7 @@ build:
       dependencies: [build]
       script: |
         sudo apt-get update && sudo apt-get install rpm
+        sed -i -e 's/-/_/g' VERSION
         export DEPLOY_RPM_USERNAME=$REPO_GRAKN_USERNAME
         export DEPLOY_RPM_PASSWORD=$REPO_GRAKN_PASSWORD
         bazel run --define version=$(git rev-parse HEAD) //binary:deploy-rpm -- snapshot
@@ -95,7 +96,7 @@ release:
         export DEPLOY_MAVEN_USERNAME=$REPO_GRAKN_USERNAME
         export DEPLOY_MAVEN_PASSWORD=$REPO_GRAKN_PASSWORD
         bazel run --define version=$(cat VERSION) //:deploy-maven -- release
-    deploy-apt:
+    deploy-apt-release:
       machine: graknlabs-ubuntu-20.04
       dependencies: [deploy-github]
       script: |
@@ -103,11 +104,12 @@ release:
         export DEPLOY_APT_USERNAME=$REPO_GRAKN_USERNAME
         export DEPLOY_APT_PASSWORD=$REPO_GRAKN_PASSWORD
         bazel run --define version=$(cat VERSION) //binary:deploy-apt -- release
-    deploy-rpm:
+    deploy-rpm-release:
       machine: graknlabs-ubuntu-20.04
       dependencies: [deploy-github]
       script: |
         sudo apt-get update && sudo apt-get install rpm
+        sed -i -e 's/-/_/g' VERSION 
         export DEPLOY_RPM_USERNAME=$REPO_GRAKN_USERNAME
         export DEPLOY_RPM_PASSWORD=$REPO_GRAKN_PASSWORD
         bazel run --define version=$(cat VERSION) //binary:deploy-rpm -- release
