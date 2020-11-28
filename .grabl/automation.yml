@@ -71,7 +71,6 @@ build:
       dependencies: [build]
       script: |
         sudo apt-get update && sudo apt-get install rpm
-        sed -i -e 's/-/_/g' VERSION
         export DEPLOY_RPM_USERNAME=$REPO_GRAKN_USERNAME
         export DEPLOY_RPM_PASSWORD=$REPO_GRAKN_PASSWORD
         bazel run --define version=$(git rev-parse HEAD) //binary:deploy-rpm -- snapshot
