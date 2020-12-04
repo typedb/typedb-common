@@ -92,7 +92,7 @@ load("//dependencies/maven:artifacts.bzl", graknlabs_common_artifacts = "artifac
 ############################
 
 load("@graknlabs_dependencies//library/maven:rules.bzl", "maven")
-maven(graknlabs_common_artifacts)
+maven(graknlabs_common_artifacts + graknlabs_dependencies_tool_maven_artifacts)
 
 #############################################
 # Generate @graknlabs_common_workspace_refs #
