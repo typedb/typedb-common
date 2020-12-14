@@ -37,33 +37,37 @@ public class EventLoop {
     private State state;
     private final TransferQueue<Job> jobs = new LinkedTransferQueue<>();
     private final ScheduledJobQueue scheduledJobs = new ScheduledJobQueue();
-    private final Thread thread;
     private final Supplier<Long> clock;
     private final Random random;
+    private final Thread thread;
 
     public EventLoop(ThreadFactory threadFactory, Supplier<Long> clock, Random random) {
-        thread = threadFactory.newThread(this::loop);
-        thread.start();
+        state = State.READY;
         this.clock = clock;
         this.random = random;
-        state = State.READY;
+        thread = threadFactory.newThread(this::loop);
+        thread.start();
     }
 
     public void submit(Runnable job, Consumer<Exception> errorHandler) {
+        assert state != State.STOPPED : "unexpected state: " + state;
+
         jobs.offer(new Job(job, errorHandler));
     }
 
     public EventLoop.Cancellable submit(long scheduleMs, Runnable job, Consumer<Exception> errorHandler) {
+        assert state != State.STOPPED : "unexpected state: " + state;
+
         final AtomicReference<Cancellable> cancellable = new AtomicReference<>();
         submit(() -> cancellable.set(scheduledJobs.offer(scheduleMs, new Job(job, errorHandler))), errorHandler);
         return cancellable.get();
     }
 
-    public void await() throws InterruptedException {
+    public synchronized void await() throws InterruptedException {
         thread.join();
     }
 
-    public void stop() throws InterruptedException {
+    public synchronized void stop() throws InterruptedException {
         submit(
                 () -> state = State.STOPPED,
                 e -> LOG.error("An unexpected error has occurred.", e)
@@ -100,7 +104,6 @@ public class EventLoop {
             }
         }
 
-        state = State.STOPPED;
         LOG.debug("stopped");
     }
 
