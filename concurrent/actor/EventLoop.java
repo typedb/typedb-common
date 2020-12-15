@@ -26,12 +26,13 @@ import java.util.concurrent.LinkedTransferQueue;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TransferQueue;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class EventLoop {
     private static final Logger LOG = LoggerFactory.getLogger(EventLoop.class);
+    private static final Consumer<Exception> DEFAULT_EXCEPTION_HANDLER = e -> LOG.error("An unexpected error has occurred.", e);
+
     private enum State { READY, RUNNING, STOPPED }
 
     private State state;
@@ -49,18 +50,15 @@ public class EventLoop {
         thread.start();
     }
 
-    public void submit(Runnable job, Consumer<Exception> errorHandler) {
+    public void schedule(Runnable job, Consumer<Exception> errorHandler) {
         assert state != State.STOPPED : "unexpected state: " + state;
 
         jobs.offer(new Job(job, errorHandler));
     }
 
-    public EventLoop.Cancellable submit(long scheduleMs, Runnable job, Consumer<Exception> errorHandler) {
+    public EventLoop.Cancellable schedule(long deadline, Runnable job, Consumer<Exception> errorHandler) {
         assert state != State.STOPPED : "unexpected state: " + state;
-
-        final AtomicReference<Cancellable> cancellable = new AtomicReference<>();
-        submit(() -> cancellable.set(scheduledJobs.offer(scheduleMs, new Job(job, errorHandler))), errorHandler);
-        return cancellable.get();
+        return new Cancellable(deadline, job, errorHandler);
     }
 
     public synchronized void await() throws InterruptedException {
@@ -68,10 +66,7 @@ public class EventLoop {
     }
 
     public synchronized void stop() throws InterruptedException {
-        submit(
-                () -> state = State.STOPPED,
-                e -> LOG.error("An unexpected error has occurred.", e)
-        );
+        schedule(() -> state = State.STOPPED, DEFAULT_EXCEPTION_HANDLER);
         await();
     }
 
@@ -107,35 +102,16 @@ public class EventLoop {
         LOG.debug("stopped");
     }
 
-    public static class Cancellable implements Comparable<Cancellable> {
-        private final long version;
-        private final long expireAtMs;
-        private final Job job;
-        private boolean cancelled = false;
+    public class Cancellable {
+        private ScheduledJobQueue.Scheduled scheduled;
 
-        public Cancellable(long version, long expireAtMs, Job job) {
-            this.expireAtMs = expireAtMs;
-            this.job = job;
-            this.version = version;
-        }
-
-        @Override
-        public int compareTo(Cancellable other) {
-            if (expireAtMs < other.expireAtMs) {
-                return -1;
-            } else if (expireAtMs > other.expireAtMs) {
-                return 1;
-            } else {
-                return Long.compare(version, other.version);
-            }
+        public Cancellable(long scheduleMs, Runnable job, Consumer<Exception> errorHandler) {
+            scheduled = null;
+            EventLoop.this.schedule(() -> scheduled = scheduledJobs.offer(scheduleMs, new Job(job, errorHandler)), errorHandler);
         }
 
         public void cancel() {
-            cancelled = true;
-        }
-
-        public boolean isCancelled() {
-            return cancelled;
+            EventLoop.this.schedule(() -> scheduled.cancel(), DEFAULT_EXCEPTION_HANDLER);
         }
     }
 
@@ -158,18 +134,18 @@ public class EventLoop {
     }
 
     private static class ScheduledJobQueue {
-        private final PriorityQueue<Cancellable> queue = new PriorityQueue<>();
+        private final PriorityQueue<Scheduled> queue = new PriorityQueue<>();
         private long counter = 0L;
 
-        public Cancellable offer(long expireAtMs, Job job) {
+        public Scheduled offer(long expireAtMs, Job job) {
             counter++;
-            Cancellable item = new Cancellable(counter, expireAtMs, job);
-            queue.add(item);
-            return item;
+            Scheduled scheduled = new Scheduled(counter, expireAtMs, job);
+            queue.add(scheduled);
+            return scheduled;
         }
 
         public Job poll(long currentTimeMs) {
-            Cancellable timer = peekToNextReady();
+            Scheduled timer = peekToNextReady();
             if (timer == null) return null;
             if (timer.expireAtMs > currentTimeMs) return null;
             queue.poll();
@@ -177,17 +153,49 @@ public class EventLoop {
         }
 
         public long timeToNext(long currentTimeMs) {
-            Cancellable timer = peekToNextReady();
+            Scheduled timer = peekToNextReady();
             if (timer == null) return Long.MAX_VALUE;
             return timer.expireAtMs - currentTimeMs;
         }
 
-        private Cancellable peekToNextReady() {
-            Cancellable item;
-            while ((item = queue.peek()) != null && item.isCancelled()) {
+        private Scheduled peekToNextReady() {
+            Scheduled scheduled;
+            while ((scheduled = queue.peek()) != null && scheduled.isCancelled()) {
                 queue.poll();
             }
-            return item;
+            return scheduled;
+        }
+
+        private static class Scheduled implements Comparable<Scheduled> {
+            private final long version;
+            private final long expireAtMs;
+            private final Job job;
+            private boolean cancelled = false;
+
+            public Scheduled(long version, long expireAtMs, Job job) {
+                this.expireAtMs = expireAtMs;
+                this.job = job;
+                this.version = version;
+            }
+
+            @Override
+            public int compareTo(Scheduled other) {
+                if (expireAtMs < other.expireAtMs) {
+                    return -1;
+                } else if (expireAtMs > other.expireAtMs) {
+                    return 1;
+                } else {
+                    return Long.compare(version, other.version);
+                }
+            }
+
+            public void cancel() {
+                cancelled = true;
+            }
+
+            public boolean isCancelled() {
+                return cancelled;
+            }
         }
     }
 }
