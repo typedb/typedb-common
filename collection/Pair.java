@@ -42,14 +42,14 @@ public class Pair<FIRST, SECOND> {
 
     @Override
     public String toString() {
-        return String.format("Pair: {%s, %s}", first.toString(), second.toString());
+        return String.format("pair(%s, %s)", first.toString(), second.toString());
     }
 
     @Override
     public boolean equals(Object obj) {
         if (obj == null || this.getClass() != obj.getClass()) return false;
         if (obj == this) return true;
-        Pair that = (Pair) obj;
+        Pair<?, ?> that = (Pair<?, ?>) obj;
         return Objects.equals(this.first, that.first) && Objects.equals(this.second, that.second);
     }
 
