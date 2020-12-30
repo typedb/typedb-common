@@ -27,6 +27,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeoutException;
 
@@ -46,15 +48,20 @@ public class GraknCoreRunner implements GraknRunner {
     private final String GRAKN_DISTRIBUTION_FORMAT;
     private final int port = ThreadLocalRandom.current().nextInt(40000, 60000);
     private final Path tmpDir;
+    private final boolean debug;
 
     private ProcessExecutor executor;
     private StartedProcess graknProcess;
 
     public GraknCoreRunner() throws InterruptedException, TimeoutException, IOException {
-        this(DISTRIBUTION_FILE);
+        this(DISTRIBUTION_FILE, false);
     }
 
-    public GraknCoreRunner(File distributionFile) throws InterruptedException, TimeoutException, IOException {
+    public GraknCoreRunner(boolean debug) throws InterruptedException, TimeoutException, IOException {
+        this(DISTRIBUTION_FILE, debug);
+    }
+
+    public GraknCoreRunner(File distributionFile, boolean debug) throws InterruptedException, TimeoutException, IOException {
         System.out.println("Constructing a Grakn Core runner");
 
         if (!distributionFile.exists()) {
@@ -78,6 +85,7 @@ public class GraknCoreRunner implements GraknRunner {
 
         this.unzip();
 
+        this.debug = debug;
         System.out.println("Grakn Core runner constructed");
     }
 
@@ -150,11 +158,17 @@ public class GraknCoreRunner implements GraknRunner {
             System.out.println("Starting Grakn Core database server at " + GRAKN_TARGET_DIRECTORY.toAbsolutePath().toString());
             System.out.println("Database directory will be at " + tmpDir.toAbsolutePath());
 
-            graknProcess = executor.command(
-                    "./grakn", "server",
-                    "--port", Integer.toString(port),
-                    "--data", tmpDir.toAbsolutePath().toString()
-            ).start();
+            List<String> arguments = new ArrayList<>();
+            arguments.add("./grakn");
+            arguments.add("server");
+            if (debug) {
+                arguments.add("--debug");
+            }
+            arguments.add("--port");
+            arguments.add(Integer.toString(port));
+            arguments.add("--data");
+            arguments.add(tmpDir.toAbsolutePath().toString());
+            graknProcess = executor.command(arguments).start();
 
             Thread.sleep(10000);
             assertTrue("Grakn Core failed to start", graknProcess.getProcess().isAlive());
