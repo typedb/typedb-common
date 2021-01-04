@@ -27,25 +27,25 @@ build:
       branch: master
     build-analysis:
       image: graknlabs-ubuntu-20.04
-      script: |
+      command: |
         SONARCLOUD_CODE_ANALYSIS_CREDENTIAL=$SONARCLOUD_CREDENTIAL \
           bazel run @graknlabs_dependencies//tool/sonarcloud:code-analysis -- \
           --project-key=graknlabs_common \
           --branch=$GRABL_BRANCH --commit-id=$GRABL_COMMIT
     dependency-analysis:
       image: graknlabs-ubuntu-20.04
-      script: |
+      command: |
         bazel run @graknlabs_dependencies//grabl/analysis:dependency-analysis
   correctness:
     build:
       image: graknlabs-ubuntu-20.04
-      script: |
+      command: |
         bazel build //... --test_output=errors
         bazel run @graknlabs_dependencies//tool/checkstyle:test-coverage
         bazel test $(bazel query 'kind(checkstyle_test, //...)')
     build-dependency:
       image: graknlabs-ubuntu-20.04
-      script: |
+      command: |
         dependencies/maven/update.sh
         git diff --exit-code dependencies/maven/artifacts.snapshot
         bazel run @graknlabs_dependencies//tool/unuseddeps:unused-deps -- list
@@ -55,7 +55,7 @@ build:
         branch: master
       image: graknlabs-ubuntu-20.04
       dependencies: [build]
-      script: |
+      command: |
         export DEPLOY_MAVEN_USERNAME=$REPO_GRAKN_USERNAME
         export DEPLOY_MAVEN_PASSWORD=$REPO_GRAKN_PASSWORD
         bazel run --define version=$(git rev-parse HEAD) //:deploy-maven -- snapshot
@@ -65,7 +65,7 @@ build:
         branch: master
       image: graknlabs-ubuntu-20.04
       dependencies: [build]
-      script: |
+      command: |
         export DEPLOY_APT_USERNAME=$REPO_GRAKN_USERNAME
         export DEPLOY_APT_PASSWORD=$REPO_GRAKN_PASSWORD
         bazel run --define version=$(git rev-parse HEAD) //binary:deploy-apt -- snapshot
@@ -75,7 +75,7 @@ build:
         branch: master
       image: graknlabs-ubuntu-20.04
       dependencies: [build]
-      script: |
+      command: |
         sudo apt-get update && sudo apt-get install rpm
         export DEPLOY_RPM_USERNAME=$REPO_GRAKN_USERNAME
         export DEPLOY_RPM_PASSWORD=$REPO_GRAKN_PASSWORD
@@ -88,7 +88,7 @@ release:
   deployment:
     deploy-github:
       image: graknlabs-ubuntu-20.04
-      script: |
+      command: |
         pip install certifi
         export RELEASE_NOTES_TOKEN=$REPO_GITHUB_TOKEN
         bazel run @graknlabs_dependencies//tool/release:create-notes -- common $(cat VERSION) ./RELEASE_TEMPLATE.md
@@ -97,14 +97,14 @@ release:
     deploy-maven-release:
       image: graknlabs-ubuntu-20.04
       dependencies: [deploy-github]
-      script: |
+      command: |
         export DEPLOY_MAVEN_USERNAME=$REPO_GRAKN_USERNAME
         export DEPLOY_MAVEN_PASSWORD=$REPO_GRAKN_PASSWORD
         bazel run --define version=$(cat VERSION) //:deploy-maven -- release
     deploy-apt-release:
       image: graknlabs-ubuntu-20.04
       dependencies: [deploy-github]
-      script: |
+      command: |
         cat VERSION
         export DEPLOY_APT_USERNAME=$REPO_GRAKN_USERNAME
         export DEPLOY_APT_PASSWORD=$REPO_GRAKN_PASSWORD
@@ -112,7 +112,7 @@ release:
     deploy-rpm-release:
       image: graknlabs-ubuntu-20.04
       dependencies: [deploy-github]
-      script: |
+      command: |
         sudo apt-get update && sudo apt-get install rpm
         sed -i -e 's/-/_/g' VERSION 
         export DEPLOY_RPM_USERNAME=$REPO_GRAKN_USERNAME
