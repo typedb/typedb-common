@@ -15,8 +15,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  */
- 
- package grakn.common.test.server;
+
+package grakn.common.test.server;
 
 import org.apache.commons.io.FileUtils;
 import org.zeroturnaround.exec.ProcessExecutor;
@@ -35,7 +35,7 @@ import java.util.concurrent.TimeoutException;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-public class GraknCoreRunner implements GraknRunner {
+public class GraknClusterRunner implements GraknRunner {
 
     private static final String[] ARGS = System.getProperty("sun.java.command").split(" ");
     private static final File DISTRIBUTION_FILE = ARGS.length > 1 ? new File(ARGS[1]) : null;
@@ -53,16 +53,16 @@ public class GraknCoreRunner implements GraknRunner {
     private ProcessExecutor executor;
     private StartedProcess graknProcess;
 
-    public GraknCoreRunner() throws InterruptedException, TimeoutException, IOException {
+    public GraknClusterRunner() throws InterruptedException, TimeoutException, IOException {
         this(DISTRIBUTION_FILE, false);
     }
 
-    public GraknCoreRunner(boolean debug) throws InterruptedException, TimeoutException, IOException {
+    public GraknClusterRunner(boolean debug) throws InterruptedException, TimeoutException, IOException {
         this(DISTRIBUTION_FILE, debug);
     }
 
-    public GraknCoreRunner(File distributionFile, boolean debug) throws InterruptedException, TimeoutException, IOException {
-        System.out.println("Constructing a Grakn Core runner");
+    public GraknClusterRunner(File distributionFile, boolean debug) throws InterruptedException, TimeoutException, IOException {
+        System.out.println("Constructing a Grakn Cluster runner");
 
         if (!distributionFile.exists()) {
             throw new IllegalArgumentException("Grakn distribution file is missing from " + distributionFile.getAbsolutePath());
@@ -74,7 +74,7 @@ public class GraknCoreRunner implements GraknRunner {
         GRAKN_DISTRIBUTION_FORMAT = distributionFormat(distributionFile);
         GRAKN_TARGET_DIRECTORY = distributionTarget(distributionFile);
 
-        tmpDir = Files.createTempDirectory("grakn_core_test");
+        tmpDir = Files.createTempDirectory("grakn-cluster-runner");
 
         this.executor = new ProcessExecutor()
                 .directory(Paths.get(".").toAbsolutePath().toFile())
@@ -86,7 +86,7 @@ public class GraknCoreRunner implements GraknRunner {
         this.unzip();
 
         this.debug = debug;
-        System.out.println("Grakn Core runner constructed");
+        System.out.println("Grakn Cluster runner constructed");
     }
 
     private static String distributionFormat(File distributionFile) {
@@ -109,18 +109,18 @@ public class GraknCoreRunner implements GraknRunner {
 
     private static void checkAndDeleteExistingDistribution(File distributionFile) throws IOException {
         Path target = distributionTarget(distributionFile);
-        System.out.println("Checking for existing Grakn distribution at " + target.toAbsolutePath().toString());
+        System.out.println("Checking for existing Grakn Cluster distribution at " + target.toAbsolutePath().toString());
         if (target.toFile().exists()) {
-            System.out.println("There exists a Grakn Core distribution and will be deleted");
+            System.out.println("There exists a Grakn Cluster distribution and will be deleted");
             FileUtils.deleteDirectory(target.toFile());
-            System.out.println("Existing Grakn Core distribution deleted");
+            System.out.println("Existing Grakn Cluster distribution deleted");
         } else {
-            System.out.println("There is no existing Grakn Core distribution");
+            System.out.println("There is no existing Grakn Cluster distribution");
         }
     }
 
     private void unzip() throws IOException, TimeoutException, InterruptedException {
-        System.out.println("Unarchiving Grakn Core distribution");
+        System.out.println("Unarchiving Grakn Cluster distribution");
         Files.createDirectory(GRAKN_TARGET_DIRECTORY);
         if (GRAKN_DISTRIBUTION_FORMAT.equals(TAR)) {
             executor.command("tar", "-xf", GRAKN_DISTRIBUTION_FILE.toString(),
@@ -129,13 +129,13 @@ public class GraknCoreRunner implements GraknRunner {
             executor.command("unzip", "-q", GRAKN_DISTRIBUTION_FILE.toString(),
                     "-d", GRAKN_TARGET_DIRECTORY.toString()).execute();
         }
-        // The Grakn Core archive extracts to a folder inside GRAKN_TARGET_DIRECTORY named
+        // The Grakn Cluster archive extracts to a folder inside GRAKN_TARGET_DIRECTORY named
         // grakn-core-server-{platform}-{version}. We know it's the only folder, so we can retrieve it using Files.list.
         final Path graknPath = Files.list(GRAKN_TARGET_DIRECTORY).findFirst().get();
         System.out.println(graknPath);
         executor = executor.directory(graknPath.toFile());
 
-        System.out.println("Grakn Core distribution unarchived");
+        System.out.println("Grakn Cluster distribution unarchived");
     }
 
     @Override
@@ -153,41 +153,46 @@ public class GraknCoreRunner implements GraknRunner {
         return host() + ":" + port();
     }
 
+    @Override
     public void start() {
         try {
-            System.out.println("Starting Grakn Core database server at " + GRAKN_TARGET_DIRECTORY.toAbsolutePath().toString());
+            System.out.println("Starting Grakn Cluster database server at " + GRAKN_TARGET_DIRECTORY.toAbsolutePath().toString());
             System.out.println("Database directory will be at " + tmpDir.toAbsolutePath());
 
             List<String> arguments = new ArrayList<>();
             arguments.add("./grakn");
             arguments.add("server");
             if (debug) {
-                arguments.add("--debug");
+//                arguments.add("--debug"); // TODO: support --debug
             }
-            arguments.add("--port");
-            arguments.add(Integer.toString(port));
+            // TODO: support --host and --port in place of --address in order to be compatible with Grakn Core?
+//            arguments.add("--port");
+//            arguments.add(Integer.toString(port));
+            arguments.add("--address");
+            arguments.add(address() + ":" + (port+1));
             arguments.add("--data");
             arguments.add(tmpDir.toAbsolutePath().toString());
             graknProcess = executor.command(arguments).start();
 
             Thread.sleep(10000);
-            assertTrue("Grakn Core failed to start", graknProcess.getProcess().isAlive());
+            assertTrue("Grakn Cluster failed to start", graknProcess.getProcess().isAlive());
 
-            System.out.println("Grakn Core database server started");
-        } catch (Throwable e) {
+            System.out.println("Grakn Cluster database server started");
+        } catch (Exception e) {
             printLogs();
             throw new RuntimeException(e);
         }
     }
 
+    @Override
     public void stop() {
         if (graknProcess != null) {
             try {
-                System.out.println("Stopping Grakn Core database server");
+                System.out.println("Stopping Grakn Cluster database server");
 
                 graknProcess.getProcess().destroy();
 
-                System.out.println("Grakn Core database server stopped");
+                System.out.println("Grakn Cluster database server stopped");
             } catch (Exception e) {
                 printLogs();
                 throw e;
@@ -197,7 +202,7 @@ public class GraknCoreRunner implements GraknRunner {
 
     private void printLogs() {
         System.out.println("================");
-        System.out.println("Grakn Core Logs:");
+        System.out.println("Grakn Cluster Logs:");
         System.out.println("================");
         Path logPath = Paths.get(".", "logs", "grakn.log");
         try {

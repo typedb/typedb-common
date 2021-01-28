@@ -20,6 +20,10 @@
 
 public interface GraknRunner {
 
+    void start();
+
+    void stop();
+
     String host();
 
     int port();

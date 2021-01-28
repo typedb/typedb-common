@@ -33,6 +33,22 @@ java_library(
     visibility = ["//visibility:public"],
 )
 
+java_library(
+    name = "grakn-cluster-setup",
+    srcs = [
+        "GraknSingleton.java",
+        "GraknClusterRunner.java",
+        "GraknRunner.java",
+    ],
+    deps = [
+        "@maven//:commons_io_commons_io",
+        "@maven//:junit_junit",
+        "@maven//:org_zeroturnaround_zt_exec",
+        "@maven//:org_slf4j_slf4j_api"
+    ],
+    visibility = ["//visibility:public"],
+)
+
 filegroup(
     name = "logback",
     srcs = ["logback.xml"],

@@ -14,9 +14,10 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+load("@graknlabs_dependencies//builder/java:rules.bzl", "host_compatible_java_test")
 
 def grakn_java_test(name, native_grakn_artifact, deps = [], classpath_resources = [], data = [], **kwargs):
-    native.java_test(
+    host_compatible_java_test(
         name = name,
         deps = depset(deps + ["@graknlabs_common//test/server:grakn-setup"]).to_list(),
         classpath_resources = depset(classpath_resources + ["@graknlabs_common//test/server:logback"]).to_list(),
