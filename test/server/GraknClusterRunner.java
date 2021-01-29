@@ -48,7 +48,6 @@ public class GraknClusterRunner extends GraknRunnerBase {
         return "Grakn Cluster";
     }
 
-
     private int serverPort() {
         return port() + 1;
     }
