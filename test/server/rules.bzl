@@ -18,7 +18,7 @@
 def grakn_java_test(name, native_grakn_artifact, deps = [], classpath_resources = [], data = [], **kwargs):
     native.java_test(
         name = name,
-        deps = depset(deps + ["@graknlabs_common//test/server:grakn-setup"]).to_list(),
+        deps = depset(deps + ["@graknlabs_common//test/server:grakn-core-setup"]).to_list(),
         classpath_resources = depset(classpath_resources + ["@graknlabs_common//test/server:logback"]).to_list(),
         data = depset(data + [native_grakn_artifact]).to_list(),
         args = ["$(location " + native_grakn_artifact + ")"],
