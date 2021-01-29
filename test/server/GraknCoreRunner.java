@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.concurrent.TimeoutException;
 
 public class GraknCoreRunner extends GraknRunnerBase {
-    public static final String NAME = "Grakn Cluster";
+    private static final String NAME = "Grakn Core";
 
     public GraknCoreRunner() throws InterruptedException, TimeoutException, IOException {
         super(NAME);

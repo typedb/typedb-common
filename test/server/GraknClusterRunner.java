@@ -25,11 +25,10 @@ import java.util.List;
 import java.util.concurrent.TimeoutException;
 
 public class GraknClusterRunner extends GraknRunnerBase {
-
-    public static final String NAME = "Grakn Cluster";
+    private static final String NAME = "Grakn Cluster";
 
     public GraknClusterRunner() throws InterruptedException, TimeoutException, IOException {
-        super("Grakn Cluster");
+        super(NAME);
     }
 
     public GraknClusterRunner(File distributionFile) throws InterruptedException, TimeoutException, IOException {
