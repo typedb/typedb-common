@@ -26,10 +26,10 @@ def grakn_java_test(name, native_grakn_artifact, deps = [], classpath_resources 
         **kwargs
     )
 
-def native_grakn_artifact(name, mac_artifact, linux_artifact, windows_artifact, **kwargs):
+def native_grakn_artifact(name, mac_artifact, linux_artifact, windows_artifact, output, **kwargs):
     native.genrule(
         name = name,
-        outs = [name],
+        outs = [output],
         srcs = select({
             "@graknlabs_dependencies//util/platform:is_mac": [mac_artifact],
             "@graknlabs_dependencies//util/platform:is_linux": [linux_artifact],
