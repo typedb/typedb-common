@@ -22,6 +22,7 @@ java_library(
     srcs = [
         "GraknSingleton.java",
         "GraknCoreRunner.java",
+        "GraknRunnerBase.java",
         "GraknRunner.java",
     ],
     deps = [
@@ -38,6 +39,7 @@ java_library(
     srcs = [
         "GraknSingleton.java",
         "GraknClusterRunner.java",
+        "GraknRunnerBase.java",
         "GraknRunner.java",
     ],
     deps = [
