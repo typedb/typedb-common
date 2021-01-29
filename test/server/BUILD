@@ -18,18 +18,27 @@
 load("@graknlabs_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
 
 java_library(
-    name = "grakn-setup",
+    name = "grakn-runner-base",
     srcs = [
-        "GraknSingleton.java",
-        "GraknCoreRunner.java",
-        "GraknRunnerBase.java",
         "GraknRunner.java",
+        "GraknRunnerBase.java",
     ],
     deps = [
         "@maven//:commons_io_commons_io",
         "@maven//:junit_junit",
         "@maven//:org_zeroturnaround_zt_exec",
         "@maven//:org_slf4j_slf4j_api"
+    ],
+)
+
+java_library(
+    name = "grakn-core-setup",
+    srcs = [
+        "GraknSingleton.java",
+        "GraknCoreRunner.java",
+    ],
+    deps = [
+        ":grakn-runner-base"
     ],
     visibility = ["//visibility:public"],
 )
@@ -39,14 +48,9 @@ java_library(
     srcs = [
         "GraknSingleton.java",
         "GraknClusterRunner.java",
-        "GraknRunnerBase.java",
-        "GraknRunner.java",
     ],
     deps = [
-        "@maven//:commons_io_commons_io",
-        "@maven//:junit_junit",
-        "@maven//:org_zeroturnaround_zt_exec",
-        "@maven//:org_slf4j_slf4j_api"
+        ":grakn-runner-base"
     ],
     visibility = ["//visibility:public"],
 )
