@@ -18,7 +18,7 @@ import static org.junit.Assert.fail;
 
 public abstract class GraknRunnerBase implements GraknRunner {
     private static final String[] ARGS = System.getProperty("sun.java.command").split(" ");
-    private static final File DISTRIBUTION_FILE = ARGS.length > 1 ? new File(ARGS[1]) : null;
+    private static final File DISTRIBUTION_ARCHIVE = ARGS.length > 1 ? new File(ARGS[1]) : null;
     private static final String TAR = ".tar.gz";
     private static final String ZIP = ".zip";
 
@@ -33,26 +33,26 @@ public abstract class GraknRunnerBase implements GraknRunner {
     private StartedProcess graknProcess;
 
     public GraknRunnerBase() throws InterruptedException, TimeoutException, IOException {
-        this(DISTRIBUTION_FILE, false);
+        this(DISTRIBUTION_ARCHIVE, false);
     }
 
     public GraknRunnerBase(boolean debug) throws InterruptedException, TimeoutException, IOException {
-        this(DISTRIBUTION_FILE, debug);
+        this(DISTRIBUTION_ARCHIVE, debug);
     }
 
-    public GraknRunnerBase(File distributionFile, boolean debug) throws InterruptedException, TimeoutException, IOException {
+    public GraknRunnerBase(File distributionArchive, boolean debug) throws InterruptedException, TimeoutException, IOException {
         this.port = ThreadLocalRandom.current().nextInt(40000, 60000);
         System.out.println("Constructing a " + name() + " runner");
 
-        if (!distributionFile.exists()) {
-            throw new IllegalArgumentException("Grakn distribution file is missing from " + distributionFile.getAbsolutePath());
+        if (!distributionArchive.exists()) {
+            throw new IllegalArgumentException("Grakn distribution file is missing from " + distributionArchive.getAbsolutePath());
         }
 
-        checkAndDeleteExistingDistribution(distributionFile);
+        checkAndDeleteExistingDistribution(distributionArchive);
 
-        distributionArchive = distributionFile;
-        distributionArchiveFormat = distributionFormat(distributionFile);
-        distributionDir = distributionTarget(distributionFile);
+        this.distributionArchive = distributionArchive;
+        distributionArchiveFormat = distributionFormat(distributionArchive);
+        distributionDir = distributionTarget(distributionArchive);
 
         dataDir = Files.createDirectories(distributionDir.resolve("server").resolve("data"));
 
