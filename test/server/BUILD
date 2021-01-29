@@ -23,34 +23,14 @@ java_library(
         "GraknSingleton.java",
         "GraknRunner.java",
         "GraknRunnerBase.java",
+        "GraknCoreRunner.java",
+        "GraknClusterRunner.java",
     ],
     deps = [
         "@maven//:commons_io_commons_io",
         "@maven//:junit_junit",
         "@maven//:org_zeroturnaround_zt_exec",
         "@maven//:org_slf4j_slf4j_api"
-    ],
-    visibility = ["//visibility:public"],
-)
-
-java_library(
-    name = "grakn-core-runner",
-    srcs = [
-        "GraknCoreRunner.java",
-    ],
-    deps = [
-        ":grakn-runner"
-    ],
-    visibility = ["//visibility:public"],
-)
-
-java_library(
-    name = "grakn-cluster-runner",
-    srcs = [
-        "GraknClusterRunner.java",
-    ],
-    deps = [
-        ":grakn-runner"
     ],
     visibility = ["//visibility:public"],
 )
