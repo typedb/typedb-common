@@ -41,7 +41,7 @@ public class GraknClusterRunner extends GraknRunnerBase {
                 "./grakn",
                 "server",
                 "--address", address() + ":" + serverPort(),
-                "--data", tmpDir.toAbsolutePath().toString()
+                "--data", dataDir.toAbsolutePath().toString()
         );
     }
 

@@ -50,7 +50,7 @@ public class GraknCoreRunner extends GraknRunnerBase {
         command.add("--port");
         command.add(Integer.toString(port));
         command.add("--data");
-        command.add(tmpDir.toAbsolutePath().toString());
+        command.add(dataDir.toAbsolutePath().toString());
 
         return command;
     }

@@ -19,16 +19,15 @@ import static org.junit.Assert.fail;
 public abstract class GraknRunnerBase implements GraknRunner {
     private static final String[] ARGS = System.getProperty("sun.java.command").split(" ");
     private static final File DISTRIBUTION_FILE = ARGS.length > 1 ? new File(ARGS[1]) : null;
-
     private static final String TAR = ".tar.gz";
     private static final String ZIP = ".zip";
 
     protected final String name;
-    private final File GRAKN_DISTRIBUTION_FILE;
-    private final Path GRAKN_TARGET_DIRECTORY;
-    private final String GRAKN_DISTRIBUTION_FORMAT;
-    protected final int port = ThreadLocalRandom.current().nextInt(40000, 60000);
-    protected final Path tmpDir;
+    private final File distributionArchive;
+    private final Path distributionDir;
+    private final String distributionArchiveFormat;
+    protected final int port;
+    protected final Path dataDir;
     protected final boolean debug;
 
     private ProcessExecutor executor;
@@ -44,6 +43,7 @@ public abstract class GraknRunnerBase implements GraknRunner {
 
     public GraknRunnerBase(String name, File distributionFile, boolean debug) throws InterruptedException, TimeoutException, IOException {
         this.name = name;
+        this.port = ThreadLocalRandom.current().nextInt(40000, 60000);
         System.out.println("Constructing a " + name + " runner");
 
         if (!distributionFile.exists()) {
@@ -52,11 +52,11 @@ public abstract class GraknRunnerBase implements GraknRunner {
 
         checkAndDeleteExistingDistribution(distributionFile);
 
-        GRAKN_DISTRIBUTION_FILE = distributionFile;
-        GRAKN_DISTRIBUTION_FORMAT = distributionFormat(distributionFile);
-        GRAKN_TARGET_DIRECTORY = distributionTarget(distributionFile);
-
-        tmpDir = Files.createTempDirectory("grakn-runner");
+        distributionArchive = distributionFile;
+        distributionArchiveFormat = distributionFormat(distributionFile);
+        distributionDir = distributionTarget(distributionFile);
+        
+        dataDir = Files.createDirectories(distributionDir.resolve("server").resolve("data"));
 
         this.executor = new ProcessExecutor()
                 .directory(Paths.get(".").toAbsolutePath().toFile())
@@ -103,17 +103,17 @@ public abstract class GraknRunnerBase implements GraknRunner {
 
     private void unzip() throws IOException, TimeoutException, InterruptedException {
         System.out.println("Unarchiving " + name + " distribution");
-        Files.createDirectory(GRAKN_TARGET_DIRECTORY);
-        if (GRAKN_DISTRIBUTION_FORMAT.equals(TAR)) {
-            executor.command("tar", "-xf", GRAKN_DISTRIBUTION_FILE.toString(),
-                    "-C", GRAKN_TARGET_DIRECTORY.toString()).execute();
+        Files.createDirectory(distributionDir);
+        if (distributionArchiveFormat.equals(TAR)) {
+            executor.command("tar", "-xf", distributionArchive.toString(),
+                    "-C", distributionDir.toString()).execute();
         } else {
-            executor.command("unzip", "-q", GRAKN_DISTRIBUTION_FILE.toString(),
-                    "-d", GRAKN_TARGET_DIRECTORY.toString()).execute();
+            executor.command("unzip", "-q", distributionArchive.toString(),
+                    "-d", distributionDir.toString()).execute();
         }
         // The Grakn Cluster archive extracts to a folder inside GRAKN_TARGET_DIRECTORY named
         // grakn-core-server-{platform}-{version}. We know it's the only folder, so we can retrieve it using Files.list.
-        final Path graknPath = Files.list(GRAKN_TARGET_DIRECTORY).findFirst().get();
+        final Path graknPath = Files.list(distributionDir).findFirst().get();
         System.out.println(graknPath);
         executor = executor.directory(graknPath.toFile());
 
@@ -139,8 +139,8 @@ public abstract class GraknRunnerBase implements GraknRunner {
     public void start() {
         try {
 
-            System.out.println("Starting " + name + " database server at " + GRAKN_TARGET_DIRECTORY.toAbsolutePath().toString());
-            System.out.println("Database directory will be at " + tmpDir.toAbsolutePath());
+            System.out.println("Starting " + name + " database server at " + distributionDir.toAbsolutePath().toString());
+            System.out.println("Database directory will be at " + dataDir.toAbsolutePath());
             graknProcess = executor.command(command()).start();
 
             Thread.sleep(10000);
