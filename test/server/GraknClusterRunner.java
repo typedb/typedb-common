@@ -25,14 +25,12 @@ import java.util.List;
 import java.util.concurrent.TimeoutException;
 
 public class GraknClusterRunner extends GraknRunnerBase {
-    private static final String NAME = "Grakn Cluster";
-
     public GraknClusterRunner() throws InterruptedException, TimeoutException, IOException {
-        super(NAME);
+        super();
     }
 
     public GraknClusterRunner(File distributionFile) throws InterruptedException, TimeoutException, IOException {
-        super(NAME, distributionFile, false);
+        super(distributionFile, false);
     }
 
     @Override
@@ -44,6 +42,12 @@ public class GraknClusterRunner extends GraknRunnerBase {
                 "--data", dataDir.toAbsolutePath().toString()
         );
     }
+
+    @Override
+    String name() {
+        return "Grakn Cluster";
+    }
+
 
     private int serverPort() {
         return port() + 1;

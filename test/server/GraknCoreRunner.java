@@ -25,18 +25,22 @@ import java.util.List;
 import java.util.concurrent.TimeoutException;
 
 public class GraknCoreRunner extends GraknRunnerBase {
-    private static final String NAME = "Grakn Core";
 
     public GraknCoreRunner() throws InterruptedException, TimeoutException, IOException {
-        super(NAME);
+        super();
     }
 
     public GraknCoreRunner(boolean debug) throws InterruptedException, TimeoutException, IOException {
-        super(NAME, debug);
+        super(debug);
     }
 
     public GraknCoreRunner(File distributionFile, boolean debug) throws InterruptedException, TimeoutException, IOException {
-        super(NAME, distributionFile, debug);
+        super(distributionFile, debug);
+    }
+
+    @Override
+    String name() {
+        return "Grakn Core";
     }
 
     @Override

@@ -22,7 +22,6 @@ public abstract class GraknRunnerBase implements GraknRunner {
     private static final String TAR = ".tar.gz";
     private static final String ZIP = ".zip";
 
-    protected final String name;
     private final File distributionArchive;
     private final Path distributionDir;
     private final String distributionArchiveFormat;
@@ -33,18 +32,17 @@ public abstract class GraknRunnerBase implements GraknRunner {
     private ProcessExecutor executor;
     private StartedProcess graknProcess;
 
-    public GraknRunnerBase(String name) throws InterruptedException, TimeoutException, IOException {
-        this(name, DISTRIBUTION_FILE, false);
+    public GraknRunnerBase() throws InterruptedException, TimeoutException, IOException {
+        this(DISTRIBUTION_FILE, false);
     }
 
-    public GraknRunnerBase(String name, boolean debug) throws InterruptedException, TimeoutException, IOException {
-        this(name, DISTRIBUTION_FILE, debug);
+    public GraknRunnerBase(boolean debug) throws InterruptedException, TimeoutException, IOException {
+        this(DISTRIBUTION_FILE, debug);
     }
 
-    public GraknRunnerBase(String name, File distributionFile, boolean debug) throws InterruptedException, TimeoutException, IOException {
-        this.name = name;
+    public GraknRunnerBase(File distributionFile, boolean debug) throws InterruptedException, TimeoutException, IOException {
         this.port = ThreadLocalRandom.current().nextInt(40000, 60000);
-        System.out.println("Constructing a " + name + " runner");
+        System.out.println("Constructing a " + name() + " runner");
 
         if (!distributionFile.exists()) {
             throw new IllegalArgumentException("Grakn distribution file is missing from " + distributionFile.getAbsolutePath());
@@ -55,7 +53,7 @@ public abstract class GraknRunnerBase implements GraknRunner {
         distributionArchive = distributionFile;
         distributionArchiveFormat = distributionFormat(distributionFile);
         distributionDir = distributionTarget(distributionFile);
-        
+
         dataDir = Files.createDirectories(distributionDir.resolve("server").resolve("data"));
 
         this.executor = new ProcessExecutor()
@@ -68,7 +66,7 @@ public abstract class GraknRunnerBase implements GraknRunner {
         this.unzip();
 
         this.debug = debug;
-        System.out.println(name + " runner constructed");
+        System.out.println(name() + " runner constructed");
     }
 
     private static String distributionFormat(File distributionFile) {
@@ -101,25 +99,6 @@ public abstract class GraknRunnerBase implements GraknRunner {
         }
     }
 
-    private void unzip() throws IOException, TimeoutException, InterruptedException {
-        System.out.println("Unarchiving " + name + " distribution");
-        Files.createDirectory(distributionDir);
-        if (distributionArchiveFormat.equals(TAR)) {
-            executor.command("tar", "-xf", distributionArchive.toString(),
-                    "-C", distributionDir.toString()).execute();
-        } else {
-            executor.command("unzip", "-q", distributionArchive.toString(),
-                    "-d", distributionDir.toString()).execute();
-        }
-        // The Grakn Cluster archive extracts to a folder inside GRAKN_TARGET_DIRECTORY named
-        // grakn-core-server-{platform}-{version}. We know it's the only folder, so we can retrieve it using Files.list.
-        final Path graknPath = Files.list(distributionDir).findFirst().get();
-        System.out.println(graknPath);
-        executor = executor.directory(graknPath.toFile());
-
-        System.out.println(name + " distribution unarchived");
-    }
-
     @Override
     public String host() {
         return "127.0.0.1";
@@ -139,14 +118,14 @@ public abstract class GraknRunnerBase implements GraknRunner {
     public void start() {
         try {
 
-            System.out.println("Starting " + name + " database server at " + distributionDir.toAbsolutePath().toString());
+            System.out.println("Starting " + name() + " database server at " + distributionDir.toAbsolutePath().toString());
             System.out.println("Database directory will be at " + dataDir.toAbsolutePath());
             graknProcess = executor.command(command()).start();
 
             Thread.sleep(10000);
-            assertTrue(name + " failed to start", graknProcess.getProcess().isAlive());
+            assertTrue(name() + " failed to start", graknProcess.getProcess().isAlive());
 
-            System.out.println(name + " database server started");
+            System.out.println(name() + " database server started");
         } catch (Exception e) {
             printLogs();
             throw new RuntimeException(e);
@@ -157,11 +136,11 @@ public abstract class GraknRunnerBase implements GraknRunner {
     public void stop() {
         if (graknProcess != null) {
             try {
-                System.out.println("Stopping " + name + " database server");
+                System.out.println("Stopping " + name() + " database server");
 
                 graknProcess.getProcess().destroy();
 
-                System.out.println(name + " database server stopped");
+                System.out.println(name() + " database server stopped");
             } catch (Exception e) {
                 printLogs();
                 throw e;
@@ -169,11 +148,32 @@ public abstract class GraknRunnerBase implements GraknRunner {
         }
     }
 
+    abstract String name();
+
     abstract List<String> command();
+
+    private void unzip() throws IOException, TimeoutException, InterruptedException {
+        System.out.println("Unarchiving " + name() + " distribution");
+        Files.createDirectory(distributionDir);
+        if (distributionArchiveFormat.equals(TAR)) {
+            executor.command("tar", "-xf", distributionArchive.toString(),
+                    "-C", distributionDir.toString()).execute();
+        } else {
+            executor.command("unzip", "-q", distributionArchive.toString(),
+                    "-d", distributionDir.toString()).execute();
+        }
+        // The Grakn Cluster archive extracts to a folder inside GRAKN_TARGET_DIRECTORY named
+        // grakn-core-server-{platform}-{version}. We know it's the only folder, so we can retrieve it using Files.list.
+        final Path graknPath = Files.list(distributionDir).findFirst().get();
+        System.out.println(graknPath);
+        executor = executor.directory(graknPath.toFile());
+
+        System.out.println(name() + " distribution unarchived");
+    }
 
     private void printLogs() {
         System.out.println("================");
-        System.out.println(name + " Logs:");
+        System.out.println(name() + " Logs:");
         System.out.println("================");
         Path logPath = Paths.get(".", "logs", "grakn.log");
         try {
