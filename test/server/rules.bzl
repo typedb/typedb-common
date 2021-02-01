@@ -28,17 +28,17 @@ def grakn_java_test(name, mac_artifact, linux_artifact, windows_artifact, deps =
         native_grakn_artifact_labels[key] = [ Label(native_grakn_artifacts[key], relative_to_caller_repository=True) ]
     native.java_test(
         name = name,
-        deps = depset(deps + ["@graknlabs_common//test/server:grakn-setup"]).to_list(),
+        deps = depset(deps + ["@graknlabs_common//test/server:grakn-runner"]).to_list(),
         classpath_resources = depset(classpath_resources + ["@graknlabs_common//test/server:logback"]).to_list(),
         data = data + select(native_grakn_artifact_labels),
         args = select(native_grakn_artifact_paths),
         **kwargs
     )
 
-def native_grakn_artifact(name, mac_artifact, linux_artifact, windows_artifact, **kwargs):
+def native_grakn_artifact(name, mac_artifact, linux_artifact, windows_artifact, output, **kwargs):
     native.genrule(
         name = name,
-        outs = ["grakn-core-server-native.tar.gz"],
+        outs = [output],
         srcs = select({
             "@graknlabs_dependencies//util/platform:is_mac": [mac_artifact],
             "@graknlabs_dependencies//util/platform:is_linux": [linux_artifact],
