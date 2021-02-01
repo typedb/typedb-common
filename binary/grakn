@@ -22,9 +22,6 @@ JAVA_BIN=java
 GRAKN_HOME=$(cd "$(dirname "${path}")" && pwd -P)
 GRAKN_CONFIG="server/conf/grakn.properties"
 
-CONSOLE_JAR_FILENAME=(${GRAKN_HOME}/console/services/lib/io-grakn-console-grakn-console*.jar) # TODO: remove 'services/' in 2.0
-SERVER_JAR_FILENAME=(${GRAKN_HOME}/server/lib/common/io-grakn-core-grakn-server*.jar)
-
 # ================================================
 # common helper functions
 # ================================================
@@ -50,7 +47,7 @@ if [ -z "$1" ]; then
     echo "  Console:         grakn console [--help]"
     exit 1
 elif [ "$1" = "console" ]; then
-    if [ -f "${CONSOLE_JAR_FILENAME}" ]; then
+    if [ -d "console" ]; then
         SERVICE_LIB_CP="console/services/lib/*"
         CLASSPATH="${GRAKN_HOME}/${SERVICE_LIB_CP}:${GRAKN_HOME}/console/conf/"
     # exec replaces current shell process with java so no commands after this one will ever get executed
@@ -61,7 +58,7 @@ elif [ "$1" = "console" ]; then
         exit 1
     fi
 elif [[ "$1" = "server" ]] || [[ "$1" = "version" ]]; then
-    if [[ -f "${SERVER_JAR_FILENAME}" ]]; then
+    if [[ -d "server" ]]; then
         IDX=0
         while [[ "${@:IDX}" ]]; do
             case ${@:IDX} in

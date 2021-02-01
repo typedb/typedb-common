@@ -21,6 +21,8 @@
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
 
@@ -46,7 +48,7 @@ public class GraknCoreRunner extends GraknRunnerBase {
     @Override
     List<String> command() {
         List<String> command = new ArrayList<>();
-        command.add("./grakn");
+        command.addAll(getGraknBinary());
         command.add("server");
         if (debug) {
             command.add("--debug");
@@ -57,5 +59,9 @@ public class GraknCoreRunner extends GraknRunnerBase {
         command.add(dataDir.toAbsolutePath().toString());
 
         return command;
+    }
+
+    private List<String> getGraknBinary() {
+        return System.getProperty("os.name").toLowerCase().contains("win") ? Arrays.asList("cmd.exe", "/c", "grakn.bat") : Collections.singletonList("grakn");
     }
 }

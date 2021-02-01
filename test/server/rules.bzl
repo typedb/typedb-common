@@ -15,13 +15,23 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-def grakn_java_test(name, native_grakn_artifact, deps = [], classpath_resources = [], data = [], **kwargs):
+def grakn_java_test(name, mac_artifact, linux_artifact, windows_artifact, deps = [], classpath_resources = [], data = [], **kwargs):
+    native_grakn_artifacts = {
+       "@graknlabs_dependencies//util/platform:is_mac": mac_artifact,
+       "@graknlabs_dependencies//util/platform:is_linux": linux_artifact,
+       "@graknlabs_dependencies//util/platform:is_windows": windows_artifact,
+    }
+    native_grakn_artifact_paths = {}
+    native_grakn_artifact_labels = {}
+    for key in native_grakn_artifacts.keys():
+        native_grakn_artifact_paths[key] = [ "$(location {})".format(native_grakn_artifacts[key]) ]
+        native_grakn_artifact_labels[key] = [ Label(native_grakn_artifacts[key], relative_to_caller_repository=True) ]
     native.java_test(
         name = name,
         deps = depset(deps + ["@graknlabs_common//test/server:grakn-runner"]).to_list(),
         classpath_resources = depset(classpath_resources + ["@graknlabs_common//test/server:logback"]).to_list(),
-        data = depset(data + [native_grakn_artifact]).to_list(),
-        args = ["$(location " + native_grakn_artifact + ")"],
+        data = data + select(native_grakn_artifact_labels),
+        args = select(native_grakn_artifact_paths),
         **kwargs
     )
 
