@@ -29,6 +29,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Collections;
+import java.util.Arrays;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeoutException;
 
@@ -159,7 +161,7 @@ public class GraknCoreRunner implements GraknRunner {
             System.out.println("Database directory will be at " + tmpDir.toAbsolutePath());
 
             List<String> arguments = new ArrayList<>();
-            arguments.add("./grakn");
+            arguments.addAll(getGraknBinary());
             arguments.add("server");
             if (debug) {
                 arguments.add("--debug");
@@ -170,7 +172,7 @@ public class GraknCoreRunner implements GraknRunner {
             arguments.add(tmpDir.toAbsolutePath().toString());
             graknProcess = executor.command(arguments).start();
 
-            Thread.sleep(10000);
+            Thread.sleep(30000);
             assertTrue("Grakn Core failed to start", graknProcess.getProcess().isAlive());
 
             System.out.println("Grakn Core database server started");
@@ -193,6 +195,10 @@ public class GraknCoreRunner implements GraknRunner {
                 throw e;
             }
         }
+    }
+
+    private List<String> getGraknBinary() {
+        return System.getProperty("os.name").toLowerCase().contains("win") ? Arrays.asList("cmd.exe", "/c", "grakn.bat") : Collections.singletonList("grakn");
     }
 
     private void printLogs() throws InterruptedException, TimeoutException, IOException {

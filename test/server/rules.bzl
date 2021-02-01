@@ -16,12 +16,15 @@
 #
 
 def grakn_java_test(name, native_grakn_artifact, deps = [], classpath_resources = [], data = [], **kwargs):
+    native_grakn_artifact_paths = {}
+    for key in native_grakn_artifact.keys():
+        native_grakn_artifact_paths[key] = [ "$(location {})".format(native_grakn_artifact[key]) ]
     native.java_test(
         name = name,
         deps = depset(deps + ["@graknlabs_common//test/server:grakn-setup"]).to_list(),
         classpath_resources = depset(classpath_resources + ["@graknlabs_common//test/server:logback"]).to_list(),
-        data = depset(data + [native_grakn_artifact]).to_list(),
-        args = ["$(location " + native_grakn_artifact + ")"],
+        data = data + select(native_grakn_artifact),
+        args = select(native_grakn_artifact_paths),
         **kwargs
     )
 
