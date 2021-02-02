@@ -44,7 +44,7 @@ public abstract class GraknRunnerBase implements GraknRunner {
     private final Path distributionDir;
     private final String distributionArchiveFormat;
     protected final int port;
-    protected Path dataDir;
+    protected final Path dataDir;
     protected final boolean debug;
 
     private ProcessExecutor executor;
@@ -78,7 +78,8 @@ public abstract class GraknRunnerBase implements GraknRunner {
                 .redirectError(System.err)
                 .readOutput(true)
                 .destroyOnExit();
-        distributionSetup(distributionDir);
+        Path graknPath = distributionSetup(distributionDir);
+        dataDir = graknPath.resolve("server").resolve("data");
         System.out.println(name() + " runner constructed");
     }
 
@@ -165,7 +166,7 @@ public abstract class GraknRunnerBase implements GraknRunner {
 
     abstract List<String> command();
 
-    private void distributionSetup(Path distributionDir) throws IOException, TimeoutException, InterruptedException {
+    private Path distributionSetup(Path distributionDir) throws IOException, TimeoutException, InterruptedException {
         System.out.println("Unarchiving " + name() + " distribution");
         Files.createDirectories(distributionDir);
         if (distributionArchiveFormat.equals(TAR)) {
@@ -181,7 +182,7 @@ public abstract class GraknRunnerBase implements GraknRunner {
         System.out.println(graknPath);
         executor = executor.directory(graknPath.toFile());
         System.out.println(name() + " distribution unarchived");
-        dataDir = graknPath.resolve("server").resolve("data");
+        return graknPath;
     }
 
     private void printLogs() {
