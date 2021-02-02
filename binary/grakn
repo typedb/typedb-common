@@ -61,7 +61,7 @@ elif [[ "$1" = "server" ]] || [[ "$1" = "version" ]]; then
     if [[ -d "${GRAKN_HOME}/server" ]]; then
         IDX=0
         while [[ "${@:IDX}" ]]; do
-            case ${@:IDX} in
+            case ${@:IDX:1} in
                 --debug) DEBUG=yes;
                 break;
             esac
