@@ -73,7 +73,7 @@ elif [[ "$1" = "server" ]] || [[ "$1" = "version" ]]; then
         if [ $DEBUG ]; then
             case "$(uname -s)" in
                 Darwin) CLASSPATH="${CLASSPATH}:${GRAKN_HOME}/server/lib/dev/*" ;;
-                *) CLASSPATH="${CLASSPATH}:${GRAKN_HOME}/server/lib/prod/*" ;;
+                *) CLASSPATH="${CLASSPATH}:${GRAKN_HOME}/server/lib/prod/*" && echo "WARNING: Debug mode is not available in this platform." ;;
             esac
             exec java ${SERVER_JAVAOPTS} -ea -cp "${CLASSPATH}" \
                 -Dgrakn.dir="${GRAKN_HOME}" -Dgrakn.conf="${GRAKN_HOME}/${GRAKN_CONFIG}" \
