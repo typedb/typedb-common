@@ -71,7 +71,11 @@ elif [[ "$1" = "server" ]] || [[ "$1" = "version" ]]; then
         CLASSPATH="${GRAKN_HOME}/server/conf/:${GRAKN_HOME}/${LIB_COMMON}"
         # exec replaces current shell process with java so no commands after these ones will ever get executed
         if [ $DEBUG ]; then
-            CLASSPATH="${CLASSPATH}:${GRAKN_HOME}/server/lib/dev/*"
+            case "$(uname -s)" in
+                Darwin) CLASSPATH="${CLASSPATH}:${GRAKN_HOME}/server/lib/dev/*" ;;
+                *) echo "WARNING: Debug mode RocksDB is not available in this platform. Fallback to production mode."
+                   CLASSPATH="${CLASSPATH}:${GRAKN_HOME}/server/lib/prod/*" ;;
+            esac
             exec java ${SERVER_JAVAOPTS} -ea -cp "${CLASSPATH}" \
                 -Dgrakn.dir="${GRAKN_HOME}" -Dgrakn.conf="${GRAKN_HOME}/${GRAKN_CONFIG}" \
                 -Dlogback.configurationFile=logback-debug.xml \
