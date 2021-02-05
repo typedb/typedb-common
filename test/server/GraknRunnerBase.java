@@ -136,7 +136,7 @@ public abstract class GraknRunnerBase implements GraknRunner {
             System.out.println("Database directory will be at " + dataDir.toAbsolutePath());
             graknProcess = executor.command(command()).start();
 
-            Thread.sleep(10000);
+            Thread.sleep(15000);
             assertTrue(name() + " failed to start", graknProcess.getProcess().isAlive());
 
             System.out.println(name() + " database server started");
