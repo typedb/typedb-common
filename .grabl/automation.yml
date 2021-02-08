@@ -69,18 +69,6 @@ build:
         export DEPLOY_APT_USERNAME=$REPO_GRAKN_USERNAME
         export DEPLOY_APT_PASSWORD=$REPO_GRAKN_PASSWORD
         bazel run --define version=$(git rev-parse HEAD) //binary:deploy-apt -- snapshot
-    deploy-rpm-snapshot:
-      filter:
-        owner: graknlabs
-        branch: master
-      image: graknlabs-ubuntu-20.04
-      dependencies: [build]
-      command: |
-        sudo apt-get update && sudo apt-get install rpm
-        export DEPLOY_RPM_USERNAME=$REPO_GRAKN_USERNAME
-        export DEPLOY_RPM_PASSWORD=$REPO_GRAKN_PASSWORD
-        bazel run --define version=$(git rev-parse HEAD) //binary:deploy-rpm -- snapshot
-
 release:
   filter:
     owner: graknlabs
@@ -111,12 +99,3 @@ release:
         export DEPLOY_APT_USERNAME=$REPO_GRAKN_USERNAME
         export DEPLOY_APT_PASSWORD=$REPO_GRAKN_PASSWORD
         bazel run --define version=$(cat VERSION) //binary:deploy-apt -- release
-    deploy-rpm-release:
-      image: graknlabs-ubuntu-20.04
-      dependencies: [deploy-github]
-      command: |
-        sudo apt-get update && sudo apt-get install rpm
-        sed -i -e 's/-/_/g' VERSION 
-        export DEPLOY_RPM_USERNAME=$REPO_GRAKN_USERNAME
-        export DEPLOY_RPM_PASSWORD=$REPO_GRAKN_PASSWORD
-        bazel run --define version=$(cat VERSION) //binary:deploy-rpm -- release
