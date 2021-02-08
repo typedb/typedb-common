@@ -44,6 +44,11 @@ public class GraknClusterRunner extends GraknRunnerBase {
     }
 
     @Override
+    int startupTimeMillis() {
+        return 12000;
+    }
+
+    @Override
     String name() {
         return "Grakn Cluster";
     }

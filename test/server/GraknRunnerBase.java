@@ -136,7 +136,7 @@ public abstract class GraknRunnerBase implements GraknRunner {
             System.out.println("Database directory will be at " + dataDir.toAbsolutePath());
             graknProcess = executor.command(command()).start();
 
-            Thread.sleep(10000);
+            Thread.sleep(startupTimeMillis());
             assertTrue(name() + " failed to start", graknProcess.getProcess().isAlive());
 
             System.out.println(name() + " database server started");
@@ -165,6 +165,8 @@ public abstract class GraknRunnerBase implements GraknRunner {
     abstract String name();
 
     abstract List<String> command();
+
+    abstract int startupTimeMillis();
 
     private Path distributionSetup(Path distributionDir) throws IOException, TimeoutException, InterruptedException {
         System.out.println("Unarchiving " + name() + " distribution");

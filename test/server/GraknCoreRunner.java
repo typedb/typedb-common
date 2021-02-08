@@ -61,6 +61,11 @@ public class GraknCoreRunner extends GraknRunnerBase {
         return command;
     }
 
+    @Override
+    int startupTimeMillis() {
+        return 10000;
+    }
+
     private List<String> getGraknBinary() {
         return System.getProperty("os.name").toLowerCase().contains("win") ? Arrays.asList("cmd.exe", "/c", "grakn.bat") : Collections.singletonList("grakn");
     }
