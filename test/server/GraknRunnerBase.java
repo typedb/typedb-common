@@ -28,7 +28,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import static org.junit.Assert.assertTrue;
@@ -39,6 +43,9 @@ public abstract class GraknRunnerBase implements GraknRunner {
     private static final File DISTRIBUTION_ARCHIVE = ARGS.length > 1 ? new File(ARGS[1]) : null;
     private static final String TAR = ".tar.gz";
     private static final String ZIP = ".zip";
+    private static final int SERVER_STARTUP_TIMEOUT_MILLIS = 30000;
+    private static final int SERVER_ALIVE_POLL_INTERVAL_MILLIS = 500;
+    private static final int SERVER_ALIVE_POLL_MAX_RETRIES = SERVER_STARTUP_TIMEOUT_MILLIS / SERVER_ALIVE_POLL_INTERVAL_MILLIS;
 
     private final File distributionArchive;
     private final Path distributionDir;
@@ -136,14 +143,43 @@ public abstract class GraknRunnerBase implements GraknRunner {
             System.out.println("Database directory will be at " + dataDir.toAbsolutePath());
             graknProcess = executor.command(command()).start();
 
-            Thread.sleep(15000);
-            assertTrue(name() + " failed to start", graknProcess.getProcess().isAlive());
+            boolean started = checkServerStarted().await(SERVER_STARTUP_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
+
+            assertTrue(name() + " failed to start", started);
 
             System.out.println(name() + " database server started");
         } catch (Exception e) {
             printLogs();
             throw new RuntimeException(e);
         }
+    }
+
+    private CountDownLatch checkServerStarted() {
+        CountDownLatch latch = new CountDownLatch(1);
+        Timer timer = new Timer();
+        timer.scheduleAtFixedRate(new TimerTask() {
+            int retryNumber = 0;
+            @Override
+            public void run() {
+                retryNumber++;
+                if (retryNumber % 4 == 0) {
+                    System.out.println(String.format("Waiting for %s server to start (%ds)...",
+                            name(), retryNumber * SERVER_ALIVE_POLL_INTERVAL_MILLIS / 1000));
+                }
+                String lsof;
+                try {
+                    lsof = executor.command("lsof", "-i", ":" + port).readOutput(true).execute().outputString();
+                } catch (IOException | InterruptedException | TimeoutException e) {
+                    lsof = "";
+                }
+                if (lsof != null && !lsof.isEmpty()) {
+                    latch.countDown();
+                    timer.cancel();
+                }
+                if (retryNumber > SERVER_ALIVE_POLL_MAX_RETRIES) timer.cancel();
+            }
+        }, 0, 500);
+        return latch;
     }
 
     @Override
