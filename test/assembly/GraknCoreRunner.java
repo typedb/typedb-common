@@ -15,40 +15,44 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  */
+ 
+ package grakn.common.test.assembly;
 
-package grakn.common.test.server;
-
-import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
 
-public class GraknClusterRunner extends GraknRunnerBase {
-    public GraknClusterRunner() throws InterruptedException, TimeoutException, IOException {
-        super();
+public class GraknCoreRunner extends GraknServerRunner {
+
+    public GraknCoreRunner() throws InterruptedException, TimeoutException, IOException {
+        this(false);
     }
 
-    public GraknClusterRunner(File distributionFile) throws InterruptedException, TimeoutException, IOException {
-        super(distributionFile, false);
-    }
-
-    @Override
-    List<String> command() {
-        return Arrays.asList(
-                "./grakn",
-                "server",
-                "--address", host() + ":" + port() + ":" + serverPort(),
-                "--data", dataDir.toAbsolutePath().toString()
-        );
+    public GraknCoreRunner(boolean debug) throws InterruptedException, TimeoutException, IOException {
+        super(debug);
     }
 
     @Override
     String name() {
-        return "Grakn Cluster";
+        return "Grakn Core";
     }
 
-    private int serverPort() {
-        return port() + 1;
+    @Override
+    List<String> command() {
+        List<String> command = new ArrayList<>();
+        command.addAll(getGraknBinary());
+        command.add("server");
+        if (debug) {
+            command.add("--debug");
+        }
+        command.add("--port");
+        command.add(Integer.toString(port));
+        command.add("--data");
+        command.add(dataDir.toAbsolutePath().toString());
+
+        return command;
     }
 }

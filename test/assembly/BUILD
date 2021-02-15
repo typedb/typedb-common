@@ -18,15 +18,30 @@
 load("@graknlabs_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
 
 java_library(
-    name = "grakn-runner",
+    name = "server-runner",
     srcs = [
         "GraknSingleton.java",
         "GraknRunner.java",
-        "GraknRunnerBase.java",
+        "GraknServerRunner.java",
         "GraknCoreRunner.java",
         "GraknClusterRunner.java",
     ],
     deps = [
+        "@maven//:commons_io_commons_io",
+        "@maven//:junit_junit",
+        "@maven//:org_zeroturnaround_zt_exec",
+        "@maven//:org_slf4j_slf4j_api"
+    ],
+    visibility = ["//visibility:public"],
+)
+
+java_library(
+    name = "console-runner",
+    srcs = [
+        "GraknConsoleRunner.java",
+    ],
+    deps = [
+        ":server-runner",
         "@maven//:commons_io_commons_io",
         "@maven//:junit_junit",
         "@maven//:org_zeroturnaround_zt_exec",
