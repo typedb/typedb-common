@@ -16,57 +16,42 @@
 #
 
 def server_java_test(name, server_mac_artifact, server_linux_artifact, server_windows_artifact, deps = [], classpath_resources = [], data = [], **kwargs):
-    native_server_artifacts = {
-       "@graknlabs_dependencies//util/platform:is_mac": server_mac_artifact,
-       "@graknlabs_dependencies//util/platform:is_linux": server_linux_artifact,
-       "@graknlabs_dependencies//util/platform:is_windows": server_windows_artifact,
-    }
-    native_artifact_paths, native_artifact_labels = native_artifact_paths_and_labels(native_server_artifacts)
+    native_server_artifact_paths, native_server_artifact_labels = native_artifact_paths_and_labels(
+        server_mac_artifact, server_linux_artifact, server_windows_artifact
+    )
     native.java_test(
         name = name,
-        deps = depset(deps + ["@graknlabs_common//test/assembly:server-runner"]).to_list(),
+        deps = depset(deps + ["@graknlabs_common//test/assembly:grakn-runner"]).to_list(),
         classpath_resources = depset(classpath_resources + ["@graknlabs_common//test/assembly:logback"]).to_list(),
-        data = data + select(native_artifact_labels),
-        args = select(native_artifact_paths),
+        data = data + select(native_server_artifact_labels),
+        args = select(native_server_artifact_paths),
         **kwargs
     )
 
-def console_java_test(name,
-                      server_mac_artifact, server_linux_artifact, server_windows_artifact,
-                      console_mac_artifact, console_linux_artifact, console_windows_artifact,
-                      deps = [], classpath_resources = [], data = [], **kwargs):
-    native_server_artifacts = {
-       "@graknlabs_dependencies//util/platform:is_mac": server_mac_artifact,
-       "@graknlabs_dependencies//util/platform:is_linux": server_linux_artifact,
-       "@graknlabs_dependencies//util/platform:is_windows": server_windows_artifact,
-    }
-    native_console_artifacts = {
-       "@graknlabs_dependencies//util/platform:is_mac": console_mac_artifact,
-       "@graknlabs_dependencies//util/platform:is_linux": console_linux_artifact,
-       "@graknlabs_dependencies//util/platform:is_windows": console_windows_artifact,
-    }
-    native_artifact_paths, native_artifact_labels = native_artifact_paths_and_labels(native_server_artifacts, native_console_artifacts)
+def console_java_test(name, server_mac_artifact, server_linux_artifact, server_windows_artifact, console_artifact, deps = [], classpath_resources = [], data = [], **kwargs):
+    native_server_artifact_paths, native_server_artifact_labels = native_artifact_paths_and_labels(
+        server_mac_artifact, server_linux_artifact, server_windows_artifact
+    )
     native.java_test(
         name = name,
-        deps = depset(deps + ["@graknlabs_common//test/assembly:console-runner"]).to_list(),
+        deps = depset(deps + ["@graknlabs_common//test/assembly:grakn-runner"]).to_list(),
         classpath_resources = depset(classpath_resources + ["@graknlabs_common//test/assembly:logback"]).to_list(),
-        data = data + select(native_artifact_labels),
-        args = select(native_artifact_paths),
+        data = data + select(native_server_artifact_labels) + [Label(console_artifact, relative_to_caller_repository=True)],
+        args = select(native_server_artifact_paths) + ["$(location {})".format(console_artifact)],
         **kwargs
     )
 
-def native_artifact_paths_and_labels(*artifacts):
-    platforms = [ "@graknlabs_dependencies//util/platform:is_mac",
-                  "@graknlabs_dependencies//util/platform:is_linux",
-                  "@graknlabs_dependencies//util/platform:is_windows"]
+def native_artifact_paths_and_labels(mac_artifact, linux_artifact, windows_artifact):
+    native_artifacts = {
+       "@graknlabs_dependencies//util/platform:is_mac": mac_artifact,
+       "@graknlabs_dependencies//util/platform:is_linux": linux_artifact,
+       "@graknlabs_dependencies//util/platform:is_windows": windows_artifact,
+    }
     native_artifact_paths = {}
     native_artifact_labels = {}
-    for platform in platforms:
-        native_artifact_paths[platform] = []
-        native_artifact_labels[platform] = []
-        for artifact in artifacts:
-            native_artifact_paths[platform].append("$(location {})".format(artifact[platform]))
-            native_artifact_labels[platform].append(Label(artifact[platform], relative_to_caller_repository=True))
+    for key in native_artifacts.keys():
+        native_artifact_labels[key] = [ Label(native_artifacts[key], relative_to_caller_repository=True) ]
+        native_artifact_paths[key] = [ "$(location {})".format(native_artifacts[key]) ]
     return native_artifact_paths, native_artifact_labels
 
 def native_grakn_artifact(name, mac_artifact, linux_artifact, windows_artifact, output, **kwargs):

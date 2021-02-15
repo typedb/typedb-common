@@ -29,48 +29,54 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.TimeoutException;
 
 import static org.junit.Assert.fail;
 
 public abstract class GraknRunner {
 
-    private static final String[] ARGS = System.getProperty("sun.java.command").split(" ");
-    private static final File DISTRIBUTION_ARCHIVE = ARGS.length > 1 ? new File(ARGS[1]) : null;
-    private static final String TAR = ".tar.gz";
+    private static final String TAR_GZ = ".tar.gz";
+    private static final String TGZ = ".tgz";
     private static final String ZIP = ".zip";
 
     protected final Path graknPath;
     protected ProcessExecutor executor;
 
     public GraknRunner() throws InterruptedException, TimeoutException, IOException {
+        this(Objects.requireNonNull(distributionArchive()));
+    }
+
+    public GraknRunner(File distributionArchive) throws InterruptedException, TimeoutException, IOException {
         System.out.println("Constructing a " + name() + " runner");
 
-        if (!DISTRIBUTION_ARCHIVE.exists()) {
-            throw new IllegalArgumentException("Grakn distribution file is missing from " + DISTRIBUTION_ARCHIVE.getAbsolutePath());
+        if (!distributionArchive.exists()) {
+            throw new IllegalArgumentException("Grakn distribution file is missing from " + distributionArchive.getAbsolutePath());
         }
 
-        checkAndDeleteExistingDistribution(DISTRIBUTION_ARCHIVE);
+        checkAndDeleteExistingDistribution(distributionArchive);
 
-        String distributionArchiveFormat = distributionFormat(DISTRIBUTION_ARCHIVE);
-        Path distributionDir = distributionTarget(DISTRIBUTION_ARCHIVE);
+        String distributionArchiveFormat = distributionFormat(distributionArchive);
+        Path distributionDir = distributionTarget(distributionArchive);
         executor = new ProcessExecutor()
                 .directory(Paths.get(".").toAbsolutePath().toFile())
                 .redirectOutput(System.out)
                 .redirectError(System.err)
                 .readOutput(true)
                 .destroyOnExit();
-        graknPath = distributionSetup(distributionDir, distributionArchiveFormat, DISTRIBUTION_ARCHIVE);
+        graknPath = distributionSetup(distributionDir, distributionArchiveFormat, distributionArchive);
         System.out.println(name() + " runner constructed");
     }
 
     private String distributionFormat(File distributionFile) {
-        if (distributionFile.toString().endsWith(TAR)) {
-            return TAR;
+        if (distributionFile.toString().endsWith(TAR_GZ)) {
+            return TAR_GZ;
+        } else if (distributionFile.toString().endsWith(TGZ)) {
+                return TGZ;
         } else if (distributionFile.toString().endsWith(ZIP)) {
             return ZIP;
         } else {
-            fail(String.format("Distribution file format should either be %s or %s", TAR, ZIP));
+            fail(String.format("Distribution file format should either be %s, %s or %s", TAR_GZ, TGZ, ZIP));
         }
         return "";
     }
@@ -97,7 +103,7 @@ public abstract class GraknRunner {
     private Path distributionSetup(Path distributionDir, String distributionArchiveFormat, File distributionArchive) throws IOException, TimeoutException, InterruptedException {
         System.out.println("Unarchiving " + name() + " distribution");
         Files.createDirectories(distributionDir);
-        if (distributionArchiveFormat.equals(TAR)) {
+        if (distributionArchiveFormat.equals(TAR_GZ) || distributionArchiveFormat.equals(TGZ)) {
             executor.command("tar", "-xf", distributionArchive.toString(),
                     "-C", distributionDir.toString()).execute();
         } else {
@@ -114,6 +120,11 @@ public abstract class GraknRunner {
 
     protected List<String> getGraknBinary() {
         return System.getProperty("os.name").toLowerCase().contains("win") ? Arrays.asList("cmd.exe", "/c", "grakn.bat") : Collections.singletonList("grakn");
+    }
+
+    protected static File distributionArchive() {
+        String[] args = System.getProperty("sun.java.command").split(" ");
+        return Objects.requireNonNull(args.length > 1 ? new File(args[1]) : null);
     }
 
     abstract String name();

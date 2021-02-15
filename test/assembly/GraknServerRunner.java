@@ -20,10 +20,12 @@ package grakn.common.test.assembly;
 
 import org.zeroturnaround.exec.StartedProcess;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.CountDownLatch;
@@ -45,7 +47,11 @@ public abstract class GraknServerRunner extends GraknRunner {
     private StartedProcess serverProcess;
 
     public GraknServerRunner(boolean debug) throws InterruptedException, TimeoutException, IOException {
-        super();
+        this(distributionArchive(), debug);
+    }
+
+    public GraknServerRunner(File distributionArchive, boolean debug) throws InterruptedException, TimeoutException, IOException {
+        super(distributionArchive);
         this.port = ThreadLocalRandom.current().nextInt(40000, 60000);
         this.debug = debug;
         this.dataDir = graknPath.resolve("server").resolve("data");
@@ -96,12 +102,8 @@ public abstract class GraknServerRunner extends GraknRunner {
                 try {
                     lsof = executor.command("lsof", "-i", ":" + port).readOutput(true).execute().outputString();
                 } catch (IOException | InterruptedException | TimeoutException e) {
-                    System.out.println(e);
                     lsof = "";
                 }
-                System.out.println(executor.getDirectory().toString());
-                System.out.println(String.join(" ", executor.getCommand()));
-                System.out.println(lsof);
                 if (lsof != null && !lsof.isEmpty()) {
                     latch.countDown();
                     timer.cancel();

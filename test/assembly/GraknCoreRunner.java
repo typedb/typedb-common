@@ -18,10 +18,9 @@
  
  package grakn.common.test.assembly;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
 
@@ -32,7 +31,11 @@ public class GraknCoreRunner extends GraknServerRunner {
     }
 
     public GraknCoreRunner(boolean debug) throws InterruptedException, TimeoutException, IOException {
-        super(debug);
+        this(distributionArchive(), debug);
+    }
+
+    public GraknCoreRunner(File distributionArchive, boolean debug) throws InterruptedException, TimeoutException, IOException {
+        super(distributionArchive, debug);
     }
 
     @Override
