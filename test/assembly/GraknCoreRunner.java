@@ -18,7 +18,6 @@
  
  package grakn.common.test.assembly;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,11 +30,7 @@ public class GraknCoreRunner extends GraknServerRunner {
     }
 
     public GraknCoreRunner(boolean debug) throws InterruptedException, TimeoutException, IOException {
-        this(distributionArchive(), debug);
-    }
-
-    public GraknCoreRunner(File distributionArchive, boolean debug) throws InterruptedException, TimeoutException, IOException {
-        super(distributionArchive, debug);
+        super(serverDistributionArchive(), debug);
     }
 
     @Override

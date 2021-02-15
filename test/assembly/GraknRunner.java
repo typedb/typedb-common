@@ -37,15 +37,10 @@ import static org.junit.Assert.fail;
 public abstract class GraknRunner {
 
     private static final String TAR_GZ = ".tar.gz";
-    private static final String TGZ = ".tgz";
     private static final String ZIP = ".zip";
 
     protected final Path graknPath;
     protected ProcessExecutor executor;
-
-    public GraknRunner() throws InterruptedException, TimeoutException, IOException {
-        this(Objects.requireNonNull(distributionArchive()));
-    }
 
     public GraknRunner(File distributionArchive) throws InterruptedException, TimeoutException, IOException {
         System.out.println("Constructing a " + name() + " runner");
@@ -71,12 +66,10 @@ public abstract class GraknRunner {
     private String distributionFormat(File distributionFile) {
         if (distributionFile.toString().endsWith(TAR_GZ)) {
             return TAR_GZ;
-        } else if (distributionFile.toString().endsWith(TGZ)) {
-                return TGZ;
         } else if (distributionFile.toString().endsWith(ZIP)) {
             return ZIP;
         } else {
-            fail(String.format("Distribution file format should either be %s, %s or %s", TAR_GZ, TGZ, ZIP));
+            fail(String.format("Distribution file format should either be %s or %s", TAR_GZ, ZIP));
         }
         return "";
     }
@@ -103,7 +96,7 @@ public abstract class GraknRunner {
     private Path distributionSetup(Path distributionDir, String distributionArchiveFormat, File distributionArchive) throws IOException, TimeoutException, InterruptedException {
         System.out.println("Unarchiving " + name() + " distribution");
         Files.createDirectories(distributionDir);
-        if (distributionArchiveFormat.equals(TAR_GZ) || distributionArchiveFormat.equals(TGZ)) {
+        if (distributionArchiveFormat.equals(TAR_GZ)) {
             executor.command("tar", "-xf", distributionArchive.toString(),
                     "-C", distributionDir.toString()).execute();
         } else {
@@ -122,9 +115,14 @@ public abstract class GraknRunner {
         return System.getProperty("os.name").toLowerCase().contains("win") ? Arrays.asList("cmd.exe", "/c", "grakn.bat") : Collections.singletonList("grakn");
     }
 
-    protected static File distributionArchive() {
+    protected static File serverDistributionArchive() {
         String[] args = System.getProperty("sun.java.command").split(" ");
         return Objects.requireNonNull(args.length > 1 ? new File(args[1]) : null);
+    }
+
+    protected static File consoleDistributionArchive() {
+        String[] args = System.getProperty("sun.java.command").split(" ");
+        return Objects.requireNonNull(args.length > 1 ? new File(args[2]) : null);
     }
 
     abstract String name();

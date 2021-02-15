@@ -25,7 +25,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.CountDownLatch;
@@ -45,10 +44,6 @@ public abstract class GraknServerRunner extends GraknRunner {
     protected final boolean debug;
     protected final Path dataDir;
     private StartedProcess serverProcess;
-
-    public GraknServerRunner(boolean debug) throws InterruptedException, TimeoutException, IOException {
-        this(distributionArchive(), debug);
-    }
 
     public GraknServerRunner(File distributionArchive, boolean debug) throws InterruptedException, TimeoutException, IOException {
         super(distributionArchive);

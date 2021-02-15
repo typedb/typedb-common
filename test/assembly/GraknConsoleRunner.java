@@ -20,7 +20,6 @@ package grakn.common.test.assembly;
 
 import org.zeroturnaround.exec.StartedProcess;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -30,11 +29,7 @@ import java.util.concurrent.TimeoutException;
 public class GraknConsoleRunner extends GraknRunner {
 
     public GraknConsoleRunner() throws InterruptedException, TimeoutException, IOException {
-        this(distributionArchive());
-    }
-
-    public GraknConsoleRunner(File distributionArchive) throws InterruptedException, TimeoutException, IOException {
-        super(distributionArchive);
+        super(consoleDistributionArchive());
     }
 
     public int run(String address, boolean isCluster, Path scriptFile) {
@@ -48,10 +43,8 @@ public class GraknConsoleRunner extends GraknRunner {
 
     private List<String> command(String address, boolean isCluster, Path scriptFile) {
         List<String> command = new ArrayList<>();
-        command.add("java");
-        command.add("-cp");
-        command.add("services/lib/*");
-        command.add("grakn.console.GraknConsole");
+        command.addAll(getGraknBinary());
+        command.add("console");
         command.add(isCluster ? "--cluster" : "--server");
         command.add(address);
         command.add("--script");
