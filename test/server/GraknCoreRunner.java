@@ -30,7 +30,7 @@ public class GraknCoreRunner extends GraknRunner {
     }
 
     public GraknCoreRunner(boolean debug) throws InterruptedException, TimeoutException, IOException {
-        super(serverDistributionArchive(), debug);
+        super(debug);
     }
 
     @Override

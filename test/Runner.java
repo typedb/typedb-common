@@ -42,9 +42,10 @@ public abstract class Runner {
     protected final Path rootPath;
     protected ProcessExecutor executor;
 
-    public Runner(File distributionArchive) throws InterruptedException, TimeoutException, IOException {
+    public Runner() throws InterruptedException, TimeoutException, IOException {
         System.out.println("Constructing a " + name() + " runner");
 
+        File distributionArchive = distributionArchive();
         if (!distributionArchive.exists()) {
             throw new IllegalArgumentException("Grakn distribution file is missing from " + distributionArchive.getAbsolutePath());
         }
@@ -115,15 +116,7 @@ public abstract class Runner {
         return System.getProperty("os.name").toLowerCase().contains("win") ? Arrays.asList("cmd.exe", "/c", "grakn.bat") : Collections.singletonList("grakn");
     }
 
-    protected static File serverDistributionArchive() {
-        String[] args = System.getProperty("sun.java.command").split(" ");
-        return Objects.requireNonNull(args.length > 1 ? new File(args[1]) : null);
-    }
-
-    protected static File consoleDistributionArchive() {
-        String[] args = System.getProperty("sun.java.command").split(" ");
-        return Objects.requireNonNull(args.length > 1 ? new File(args[2]) : null);
-    }
+    protected abstract File distributionArchive();
 
     protected abstract String name();
 }

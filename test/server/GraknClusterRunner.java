@@ -30,7 +30,7 @@ public class GraknClusterRunner extends GraknRunner {
     }
 
     public GraknClusterRunner(boolean debug) throws InterruptedException, TimeoutException, IOException {
-        super(serverDistributionArchive(), debug);
+        super(debug);
     }
 
     @Override

@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.CountDownLatch;
@@ -46,8 +47,8 @@ public abstract class GraknRunner extends Runner {
     protected final Path dataDir;
     private StartedProcess serverProcess;
 
-    public GraknRunner(File distributionArchive, boolean debug) throws InterruptedException, TimeoutException, IOException {
-        super(distributionArchive);
+    public GraknRunner(boolean debug) throws InterruptedException, TimeoutException, IOException {
+        super();
         this.port = ThreadLocalRandom.current().nextInt(40000, 60000);
         this.debug = debug;
         this.dataDir = rootPath.resolve("server").resolve("data");
@@ -136,6 +137,12 @@ public abstract class GraknRunner extends Runner {
             System.out.println("Unable to print '" + logPath + "'");
             e.printStackTrace();
         }
+    }
+
+    @Override
+    protected File distributionArchive() {
+        String[] args = System.getProperty("sun.java.command").split(" ");
+        return Objects.requireNonNull(args.length > 1 ? new File(args[1]) : null);
     }
 
     abstract List<String> command();

@@ -21,16 +21,18 @@ package grakn.common.test.console;
 import grakn.common.test.Runner;
 import org.zeroturnaround.exec.StartedProcess;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.TimeoutException;
 
 public class ConsoleRunner extends Runner {
 
     public ConsoleRunner() throws InterruptedException, TimeoutException, IOException {
-        super(consoleDistributionArchive());
+        super();
     }
 
     public int run(String address, boolean isCluster, Path scriptFile) {
@@ -51,6 +53,12 @@ public class ConsoleRunner extends Runner {
         command.add("--script");
         command.add(scriptFile.toAbsolutePath().toString());
         return command;
+    }
+
+    @Override
+    protected File distributionArchive() {
+        String[] args = System.getProperty("sun.java.command").split(" ");
+        return Objects.requireNonNull(args.length > 1 ? new File(args[2]) : null);
     }
 
     @Override
