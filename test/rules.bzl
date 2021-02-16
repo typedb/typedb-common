@@ -28,8 +28,8 @@ def grakn_java_test(name, server_mac_artifact, server_linux_artifact, server_win
         )
     native.java_test(
         name = name,
-        deps = depset(deps + ["@graknlabs_common//test/assembly:grakn-runner"]).to_list(),
-        classpath_resources = depset(classpath_resources + ["@graknlabs_common//test/assembly:logback"]).to_list(),
+        deps = depset(deps + ["@graknlabs_common//test:grakn-runner"]).to_list(),
+        classpath_resources = depset(classpath_resources + ["@graknlabs_common//test:logback"]).to_list(),
         data = data + select(native_server_artifact_labels) + select(native_console_artifact_labels),
         args = select(native_server_artifact_paths) + select(native_console_artifact_paths),
         **kwargs
