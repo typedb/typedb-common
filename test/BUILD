@@ -20,12 +20,12 @@ load("@graknlabs_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
 java_library(
     name = "grakn-runner",
     srcs = [
-        "GraknSingleton.java",
-        "GraknRunner.java",
-        "GraknServerRunner.java",
-        "GraknCoreRunner.java",
-        "GraknClusterRunner.java",
-        "GraknConsoleRunner.java",
+        "Runner.java",
+        "server/GraknSingleton.java",
+        "server/GraknRunner.java",
+        "server/GraknCoreRunner.java",
+        "server/GraknClusterRunner.java",
+        "console/ConsoleRunner.java",
     ],
     deps = [
         "@maven//:commons_io_commons_io",

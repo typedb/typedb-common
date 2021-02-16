@@ -15,28 +15,17 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-def server_java_test(name, server_mac_artifact, server_linux_artifact, server_windows_artifact, deps = [], classpath_resources = [], data = [], **kwargs):
-    native_server_artifact_paths, native_server_artifact_labels = native_artifact_paths_and_labels(
-        server_mac_artifact, server_linux_artifact, server_windows_artifact
-    )
-    native.java_test(
-        name = name,
-        deps = depset(deps + ["@graknlabs_common//test/assembly:grakn-runner"]).to_list(),
-        classpath_resources = depset(classpath_resources + ["@graknlabs_common//test/assembly:logback"]).to_list(),
-        data = data + select(native_server_artifact_labels),
-        args = select(native_server_artifact_paths),
-        **kwargs
-    )
-
-def console_java_test(name, server_mac_artifact, server_linux_artifact, server_windows_artifact,
-                      console_mac_artifact, console_linux_artifact, console_windows_artifact,
+def grakn_java_test(name, server_mac_artifact, server_linux_artifact, server_windows_artifact,
+                      console_mac_artifact = None, console_linux_artifact = None, console_windows_artifact = None,
                       deps = [], classpath_resources = [], data = [], **kwargs):
     native_server_artifact_paths, native_server_artifact_labels = native_artifact_paths_and_labels(
         server_mac_artifact, server_linux_artifact, server_windows_artifact
     )
-    native_console_artifact_paths, native_console_artifact_labels = native_artifact_paths_and_labels(
-        console_mac_artifact, console_linux_artifact, console_windows_artifact
-    )
+    native_console_artifact_paths, native_console_artifact_labels = [], []
+    if console_mac_artifact and console_linux_artifact and console_windows_artifact:
+        native_console_artifact_paths, native_console_artifact_labels = native_artifact_paths_and_labels(
+            console_mac_artifact, console_linux_artifact, console_windows_artifact
+        )
     native.java_test(
         name = name,
         deps = depset(deps + ["@graknlabs_common//test/assembly:grakn-runner"]).to_list(),

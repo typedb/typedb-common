@@ -16,14 +16,14 @@
  *
  */
 
-package grakn.common.test.assembly;
+package grakn.common.test.server;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
 
-public class GraknClusterRunner extends GraknServerRunner {
+public class GraknClusterRunner extends GraknRunner {
 
     public GraknClusterRunner() throws InterruptedException, TimeoutException, IOException {
         this(false);
@@ -34,7 +34,7 @@ public class GraknClusterRunner extends GraknServerRunner {
     }
 
     @Override
-    String name() {
+    protected String name() {
         return "Grakn Cluster";
     }
 

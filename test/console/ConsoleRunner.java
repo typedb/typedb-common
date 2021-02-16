@@ -16,8 +16,9 @@
  *
  */
 
-package grakn.common.test.assembly;
+package grakn.common.test.console;
 
+import grakn.common.test.Runner;
 import org.zeroturnaround.exec.StartedProcess;
 
 import java.io.IOException;
@@ -26,9 +27,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
 
-public class GraknConsoleRunner extends GraknRunner {
+public class ConsoleRunner extends Runner {
 
-    public GraknConsoleRunner() throws InterruptedException, TimeoutException, IOException {
+    public ConsoleRunner() throws InterruptedException, TimeoutException, IOException {
         super(consoleDistributionArchive());
     }
 
@@ -53,7 +54,7 @@ public class GraknConsoleRunner extends GraknRunner {
     }
 
     @Override
-    String name() {
+    protected String name() {
         return "Grakn Console";
     }
 }

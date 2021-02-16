@@ -15,17 +15,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package grakn.common.test.assembly;
+package grakn.common.test.server;
 
 public class GraknSingleton {
 
-    private static GraknServerRunner graknServerRunner;
+    private static GraknRunner graknRunner;
 
-    public static void setGraknServerRunner(GraknServerRunner instance) {
-        graknServerRunner = instance;
+    public static void setGraknRunner(GraknRunner instance) {
+        graknRunner = instance;
     }
 
-    public static GraknServerRunner getGraknServerRunner() {
-        return graknServerRunner;
+    public static GraknRunner getGraknRunner() {
+        return graknRunner;
     }
 }

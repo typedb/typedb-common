@@ -16,7 +16,7 @@
  *
  */
 
-package grakn.common.test.assembly;
+package grakn.common.test;
 
 import org.apache.commons.io.FileUtils;
 import org.zeroturnaround.exec.ProcessExecutor;
@@ -34,15 +34,15 @@ import java.util.concurrent.TimeoutException;
 
 import static org.junit.Assert.fail;
 
-public abstract class GraknRunner {
+public abstract class Runner {
 
     private static final String TAR_GZ = ".tar.gz";
     private static final String ZIP = ".zip";
 
-    protected final Path graknPath;
+    protected final Path rootPath;
     protected ProcessExecutor executor;
 
-    public GraknRunner(File distributionArchive) throws InterruptedException, TimeoutException, IOException {
+    public Runner(File distributionArchive) throws InterruptedException, TimeoutException, IOException {
         System.out.println("Constructing a " + name() + " runner");
 
         if (!distributionArchive.exists()) {
@@ -59,7 +59,7 @@ public abstract class GraknRunner {
                 .redirectError(System.err)
                 .readOutput(true)
                 .destroyOnExit();
-        graknPath = distributionSetup(distributionDir, distributionArchiveFormat, distributionArchive);
+        rootPath = distributionSetup(distributionDir, distributionArchiveFormat, distributionArchive);
         System.out.println(name() + " runner constructed");
     }
 
@@ -125,5 +125,5 @@ public abstract class GraknRunner {
         return Objects.requireNonNull(args.length > 1 ? new File(args[2]) : null);
     }
 
-    abstract String name();
+    protected abstract String name();
 }

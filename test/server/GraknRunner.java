@@ -16,8 +16,9 @@
  *
  */
 
-package grakn.common.test.assembly;
+package grakn.common.test.server;
 
+import grakn.common.test.Runner;
 import org.zeroturnaround.exec.StartedProcess;
 
 import java.io.File;
@@ -34,7 +35,7 @@ import java.util.concurrent.TimeoutException;
 
 import static org.junit.Assert.assertTrue;
 
-public abstract class GraknServerRunner extends GraknRunner {
+public abstract class GraknRunner extends Runner {
 
     private static final int SERVER_STARTUP_TIMEOUT_MILLIS = 30000;
     private static final int SERVER_ALIVE_POLL_INTERVAL_MILLIS = 500;
@@ -45,11 +46,11 @@ public abstract class GraknServerRunner extends GraknRunner {
     protected final Path dataDir;
     private StartedProcess serverProcess;
 
-    public GraknServerRunner(File distributionArchive, boolean debug) throws InterruptedException, TimeoutException, IOException {
+    public GraknRunner(File distributionArchive, boolean debug) throws InterruptedException, TimeoutException, IOException {
         super(distributionArchive);
         this.port = ThreadLocalRandom.current().nextInt(40000, 60000);
         this.debug = debug;
-        this.dataDir = graknPath.resolve("server").resolve("data");
+        this.dataDir = rootPath.resolve("server").resolve("data");
     }
 
     public String host() {
@@ -66,7 +67,7 @@ public abstract class GraknServerRunner extends GraknRunner {
 
     public void start() {
         try {
-            System.out.println("Starting " + name() + " database server at " + graknPath.toAbsolutePath().toString());
+            System.out.println("Starting " + name() + " database server at " + rootPath.toAbsolutePath().toString());
             System.out.println("Database directory will be at " + dataDir.toAbsolutePath());
             serverProcess = executor.command(command()).start();
 
