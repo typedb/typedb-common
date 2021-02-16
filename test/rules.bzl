@@ -30,8 +30,8 @@ def grakn_java_test(name, server_mac_artifact, server_linux_artifact, server_win
         name = name,
         deps = depset(deps + ["@graknlabs_common//test:grakn-runner"]).to_list(),
         classpath_resources = depset(classpath_resources + ["@graknlabs_common//test:logback"]).to_list(),
-        data = data + select(native_server_artifact_labels) + select(native_console_artifact_labels),
-        args = select(native_server_artifact_paths) + select(native_console_artifact_paths),
+        data = data + select(native_server_artifact_labels) + select(native_console_artifact_labels) if native_console_artifact_labels else [],
+        args = select(native_server_artifact_paths) + select(native_console_artifact_paths) if native_console_artifact_paths else [],
         **kwargs
     )
 
