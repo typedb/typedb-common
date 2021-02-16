@@ -18,34 +18,39 @@
 
 package grakn.common.test.server;
 
-import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
 
-public class GraknClusterRunner extends GraknRunnerBase {
+public class GraknClusterRunner extends GraknRunner {
+
     public GraknClusterRunner() throws InterruptedException, TimeoutException, IOException {
-        super();
+        this(false);
     }
 
-    public GraknClusterRunner(File distributionFile) throws InterruptedException, TimeoutException, IOException {
-        super(distributionFile, false);
+    public GraknClusterRunner(boolean debug) throws InterruptedException, TimeoutException, IOException {
+        super(debug);
+    }
+
+    @Override
+    protected String name() {
+        return "Grakn Cluster";
     }
 
     @Override
     List<String> command() {
-        return Arrays.asList(
-                "./grakn",
-                "server",
-                "--address", host() + ":" + port() + ":" + serverPort(),
-                "--data", dataDir.toAbsolutePath().toString()
-        );
-    }
-
-    @Override
-    String name() {
-        return "Grakn Cluster";
+        List<String> command = new ArrayList<>();
+        command.addAll(getGraknBinary());
+        command.add("server");
+        if (debug) {
+            command.add("--debug");
+        }
+        command.add("--address");
+        command.add(host() + ":" + port() + ":" + serverPort());
+        command.add("--data");
+        command.add(dataDir.toAbsolutePath().toString());
+        return command;
     }
 
     private int serverPort() {
