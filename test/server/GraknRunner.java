@@ -26,11 +26,9 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -42,40 +40,25 @@ public abstract class GraknRunner extends Runner {
     private static final int SERVER_ALIVE_POLL_INTERVAL_MILLIS = 500;
     private static final int SERVER_ALIVE_POLL_MAX_RETRIES = SERVER_STARTUP_TIMEOUT_MILLIS / SERVER_ALIVE_POLL_INTERVAL_MILLIS;
 
-    protected final int port;
-    protected final boolean debug;
     protected final Path dataDir;
     private StartedProcess serverProcess;
 
-    public GraknRunner(boolean debug) throws InterruptedException, TimeoutException, IOException {
+    public GraknRunner() throws InterruptedException, TimeoutException, IOException {
         super();
-        this.port = ThreadLocalRandom.current().nextInt(40000, 60000);
-        this.debug = debug;
         this.dataDir = rootPath.resolve("server").resolve("data");
     }
 
-    public String host() {
-        return "127.0.0.1";
-    }
+    protected abstract List<String> command();
 
-    public int port() {
-        return port;
-    }
-
-    public String address() {
-        return host() + ":" + port();
-    }
+    protected abstract int listeningPort();
 
     public void start() {
         try {
             System.out.println("Starting " + name() + " database server at " + rootPath.toAbsolutePath().toString());
             System.out.println("Database directory will be at " + dataDir.toAbsolutePath());
             serverProcess = executor.command(command()).start();
-
             boolean started = checkServerStarted().await(SERVER_STARTUP_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
-
             assertTrue(name() + " failed to start", started);
-
             System.out.println(name() + " database server started");
         } catch (Exception e) {
             printLogs();
@@ -97,7 +80,7 @@ public abstract class GraknRunner extends Runner {
                 }
                 String lsof;
                 try {
-                    lsof = executor.command("lsof", "-i", ":" + port).readOutput(true).execute().outputString();
+                    lsof = executor.command("lsof", "-i", ":" + listeningPort()).readOutput(true).execute().outputString();
                 } catch (IOException | InterruptedException | TimeoutException e) {
                     lsof = "";
                 }
@@ -115,9 +98,7 @@ public abstract class GraknRunner extends Runner {
         if (serverProcess != null) {
             try {
                 System.out.println("Stopping " + name() + " database server");
-
                 serverProcess.getProcess().destroy();
-
                 System.out.println(name() + " database server stopped");
             } catch (Exception e) {
                 printLogs();
@@ -142,8 +123,7 @@ public abstract class GraknRunner extends Runner {
     @Override
     protected File distributionArchive() {
         String[] args = System.getProperty("sun.java.command").split(" ");
-        return Objects.requireNonNull(args.length > 1 ? new File(args[1]) : null);
+        assert args.length > 1;
+        return new File(args[1]);
     }
-
-    abstract List<String> command();
 }
