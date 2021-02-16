@@ -44,6 +44,6 @@ filegroup(
 
 checkstyle_test(
     name = "checkstyle",
-    include = glob(["*"]),
+    include = glob(["*", "server/*", "console/*"]),
     license_type = "agpl",
 )
