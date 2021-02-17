@@ -80,7 +80,7 @@ public abstract class Runner {
         String format = distributionFormat(distributionFile);
         return Paths.get(distributionFile.toString().replaceAll(
                 format.replace(".", "\\."), ""
-        ) + "-" + UUID.randomUUID());
+        ) + "--" + name());
     }
 
     private void checkAndDeleteExistingDistribution(File distributionFile) throws IOException {
