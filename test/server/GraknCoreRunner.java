@@ -34,7 +34,7 @@ public class GraknCoreRunner extends GraknRunner {
     }
 
     @Override
-    protected int listeningPort() {
+    protected int clientPort() {
         return port;
     }
 

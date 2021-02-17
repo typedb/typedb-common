@@ -50,7 +50,11 @@ public abstract class GraknRunner extends Runner {
 
     protected abstract List<String> command();
 
-    protected abstract int listeningPort();
+    protected abstract int clientPort();
+
+    public String address() {
+        return "127.0.0.1:" + clientPort();
+    }
 
     public void start() {
         try {
@@ -80,7 +84,7 @@ public abstract class GraknRunner extends Runner {
                 }
                 String lsof;
                 try {
-                    lsof = executor.command("lsof", "-i", ":" + listeningPort()).readOutput(true).execute().outputString();
+                    lsof = executor.command("lsof", "-i", ":" + clientPort()).readOutput(true).execute().outputString();
                 } catch (IOException | InterruptedException | TimeoutException e) {
                     lsof = "";
                 }
