@@ -65,15 +65,15 @@ public class GraknClusterRunner extends GraknRunner {
         command.addAll(getGraknBinary());
         command.add("server");
         command.add("--address");
-        command.add(address(ports));
+        command.add(getAddressArg(ports));
         command.add("--peers");
-        command.add(peerPorts.stream().map(this::address).collect(Collectors.joining(",")));
+        command.add(peerPorts.stream().map(this::getAddressArg).collect(Collectors.joining(",")));
         command.add("--data");
         command.add(dataDir.toAbsolutePath().toString());
         return command;
     }
 
-    private String address(Pair<Integer, Integer> ports) {
+    private String getAddressArg(Pair<Integer, Integer> ports) {
         return "127.0.0.1" + ":" + ports.first() + ":" + ports.second();
     }
 }
