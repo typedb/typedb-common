@@ -29,7 +29,6 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.TimeoutException;
 
@@ -80,7 +79,7 @@ public abstract class Runner {
         String format = distributionFormat(distributionFile);
         return Paths.get(distributionFile.toString().replaceAll(
                 format.replace(".", "\\."), ""
-        ) + "--" + name());
+        ) + "--" + UUID.randomUUID());
     }
 
     private void checkAndDeleteExistingDistribution(File distributionFile) throws IOException {

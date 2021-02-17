@@ -51,7 +51,7 @@ public class GraknClusterRunner extends GraknRunner {
 
     @Override
     protected String name() {
-        return "grakn-cluster::" + getAddressString(ports);
+        return "Grakn Cluster";
     }
 
     @Override
