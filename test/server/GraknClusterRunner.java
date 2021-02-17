@@ -64,7 +64,6 @@ public class GraknClusterRunner extends GraknRunner {
         List<String> command = new ArrayList<>();
         command.addAll(getGraknBinary());
         command.add("server");
-        command.add("--debug");
         command.add("--address");
         command.add(address(ports));
         command.add("--peers");
