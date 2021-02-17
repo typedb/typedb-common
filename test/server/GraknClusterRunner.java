@@ -55,7 +55,7 @@ public class GraknClusterRunner extends GraknRunner {
     }
 
     @Override
-    protected int clientPort() {
+    protected int port() {
         return ports.first();
     }
 
