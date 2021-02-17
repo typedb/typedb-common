@@ -21,36 +21,38 @@
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeoutException;
 
 public class GraknCoreRunner extends GraknRunner {
 
+    private final int port;
+
     public GraknCoreRunner() throws InterruptedException, TimeoutException, IOException {
-        this(false);
+        super();
+        this.port = ThreadLocalRandom.current().nextInt(40000, 60000);
     }
 
-    public GraknCoreRunner(boolean debug) throws InterruptedException, TimeoutException, IOException {
-        super(debug);
+    @Override
+    protected int port() {
+        return port;
     }
 
     @Override
     protected String name() {
-        return "Grakn Core";
+        return "grakn-core::" + port;
     }
 
     @Override
-    List<String> command() {
+    protected List<String> command() {
         List<String> command = new ArrayList<>();
         command.addAll(getGraknBinary());
         command.add("server");
-        if (debug) {
-            command.add("--debug");
-        }
+        command.add("--debug");
         command.add("--port");
         command.add(Integer.toString(port));
         command.add("--data");
         command.add(dataDir.toAbsolutePath().toString());
-
         return command;
     }
 }

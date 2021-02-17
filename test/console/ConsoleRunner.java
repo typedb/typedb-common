@@ -26,7 +26,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
+import java.util.UUID;
 import java.util.concurrent.TimeoutException;
 
 public class ConsoleRunner extends Runner {
@@ -58,11 +58,12 @@ public class ConsoleRunner extends Runner {
     @Override
     protected File distributionArchive() {
         String[] args = System.getProperty("sun.java.command").split(" ");
-        return Objects.requireNonNull(args.length > 2 ? new File(args[2]) : null);
+        assert args.length > 2;
+        return new File(args[2]);
     }
 
     @Override
     protected String name() {
-        return "Grakn Console";
+        return "grakn-console::" + UUID.randomUUID();
     }
 }

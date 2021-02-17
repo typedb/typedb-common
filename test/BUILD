@@ -28,6 +28,7 @@ java_library(
         "console/ConsoleRunner.java",
     ],
     deps = [
+        "//:common",
         "@maven//:commons_io_commons_io",
         "@maven//:junit_junit",
         "@maven//:org_zeroturnaround_zt_exec",
