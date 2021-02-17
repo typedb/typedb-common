@@ -40,7 +40,7 @@ public class GraknCoreRunner extends GraknRunner {
 
     @Override
     protected String name() {
-        return "Grakn Core";
+        return "grakn-core::" + port;
     }
 
     @Override

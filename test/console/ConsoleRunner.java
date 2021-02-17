@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.TimeoutException;
 
 public class ConsoleRunner extends Runner {
@@ -63,6 +64,6 @@ public class ConsoleRunner extends Runner {
 
     @Override
     protected String name() {
-        return "Grakn Console";
+        return "grakn-console::" + UUID.randomUUID();
     }
 }
