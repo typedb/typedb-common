@@ -19,7 +19,7 @@ load("@graknlabs_dependencies//builder/java:rules.bzl", "native_dep_for_host_pla
 
 def grakn_java_test(name, server_mac_artifact, server_linux_artifact, server_windows_artifact,
                       console_mac_artifact = None, console_linux_artifact = None, console_windows_artifact = None,
-                      native_libraries_deps = [], deps = [], classpath_resources = [], data = [], **kwargs):
+                      native_libraries_deps = [], deps = [], classpath_resources = [], data = [], args = [], **kwargs):
     native_server_artifact_paths, native_server_artifact_labels = native_artifact_paths_and_labels(
         server_mac_artifact, server_linux_artifact, server_windows_artifact
     )
@@ -36,7 +36,7 @@ def grakn_java_test(name, server_mac_artifact, server_linux_artifact, server_win
         deps = depset(deps + ["@graknlabs_common//test:grakn-runner"]).to_list() + native_deps,
         classpath_resources = depset(classpath_resources + ["@graknlabs_common//test:logback"]).to_list(),
         data = data + select(native_server_artifact_labels) + (select(native_console_artifact_labels) if native_console_artifact_labels else []),
-        args = select(native_server_artifact_paths) + (select(native_console_artifact_paths) if native_console_artifact_paths else []),
+        args = select(native_server_artifact_paths) + (select(native_console_artifact_paths) if native_console_artifact_paths else []) + args,
         **kwargs
     )
 
