@@ -84,7 +84,7 @@ public abstract class GraknRunner extends Runner {
                 }
                 String lsof;
                 try {
-                    lsof = executor.command("lsof", "-i", ":" + port()).readOutput(true).execute().outputString();
+                    lsof = executor.command("lsof", "-nP", "-iTCP:" + port(), "-sTCP:LISTEN").readOutput(true).execute().outputString();
                 } catch (IOException | InterruptedException | TimeoutException e) {
                     lsof = "";
                 }
@@ -102,7 +102,7 @@ public abstract class GraknRunner extends Runner {
         if (serverProcess != null) {
             try {
                 System.out.println("Stopping " + name() + " database server");
-                serverProcess.getProcess().destroy();
+                serverProcess.getProcess().destroyForcibly();
                 System.out.println(name() + " database server stopped");
             } catch (Exception e) {
                 printLogs();
