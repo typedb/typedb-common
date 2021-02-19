@@ -48,7 +48,6 @@ public class GraknCoreRunner extends GraknRunner {
         List<String> command = new ArrayList<>();
         command.addAll(getGraknBinary());
         command.add("server");
-        command.add("--debug");
         command.add("--port");
         command.add(Integer.toString(port));
         command.add("--data");
