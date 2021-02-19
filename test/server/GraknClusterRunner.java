@@ -41,12 +41,12 @@ public class GraknClusterRunner extends GraknRunner {
         this.peerPorts = peerPorts;
     }
 
-    public GraknClusterRunner(Pair<Integer, Integer> ports) throws InterruptedException, TimeoutException, IOException {
-        this(ports, list(ports));
+    public GraknClusterRunner(Integer port) throws InterruptedException, TimeoutException, IOException {
+        this(pair(port, port + 1), list(pair(port, port + 1)));
     }
 
     public GraknClusterRunner() throws InterruptedException, TimeoutException, IOException {
-        this(pair(ThreadLocalRandom.current().nextInt(40000, 60000), ThreadLocalRandom.current().nextInt(40000)));
+        this(ThreadLocalRandom.current().nextInt(40000, 60000));
     }
 
     @Override
