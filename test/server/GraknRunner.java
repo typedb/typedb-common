@@ -23,6 +23,7 @@ import org.zeroturnaround.exec.StartedProcess;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.Socket;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
@@ -82,13 +83,7 @@ public abstract class GraknRunner extends Runner {
                     System.out.println(String.format("Waiting for %s server to start (%ds)...",
                             name(), retryNumber * SERVER_ALIVE_POLL_INTERVAL_MILLIS / 1000));
                 }
-                String lsof;
-                try {
-                    lsof = executor.command("lsof", "-nP", "-iTCP:" + port(), "-sTCP:LISTEN").readOutput(true).execute().outputString();
-                } catch (IOException | InterruptedException | TimeoutException e) {
-                    lsof = "";
-                }
-                if (lsof != null && !lsof.isEmpty()) {
+                if (isServerReady("localhost", port())) {
                     latch.countDown();
                     timer.cancel();
                 }
@@ -96,6 +91,16 @@ public abstract class GraknRunner extends Runner {
             }
         }, 0, 500);
         return latch;
+    }
+
+    private static boolean isServerReady(String host, int port) {
+        try {
+            Socket s = new Socket(host, port);
+            s.close();
+            return true;
+        } catch (IOException e) {
+            return false;
+        }
     }
 
     public void stop() {

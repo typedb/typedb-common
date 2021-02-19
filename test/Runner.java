@@ -29,7 +29,6 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.TimeoutException;
 
 import static org.junit.Assert.fail;
@@ -53,7 +52,7 @@ public abstract class Runner {
         checkAndDeleteExistingDistribution(distributionArchive);
 
         String distributionArchiveFormat = distributionFormat(distributionArchive);
-        Path distributionDir = distributionTarget(distributionArchive);
+        Path distributionDir = distributionTarget();
         executor = new ProcessExecutor()
                 .directory(Paths.get(".").toAbsolutePath().toFile())
                 .redirectOutput(System.out)
@@ -75,15 +74,12 @@ public abstract class Runner {
         return "";
     }
 
-    private Path distributionTarget(File distributionFile) {
-        String format = distributionFormat(distributionFile);
-        return Paths.get(distributionFile.toString().replaceAll(
-                format.replace(".", "\\."), ""
-        ) + "--" + UUID.randomUUID());
+    private Path distributionTarget() throws IOException {
+        return Files.createTempDirectory("grakn");
     }
 
     private void checkAndDeleteExistingDistribution(File distributionFile) throws IOException {
-        Path target = distributionTarget(distributionFile);
+        Path target = distributionTarget();
         System.out.println("Checking for existing distribution at " + target.toAbsolutePath().toString());
         if (target.toFile().exists()) {
             System.out.println("An existing distribution found. Deleting...");
