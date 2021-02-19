@@ -107,7 +107,7 @@ public abstract class Runner {
         // The Grakn Cluster archive extracts to a folder inside GRAKN_TARGET_DIRECTORY named
         // grakn-core-server-{platform}-{version}. We know it's the only folder, so we can retrieve it using Files.list.
         final Path graknPath = Files.list(distributionDir).findFirst().get();
-        executor = executor.directory(graknPath.toFile());
+        executor = executor.directory(graknPath.toAbsolutePath().toFile());
         System.out.println(name() + " distribution unarchived");
         return graknPath;
     }
