@@ -66,8 +66,10 @@ public class GraknClusterRunner extends GraknRunner {
         command.add("server");
         command.add("--address");
         command.add(getAddressString(ports));
-        command.add("--peers");
-        command.add(peerPorts.stream().map(this::getAddressString).collect(Collectors.joining(",")));
+        peerPorts.forEach(peerPort -> {
+            command.add("--peer");
+            command.add(getAddressString(peerPort));
+        });
         command.add("--data");
         command.add(dataDir.toAbsolutePath().toString());
         return command;
