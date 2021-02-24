@@ -43,6 +43,15 @@ public class ConsoleRunner extends Runner {
         }
     }
 
+    public int run(String address, boolean isCluster, String... commands) {
+        try {
+            StartedProcess consoleProcess = executor.command(command(address, isCluster, commands)).start();
+            return consoleProcess.getProcess().waitFor();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     private List<String> command(String address, boolean isCluster, Path scriptFile) {
         List<String> command = new ArrayList<>();
         command.addAll(getGraknBinary());
@@ -51,6 +60,19 @@ public class ConsoleRunner extends Runner {
         command.add(address);
         command.add("--script");
         command.add(scriptFile.toAbsolutePath().toString());
+        return command;
+    }
+
+    private List<String> command(String address, boolean isCluster, String... commands) {
+        List<String> command = new ArrayList<>();
+        command.addAll(getGraknBinary());
+        command.add("console");
+        command.add(isCluster ? "--cluster" : "--server");
+        command.add(address);
+        for (String commandString : commands) {
+            command.add("--command");
+            command.add(commandString);
+        }
         return command;
     }
 
