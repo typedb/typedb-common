@@ -31,6 +31,10 @@ public class Java {
                 version = version.substring(0, dot);
             }
         }
-        return Integer.parseInt(version);
+        try {
+            return Integer.parseInt(version);
+        } catch (Exception e) {
+            return -1;
+        }
     }
 }
