@@ -19,6 +19,8 @@
 package grakn.common.util;
 
 public class Java {
+    public static Integer UNKNOWN_VERSION = -1;
+
     public static Integer getMajorVersion() {
         String version = System.getProperty("java.version");
         if (version.startsWith("1.")) {
@@ -34,7 +36,7 @@ public class Java {
         try {
             return Integer.parseInt(version);
         } catch (Exception e) {
-            return -1;
+            return Java.UNKNOWN_VERSION;
         }
     }
 }
