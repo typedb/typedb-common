@@ -48,7 +48,7 @@ if [ -z "$1" ]; then
     exit 1
 elif [ "$1" = "console" ]; then
     if [ -d "${GRAKN_HOME}/console" ]; then
-        SERVICE_LIB_CP="console/services/lib/*"
+        SERVICE_LIB_CP="console/lib/*"
         CLASSPATH="${GRAKN_HOME}/${SERVICE_LIB_CP}:${GRAKN_HOME}/console/conf/"
     # exec replaces current shell process with java so no commands after this one will ever get executed
         exec java ${CONSOLE_JAVAOPTS} -cp "${CLASSPATH}" -Dgrakn.dir="${GRAKN_HOME}" grakn.console.GraknConsole "${@:2}"
