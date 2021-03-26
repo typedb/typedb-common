@@ -51,7 +51,7 @@ goto exiterror
 
 :startconsole
 
-set "G_CP=%GRAKN_HOME%\console\conf\;%GRAKN_HOME%\console\services\lib\*"
+set "G_CP=%GRAKN_HOME%\console\conf\;%GRAKN_HOME%\console\lib\*"
 if exist .\console\ (
   java %CONSOLE_JAVAOPTS% -cp "%G_CP%" -Dgrakn.dir="%GRAKN_HOME%" grakn.console.GraknConsole %2 %3 %4 %5 %6 %7 %8 %9
   goto exit
