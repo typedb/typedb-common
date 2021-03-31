@@ -57,6 +57,7 @@ deploy_github(
 assemble_maven(
     name = "assemble-maven",
     target = ":common",
+    source_jar_prefix = "grakn/common/",
     workspace_refs = "@graknlabs_common_workspace_refs//:refs.json",
     version_overrides = version(artifacts_org = artifacts, artifacts_repo={}),
     project_name = "Grakn Common",
