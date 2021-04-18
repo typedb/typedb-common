@@ -1,0 +1,8 @@
+[Unit]
+Description=Grakn Core
+[Service]
+Type=simple
+ExecStart=/opt/grakn/core/grakn server
+Restart=on-failure
+RestartSec=10
+KillMode=process
