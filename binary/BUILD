@@ -21,7 +21,7 @@ load("@graknlabs_bazel_distribution//common:rules.bzl", "assemble_targz")
 load("@graknlabs_dependencies//distribution:deployment.bzl", "deployment")
 load("@graknlabs_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
 
-exports_files(["grakn", "grakn.bat", "grakn-docker.sh"])
+exports_files(["grakn", "grakn.bat", "grakn-docker.sh", "grakn-core.service"])
 
 assemble_targz(
     name = "assemble-bash-targz",
@@ -32,6 +32,13 @@ assemble_targz(
         "grakn": "0755",
     },
     visibility = ["//visibility:public"]
+)
+
+assemble_targz(
+    name = "assemble-apt-targz",
+    additional_files = {
+        "//binary:grakn-core.service": 'grakn-core.service',
+    },
 )
 
 assemble_targz(
@@ -47,7 +54,7 @@ assemble_apt(
     package_name = "grakn-bin",
     maintainer = "Grakn Labs <community@grakn.ai>",
     description = "Grakn Core (binaries)",
-    archives = [":assemble-bash-targz"],
+    archives = [":assemble-bash-targz", ":assemble-apt-targz"],
     installation_dir = "/opt/grakn/core/",
     empty_dirs = [
         "var/log/grakn/",
@@ -61,6 +68,7 @@ assemble_apt(
     symlinks = {
         "usr/local/bin/grakn": "/opt/grakn/core/grakn",
         "opt/grakn/core/server/logs": "/var/log/grakn/",
+        "usr/lib/systemd/system/grakn-core.service": "/opt/grakn/core/grakn-core.service",
     },
 )
 

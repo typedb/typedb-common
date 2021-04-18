@@ -1,0 +1,5 @@
+[Unit]
+Description=Grakn Core
+[Service]
+Type=simple
+ExecStart=/opt/grakn/core/grakn server
