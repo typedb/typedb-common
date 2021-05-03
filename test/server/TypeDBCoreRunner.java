@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Grakn Labs
+ * Copyright (C) 2021 Vaticle
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -16,7 +16,7 @@
  *
  */
  
- package grakn.common.test.server;
+ package com.vaticle.typedb.common.test.server;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -24,11 +24,11 @@ import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeoutException;
 
-public class GraknCoreRunner extends GraknRunner {
+public class TypeDBCoreRunner extends TypeDBRunner {
 
     private final int port;
 
-    public GraknCoreRunner() throws InterruptedException, TimeoutException, IOException {
+    public TypeDBCoreRunner() throws InterruptedException, TimeoutException, IOException {
         super();
         this.port = ThreadLocalRandom.current().nextInt(40000, 60000);
     }
@@ -40,13 +40,13 @@ public class GraknCoreRunner extends GraknRunner {
 
     @Override
     protected String name() {
-        return "Grakn Core";
+        return "TypeDB (core)";
     }
 
     @Override
     protected List<String> command() {
         List<String> command = new ArrayList<>();
-        command.addAll(getGraknBinary());
+        command.addAll(getTypeDBBinary());
         command.add("server");
         command.add("--port");
         command.add(Integer.toString(port));

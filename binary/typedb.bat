@@ -1,5 +1,5 @@
 @echo off
-REM Copyright (C) 2021 Grakn Labs
+REM Copyright (C) 2021 Vaticle
 REM
 REM This program is free software: you can redistribute it and/or modify
 REM it under the terms of the GNU Affero General Public License as
@@ -15,15 +15,15 @@ REM You should have received a copy of the GNU Affero General Public License
 REM along with this program.  If not, see <https://www.gnu.org/licenses/>.
 REM
 
-SET "GRAKN_HOME=%cd%"
+SET "TYPEDB_HOME=%cd%"
 
 
-SET "GRAKN_CONFIG=server\conf\grakn.properties"
+SET "TYPEDB_CONFIG=server\conf\typedb.properties"
 
 where java >NUL 2>NUL
 if %ERRORLEVEL% GEQ 1 (
     echo Java is not installed on this machine.
-    echo Grakn needs Java 1.8 in order to run. See the following setup guide: http://dev.grakn.ai/docs/get-started/setup-guide
+    echo TypeDB needs Java 11+ in order to run. See the following setup guide: http://docs.vaticle.com/docs/get-started/setup-guide
     pause
     exit 1
 )
@@ -37,41 +37,41 @@ if "%1" == "server"  goto startserver
 if "%1" == "version" goto startserver
 
 echo   Invalid argument: %1. Possible commands are:
-echo   Server:          grakn server [--help]
-echo   Console:         grakn console [--help]
+echo   Server:          typedb server [--help]
+echo   Console:         typedb console [--help]
 goto exiterror
 
 :missingargument
 
  echo   Missing argument. Possible commands are:
- echo   Server:          grakn server [--help]
- echo   Console:         grakn console [--help]
+ echo   Server:          typedb server [--help]
+ echo   Console:         typedb console [--help]
 
 goto exiterror
 
 :startconsole
 
-set "G_CP=%GRAKN_HOME%\console\conf\;%GRAKN_HOME%\console\lib\*"
+set "G_CP=%TYPEDB_HOME%\console\conf\;%TYPEDB_HOME%\console\lib\*"
 if exist .\console\ (
-  java %CONSOLE_JAVAOPTS% -cp "%G_CP%" -Dgrakn.dir="%GRAKN_HOME%" grakn.console.GraknConsole %2 %3 %4 %5 %6 %7 %8 %9
+  java %CONSOLE_JAVAOPTS% -cp "%G_CP%" -Dtypedb.dir="%TYPEDB_HOME%" com.vaticle.typedb.console.TypeDBConsole %2 %3 %4 %5 %6 %7 %8 %9
   goto exit
 ) else (
-  echo Grakn Core Console is not included in this Grakn distribution^.
-  echo You may want to install Grakn Core Console or Grakn Core ^(all^)^.
+  echo TypeDB Console is not included in this TypeDB distribution^.
+  echo You may want to install TypeDB Console or TypeDB ^(all^)^.
   goto exiterror
 )
 
 :startserver
 
-set "G_CP=%GRAKN_HOME%\server\conf\;%GRAKN_HOME%\server\lib\common\*;%GRAKN_HOME%\server\lib\prod\*"
+set "G_CP=%TYPEDB_HOME%\server\conf\;%TYPEDB_HOME%\server\lib\common\*;%TYPEDB_HOME%\server\lib\prod\*"
 
 
 if exist .\server\ (
-  java %SERVER_JAVAOPTS% -cp "%G_CP%" -Dgrakn.dir="%GRAKN_HOME%" -Dgrakn.conf="%GRAKN_HOME%\%GRAKN_CONFIG%" grakn.core.server.GraknServer %2 %3 %4 %5 %6 %7 %8 %9
+  java %SERVER_JAVAOPTS% -cp "%G_CP%" -Dtypedb.dir="%TYPEDB_HOME%" -Dtypedb.conf="%TYPEDB_HOME%\%TYPEDB_CONFIG%" com.vaticle.typedb.server.TypeDBServer %2 %3 %4 %5 %6 %7 %8 %9
   goto exit
 ) else (
-  echo Grakn Core Server is not included in this Grakn distribution^.
-  echo You may want to install Grakn Core Server or Grakn Core ^(all^)^.
+  echo TypeDB Server is not included in this TypeDB distribution^.
+  echo You may want to install TypeDB Server or TypeDB ^(all^)^.
   goto exiterror
 )
 

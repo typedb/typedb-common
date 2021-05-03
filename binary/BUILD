@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2021 Grakn Labs
+# Copyright (C) 2021 Vaticle
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -16,20 +16,20 @@
 #
 #
 
-load("@graknlabs_bazel_distribution//apt:rules.bzl", "assemble_apt", "deploy_apt")
-load("@graknlabs_bazel_distribution//common:rules.bzl", "assemble_targz")
-load("@graknlabs_dependencies//distribution:deployment.bzl", "deployment")
-load("@graknlabs_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
+load("@vaticle_bazel_distribution//apt:rules.bzl", "assemble_apt", "deploy_apt")
+load("@vaticle_bazel_distribution//common:rules.bzl", "assemble_targz")
+load("@vaticle_dependencies//distribution:deployment.bzl", "deployment")
+load("@vaticle_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
 
-exports_files(["grakn", "grakn.bat", "grakn-docker.sh", "grakn-core.service"])
+exports_files(["typedb", "typedb.bat", "typedb.service"])
 
 assemble_targz(
     name = "assemble-bash-targz",
     additional_files = {
-        "//binary:grakn": 'grakn',
+        "//binary:typedb": 'typedb',
     },
     permissions = {
-        "grakn": "0755",
+        "typedb": "0755",
     },
     visibility = ["//visibility:public"]
 )
@@ -37,38 +37,38 @@ assemble_targz(
 assemble_targz(
     name = "assemble-apt-targz",
     additional_files = {
-        "//binary:grakn-core.service": 'grakn-core.service',
+        "//binary:typedb.service": "typedb.service",
     },
 )
 
 assemble_targz(
     name = "assemble-bat-targz",
     additional_files = {
-        "//binary:grakn.bat": 'grakn.bat',
+        "//binary:typedb.bat": "typedb.bat",
     },
     visibility = ["//visibility:public"]
 )
 
 assemble_apt(
     name = "assemble-linux-apt",
-    package_name = "grakn-bin",
-    maintainer = "Grakn Labs <community@grakn.ai>",
-    description = "Grakn Core (binaries)",
+    package_name = "typedb-bin",
+    maintainer = "Vaticle <community@vaticle.com>",
+    description = "TypeDB (binaries)",
     archives = [":assemble-bash-targz", ":assemble-apt-targz"],
-    installation_dir = "/opt/grakn/core/",
+    installation_dir = "/opt/typedb/core/",
     empty_dirs = [
-        "var/log/grakn/",
+        "var/log/typedb/",
     ],
     depends = [
         "openjdk-8-jre"
     ],
     permissions = {
-        "var/log/grakn/": "0777",
+        "var/log/typedb/": "0777",
     },
     symlinks = {
-        "usr/local/bin/grakn": "/opt/grakn/core/grakn",
-        "opt/grakn/core/server/logs": "/var/log/grakn/",
-        "usr/lib/systemd/system/grakn-core.service": "/opt/grakn/core/grakn-core.service",
+        "usr/local/bin/typedb": "/opt/typedb/core/typedb",
+        "opt/typedb/core/server/logs": "/var/log/typedb/",
+        "usr/lib/systemd/system/typedb.service": "/opt/typedb/core/typedb.service",
     },
 )
 

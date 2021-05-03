@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Grakn Labs
+ * Copyright (C) 2021 Vaticle
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -15,17 +15,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package grakn.common.test.server;
+package com.vaticle.typedb.common.test.server;
 
-public class GraknSingleton {
+public class TypeDBSingleton {
 
-    private static GraknRunner graknRunner;
+    private static TypeDBRunner typeDBRunner;
 
-    public static void setGraknRunner(GraknRunner instance) {
-        graknRunner = instance;
+    public static void setTypeDBRunner(TypeDBRunner instance) {
+        typeDBRunner = instance;
     }
 
-    public static GraknRunner getGraknRunner() {
-        return graknRunner;
+    public static TypeDBRunner getTypeDBRunner() {
+        return typeDBRunner;
     }
 }
