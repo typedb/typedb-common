@@ -17,7 +17,9 @@
 #
 
 # Grakn global variables
-JAVA_BIN=java
+JAVA_HOME=${JAVA_HOME:-java}
+echo "Using java executable at $JAVA_HOME"
+JAVA_BIN=$JAVA_HOME
 [[ $(readlink $0) ]] && path=$(readlink $0) || path=$0
 GRAKN_HOME=$(cd "$(dirname "${path}")" && pwd -P)
 GRAKN_CONFIG="server/conf/grakn.properties"
@@ -51,7 +53,7 @@ elif [ "$1" = "console" ]; then
         SERVICE_LIB_CP="console/lib/*"
         CLASSPATH="${GRAKN_HOME}/${SERVICE_LIB_CP}:${GRAKN_HOME}/console/conf/"
     # exec replaces current shell process with java so no commands after this one will ever get executed
-        exec java ${CONSOLE_JAVAOPTS} -cp "${CLASSPATH}" -Dgrakn.dir="${GRAKN_HOME}" grakn.console.GraknConsole "${@:2}"
+        exec JAVA_BIN ${CONSOLE_JAVAOPTS} -cp "${CLASSPATH}" -Dgrakn.dir="${GRAKN_HOME}" grakn.console.GraknConsole "${@:2}"
     else
         echo "Grakn Core Console is not included in this Grakn distribution."
         echo "You may want to install Grakn Core Console or Grakn Core (all)."
@@ -76,13 +78,13 @@ elif [[ "$1" = "server" ]] || [[ "$1" = "version" ]]; then
                 *) echo "WARNING: Debug mode RocksDB is not available in this platform. Fallback to production mode."
                    CLASSPATH="${CLASSPATH}:${GRAKN_HOME}/server/lib/prod/*" ;;
             esac
-            exec java ${SERVER_JAVAOPTS} -ea -cp "${CLASSPATH}" \
+            exec JAVA_BIN ${SERVER_JAVAOPTS} -ea -cp "${CLASSPATH}" \
                 -Dgrakn.dir="${GRAKN_HOME}" -Dgrakn.conf="${GRAKN_HOME}/${GRAKN_CONFIG}" \
                 -Dlogback.configurationFile=logback-debug.xml \
                 grakn.core.server.GraknServer "${@:2}"
         else
             CLASSPATH="${CLASSPATH}:${GRAKN_HOME}/server/lib/prod/*"
-            exec java ${SERVER_JAVAOPTS} -cp "${CLASSPATH}" \
+            exec JAVA_BIN ${SERVER_JAVAOPTS} -cp "${CLASSPATH}" \
                 -Dgrakn.dir="${GRAKN_HOME}" -Dgrakn.conf="${GRAKN_HOME}/${GRAKN_CONFIG}" \
                 grakn.core.server.GraknServer "${@:2}"
         fi
