@@ -18,6 +18,9 @@
 
 # TypeDB global variables
 JAVA_BIN=java
+if [[ ! -z "$JAVA_HOME" ]]; then
+    JAVA_BIN="$JAVA_HOME/bin/java"
+fi
 [[ $(readlink $0) ]] && path=$(readlink $0) || path=$0
 TYPEDB_HOME=$(cd "$(dirname "${path}")" && pwd -P)
 TYPEDB_CONFIG="server/conf/typedb.properties"
@@ -51,7 +54,7 @@ elif [ "$1" = "console" ]; then
         SERVICE_LIB_CP="console/lib/*"
         CLASSPATH="${TYPEDB_HOME}/${SERVICE_LIB_CP}:${TYPEDB_HOME}/console/conf/"
     # exec replaces current shell process with java so no commands after this one will ever get executed
-        exec java ${CONSOLE_JAVAOPTS} -cp "${CLASSPATH}" -Dtypedb.dir="${TYPEDB_HOME}" com.vaticle.typedb.console.TypeDBConsole "${@:2}"
+        exec $JAVA_BIN ${CONSOLE_JAVAOPTS} -cp "${CLASSPATH}" -Dtypedb.dir="${TYPEDB_HOME}" com.vaticle.typedb.console.TypeDBConsole "${@:2}"
     else
         echo "TypeDB Console is not included in this TypeDB distribution."
         echo "You may want to install TypeDB Console or TypeDB (all)."
@@ -76,13 +79,13 @@ elif [[ "$1" = "server" ]] || [[ "$1" = "version" ]]; then
                 *) echo "WARNING: Debug mode RocksDB is not available in this platform. Fallback to production mode."
                    CLASSPATH="${CLASSPATH}:${TYPEDB_HOME}/server/lib/prod/*" ;;
             esac
-            exec java ${SERVER_JAVAOPTS} -ea -cp "${CLASSPATH}" \
+            exec $JAVA_BIN ${SERVER_JAVAOPTS} -ea -cp "${CLASSPATH}" \
                 -Dtypedb.dir="${TYPEDB_HOME}" -Dtypedb.conf="${TYPEDB_HOME}/${TYPEDB_CONFIG}" \
                 -Dlogback.configurationFile=logback-debug.xml \
                 com.vaticle.typedb.server.TypeDBServer "${@:2}"
         else
             CLASSPATH="${CLASSPATH}:${TYPEDB_HOME}/server/lib/prod/*"
-            exec java ${SERVER_JAVAOPTS} -cp "${CLASSPATH}" \
+            exec $JAVA_BIN ${SERVER_JAVAOPTS} -cp "${CLASSPATH}" \
                 -Dtypedb.dir="${TYPEDB_HOME}" -Dtypedb.conf="${TYPEDB_HOME}/${TYPEDB_CONFIG}" \
                 com.vaticle.typedb.server.TypeDBServer "${@:2}"
         fi
