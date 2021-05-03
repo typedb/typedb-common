@@ -17,7 +17,10 @@
 #
 
 # Grakn global variables
-JAVA_HOME=${JAVA_HOME/bin/java:-java}
+JAVA_HOME=${JAVA_HOME:-java}
+if [[ "$JAVA_HOME" != "java" ]]; then
+    JAVA_HOME="$JAVA_HOME/bin/java"
+fi
 echo "Using java executable at $JAVA_HOME"
 JAVA_BIN=$JAVA_HOME
 [[ $(readlink $0) ]] && path=$(readlink $0) || path=$0
