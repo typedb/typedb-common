@@ -17,11 +17,10 @@
 #
 
 # TypeDB global variables
-JAVA_HOME=${JAVA_HOME:-java}
-if [[ "$JAVA_HOME" != "java" ]]; then
-    JAVA_HOME="$JAVA_HOME/bin/java"
+JAVA_BIN=java
+if [[ ! -z "$JAVA_HOME" ]]; then
+    JAVA_BIN="$JAVA_HOME/bin/java"
 fi
-JAVA_BIN=$JAVA_HOME
 [[ $(readlink $0) ]] && path=$(readlink $0) || path=$0
 TYPEDB_HOME=$(cd "$(dirname "${path}")" && pwd -P)
 TYPEDB_CONFIG="server/conf/typedb.properties"
