@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Copyright (C) 2021 Grakn Labs
+# Copyright (C) 2021 Vaticle
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -16,11 +16,11 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-# Grakn global variables
+# TypeDB global variables
 JAVA_BIN=java
 [[ $(readlink $0) ]] && path=$(readlink $0) || path=$0
-GRAKN_HOME=$(cd "$(dirname "${path}")" && pwd -P)
-GRAKN_CONFIG="server/conf/grakn.properties"
+TYPEDB_HOME=$(cd "$(dirname "${path}")" && pwd -P)
+TYPEDB_CONFIG="server/conf/typedb.properties"
 
 # ================================================
 # common helper functions
@@ -30,7 +30,7 @@ exit_if_java_not_found() {
     exit_code=$?
 
     if [[ $exit_code -ne 0 ]]; then
-        echo "Java is not installed on this machine. Grakn needs Java 1.8 in order to run."
+        echo "Java is not installed on this machine. TypeDB needs Java 11+ in order to run."
         exit 1
     fi
 }
@@ -43,22 +43,22 @@ exit_if_java_not_found
 
 if [ -z "$1" ]; then
     echo "Missing argument. Possible commands are:"
-    echo "  Server:          grakn server [--help]"
-    echo "  Console:         grakn console [--help]"
+    echo "  Server:          typedb server [--help]"
+    echo "  Console:         typedb console [--help]"
     exit 1
 elif [ "$1" = "console" ]; then
-    if [ -d "${GRAKN_HOME}/console" ]; then
+    if [ -d "${TYPEDB_HOME}/console" ]; then
         SERVICE_LIB_CP="console/lib/*"
-        CLASSPATH="${GRAKN_HOME}/${SERVICE_LIB_CP}:${GRAKN_HOME}/console/conf/"
+        CLASSPATH="${TYPEDB_HOME}/${SERVICE_LIB_CP}:${TYPEDB_HOME}/console/conf/"
     # exec replaces current shell process with java so no commands after this one will ever get executed
-        exec java ${CONSOLE_JAVAOPTS} -cp "${CLASSPATH}" -Dgrakn.dir="${GRAKN_HOME}" grakn.console.GraknConsole "${@:2}"
+        exec java ${CONSOLE_JAVAOPTS} -cp "${CLASSPATH}" -Dtypedb.dir="${TYPEDB_HOME}" com.vaticle.typedb.console.TypeDBConsole "${@:2}"
     else
-        echo "Grakn Core Console is not included in this Grakn distribution."
-        echo "You may want to install Grakn Core Console or Grakn Core (all)."
+        echo "TypeDB Console is not included in this TypeDB distribution."
+        echo "You may want to install TypeDB Console or TypeDB (all)."
         exit 1
     fi
 elif [[ "$1" = "server" ]] || [[ "$1" = "version" ]]; then
-    if [[ -d "${GRAKN_HOME}/server" ]]; then
+    if [[ -d "${TYPEDB_HOME}/server" ]]; then
         IDX=0
         while [[ "${@:IDX}" ]]; do
             case ${@:IDX:1} in
@@ -68,32 +68,32 @@ elif [[ "$1" = "server" ]] || [[ "$1" = "version" ]]; then
             IDX=$((IDX+1))
         done
         LIB_COMMON="server/lib/common/*"
-        CLASSPATH="${GRAKN_HOME}/server/conf/:${GRAKN_HOME}/${LIB_COMMON}"
+        CLASSPATH="${TYPEDB_HOME}/server/conf/:${TYPEDB_HOME}/${LIB_COMMON}"
         # exec replaces current shell process with java so no commands after these ones will ever get executed
         if [ $DEBUG ]; then
             case "$(uname -s)" in
-                Darwin) CLASSPATH="${CLASSPATH}:${GRAKN_HOME}/server/lib/dev/*" ;;
+                Darwin) CLASSPATH="${CLASSPATH}:${TYPEDB_HOME}/server/lib/dev/*" ;;
                 *) echo "WARNING: Debug mode RocksDB is not available in this platform. Fallback to production mode."
-                   CLASSPATH="${CLASSPATH}:${GRAKN_HOME}/server/lib/prod/*" ;;
+                   CLASSPATH="${CLASSPATH}:${TYPEDB_HOME}/server/lib/prod/*" ;;
             esac
             exec java ${SERVER_JAVAOPTS} -ea -cp "${CLASSPATH}" \
-                -Dgrakn.dir="${GRAKN_HOME}" -Dgrakn.conf="${GRAKN_HOME}/${GRAKN_CONFIG}" \
+                -Dtypedb.dir="${TYPEDB_HOME}" -Dtypedb.conf="${TYPEDB_HOME}/${TYPEDB_CONFIG}" \
                 -Dlogback.configurationFile=logback-debug.xml \
-                grakn.core.server.GraknServer "${@:2}"
+                com.vaticle.typedb.server.TypeDBServer "${@:2}"
         else
-            CLASSPATH="${CLASSPATH}:${GRAKN_HOME}/server/lib/prod/*"
+            CLASSPATH="${CLASSPATH}:${TYPEDB_HOME}/server/lib/prod/*"
             exec java ${SERVER_JAVAOPTS} -cp "${CLASSPATH}" \
-                -Dgrakn.dir="${GRAKN_HOME}" -Dgrakn.conf="${GRAKN_HOME}/${GRAKN_CONFIG}" \
-                grakn.core.server.GraknServer "${@:2}"
+                -Dtypedb.dir="${TYPEDB_HOME}" -Dtypedb.conf="${TYPEDB_HOME}/${TYPEDB_CONFIG}" \
+                com.vaticle.typedb.server.TypeDBServer "${@:2}"
         fi
     else
-        echo "Grakn Core Server is not included in this Grakn distribution."
-        echo "You may want to install Grakn Core Server or Grakn Core (all)."
+        echo "TypeDB Server is not included in this TypeDB distribution."
+        echo "You may want to install TypeDB Server or TypeDB (all)."
         exit 1
     fi
 else
     echo "Invalid argument: $1. Possible commands are: "
-    echo "  Server:          grakn server [--help]"
-    echo "  Console:         grakn console [--help]"
+    echo "  Server:          typedb server [--help]"
+    echo "  Console:         typedb console [--help]"
     exit 1
 fi

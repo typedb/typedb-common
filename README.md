@@ -1,5 +1,5 @@
-# Grakn Common
+# TypeDB Common
 
-[![Grabl](https://grabl.io/api/status/graknlabs/common/badge.svg)](https://grabl.io/graknlabs/common)
+[![Grabl](https://grabl.io/api/status/vaticle/typedb-common/badge.svg)](https://grabl.io/vaticle/typedb-common)
 
-Grakn Labs common libraries and scripts reused across @graknlabs repositories.
+Common libraries and scripts reused across TypeDB repositories and community projects.

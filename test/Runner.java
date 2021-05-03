@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Grakn Labs
+ * Copyright (C) 2021 Vaticle
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -16,7 +16,7 @@
  *
  */
 
-package grakn.common.test;
+package com.vaticle.typedb.common.test;
 
 import org.apache.commons.io.FileUtils;
 import org.zeroturnaround.exec.ProcessExecutor;
@@ -46,7 +46,7 @@ public abstract class Runner {
 
         File distributionArchive = distributionArchive();
         if (!distributionArchive.exists()) {
-            throw new IllegalArgumentException("Grakn distribution file is missing from " + distributionArchive.getAbsolutePath());
+            throw new IllegalArgumentException("TypeDB distribution file is missing from " + distributionArchive.getAbsolutePath());
         }
 
         checkAndDeleteExistingDistribution(distributionArchive);
@@ -75,7 +75,7 @@ public abstract class Runner {
     }
 
     private Path distributionTarget() throws IOException {
-        return Files.createTempDirectory("grakn");
+        return Files.createTempDirectory("typedb");
     }
 
     private void checkAndDeleteExistingDistribution(File distributionFile) throws IOException {
@@ -100,16 +100,16 @@ public abstract class Runner {
             executor.command("unzip", "-q", distributionArchive.toString(),
                     "-d", distributionDir.toString()).execute();
         }
-        // The Grakn Cluster archive extracts to a folder inside GRAKN_TARGET_DIRECTORY named
-        // grakn-core-server-{platform}-{version}. We know it's the only folder, so we can retrieve it using Files.list.
-        final Path graknPath = Files.list(distributionDir).findFirst().get();
-        executor = executor.directory(graknPath.toAbsolutePath().toFile());
+        // The TypeDB Cluster archive extracts to a folder inside TYPEDB_TARGET_DIRECTORY named
+        // typedb-server-{platform}-{version}. We know it's the only folder, so we can retrieve it using Files.list.
+        final Path typeDBPath = Files.list(distributionDir).findFirst().get();
+        executor = executor.directory(typeDBPath.toAbsolutePath().toFile());
         System.out.println(name() + " distribution unarchived");
-        return graknPath;
+        return typeDBPath;
     }
 
-    protected List<String> getGraknBinary() {
-        return System.getProperty("os.name").toLowerCase().contains("win") ? Arrays.asList("cmd.exe", "/c", "grakn.bat") : Collections.singletonList("grakn");
+    protected List<String> getTypeDBBinary() {
+        return System.getProperty("os.name").toLowerCase().contains("win") ? Arrays.asList("cmd.exe", "/c", "typedb.bat") : Collections.singletonList("typedb");
     }
 
     protected abstract File distributionArchive();

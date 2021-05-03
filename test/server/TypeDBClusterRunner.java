@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Grakn Labs
+ * Copyright (C) 2021 Vaticle
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -16,42 +16,41 @@
  *
  */
 
-package grakn.common.test.server;
+package com.vaticle.typedb.common.test.server;
 
-import grakn.common.collection.Pair;
+import com.vaticle.typedb.common.collection.Pair;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeoutException;
-import java.util.stream.Collectors;
 
-import static grakn.common.collection.Collections.list;
-import static grakn.common.collection.Collections.pair;
+import static com.vaticle.typedb.common.collection.Collections.list;
+import static com.vaticle.typedb.common.collection.Collections.pair;
 
-public class GraknClusterRunner extends GraknRunner {
+public class TypeDBClusterRunner extends TypeDBRunner {
 
     private final Pair<Integer, Integer> ports;
     private final List<Pair<Integer, Integer>> peerPorts;
 
-    public GraknClusterRunner(Pair<Integer, Integer> ports, List<Pair<Integer, Integer>> peerPorts) throws InterruptedException, TimeoutException, IOException {
+    public TypeDBClusterRunner(Pair<Integer, Integer> ports, List<Pair<Integer, Integer>> peerPorts) throws InterruptedException, TimeoutException, IOException {
         super();
         this.ports = ports;
         this.peerPorts = peerPorts;
     }
 
-    public GraknClusterRunner(Integer port) throws InterruptedException, TimeoutException, IOException {
+    public TypeDBClusterRunner(Integer port) throws InterruptedException, TimeoutException, IOException {
         this(pair(port, port + 1), list(pair(port, port + 1)));
     }
 
-    public GraknClusterRunner() throws InterruptedException, TimeoutException, IOException {
+    public TypeDBClusterRunner() throws InterruptedException, TimeoutException, IOException {
         this(ThreadLocalRandom.current().nextInt(40000, 60000));
     }
 
     @Override
     protected String name() {
-        return "Grakn Cluster";
+        return "TypeDB Cluster";
     }
 
     @Override
@@ -62,7 +61,7 @@ public class GraknClusterRunner extends GraknRunner {
     @Override
     protected List<String> command() {
         List<String> command = new ArrayList<>();
-        command.addAll(getGraknBinary());
+        command.addAll(getTypeDBBinary());
         command.add("server");
         command.add("--address");
         command.add(getAddressString(ports));

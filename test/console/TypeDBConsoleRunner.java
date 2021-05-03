@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Grakn Labs
+ * Copyright (C) 2021 Vaticle
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -16,9 +16,9 @@
  *
  */
 
-package grakn.common.test.console;
+package com.vaticle.typedb.common.test.console;
 
-import grakn.common.test.Runner;
+import com.vaticle.typedb.common.test.Runner;
 import org.zeroturnaround.exec.StartedProcess;
 
 import java.io.File;
@@ -28,9 +28,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
 
-public class ConsoleRunner extends Runner {
+public class TypeDBConsoleRunner extends Runner {
 
-    public ConsoleRunner() throws InterruptedException, TimeoutException, IOException {
+    public TypeDBConsoleRunner() throws InterruptedException, TimeoutException, IOException {
         super();
     }
 
@@ -54,7 +54,7 @@ public class ConsoleRunner extends Runner {
 
     private List<String> command(String address, boolean isCluster, Path scriptFile) {
         List<String> command = new ArrayList<>();
-        command.addAll(getGraknBinary());
+        command.addAll(getTypeDBBinary());
         command.add("console");
         command.add(isCluster ? "--cluster" : "--server");
         command.add(address);
@@ -65,7 +65,7 @@ public class ConsoleRunner extends Runner {
 
     private List<String> command(String address, boolean isCluster, String... commands) {
         List<String> command = new ArrayList<>();
-        command.addAll(getGraknBinary());
+        command.addAll(getTypeDBBinary());
         command.add("console");
         command.add(isCluster ? "--cluster" : "--server");
         command.add(address);
@@ -85,6 +85,6 @@ public class ConsoleRunner extends Runner {
 
     @Override
     protected String name() {
-        return "Grakn Console";
+        return "TypeDB Console";
     }
 }
