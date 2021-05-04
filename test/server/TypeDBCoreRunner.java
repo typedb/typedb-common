@@ -15,8 +15,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  */
- 
- package com.vaticle.typedb.common.test.server;
+
+package com.vaticle.typedb.common.test.server;
 
 import java.io.IOException;
 import java.util.ArrayList;

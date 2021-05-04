@@ -40,8 +40,8 @@ public class Bytes {
 
         final int len = hexString.length();
         final byte[] bytes = new byte[len / 2];
-        for (int i = 0; i < bytes.length; i ++) {
-            bytes[i] = (byte) ((HEX_MAP.get(hexString.charAt(i*2)) << 4) + HEX_MAP.get(hexString.charAt((i*2)+1)));
+        for (int i = 0; i < bytes.length; i++) {
+            bytes[i] = (byte) ((HEX_MAP.get(hexString.charAt(i * 2)) << 4) + HEX_MAP.get(hexString.charAt((i * 2) + 1)));
         }
         return bytes;
     }

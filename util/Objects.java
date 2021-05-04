@@ -22,6 +22,7 @@ public class Objects {
     /**
      * For any class, get its name including any classes/interfaces it is nested inside, but excluding its package name.
      * The class name should start with an uppercase character, and the package name should not contain uppercase characters.
+     *
      * @param clazz The class.
      * @return The class name including any classes/interfaces it is nested inside, but excluding its package name.
      */

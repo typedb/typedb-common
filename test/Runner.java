@@ -95,10 +95,10 @@ public abstract class Runner {
         Files.createDirectories(distributionDir);
         if (distributionArchiveFormat.equals(TAR_GZ)) {
             executor.command("tar", "-xf", distributionArchive.toString(),
-                    "-C", distributionDir.toString()).execute();
+                             "-C", distributionDir.toString()).execute();
         } else {
             executor.command("unzip", "-q", distributionArchive.toString(),
-                    "-d", distributionDir.toString()).execute();
+                             "-d", distributionDir.toString()).execute();
         }
         // The TypeDB Cluster archive extracts to a folder inside TYPEDB_TARGET_DIRECTORY named
         // typedb-server-{platform}-{version}. We know it's the only folder, so we can retrieve it using Files.list.

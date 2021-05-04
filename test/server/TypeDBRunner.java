@@ -76,12 +76,13 @@ public abstract class TypeDBRunner extends Runner {
         Timer timer = new Timer();
         timer.scheduleAtFixedRate(new TimerTask() {
             int retryNumber = 0;
+
             @Override
             public void run() {
                 retryNumber++;
                 if (retryNumber % 4 == 0) {
                     System.out.println(String.format("Waiting for %s server to start (%ds)...",
-                            name(), retryNumber * SERVER_ALIVE_POLL_INTERVAL_MILLIS / 1000));
+                                                     name(), retryNumber * SERVER_ALIVE_POLL_INTERVAL_MILLIS / 1000));
                 }
                 if (isServerReady("localhost", port())) {
                     latch.countDown();
