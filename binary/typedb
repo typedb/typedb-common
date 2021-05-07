@@ -61,7 +61,7 @@ elif [ "$1" = "console" ]; then
         echo "You may want to install TypeDB Console or TypeDB (all)."
         exit 1
     fi
-elif [[ "$1" = "server" ]] || [[ "$1" = "node" ]] || [[ "$1" = "version" ]]; then
+elif [[ "$1" = "server" ]] || [[ "$1" = "node" ]]; then
     if [[ "$1" = "server" ]]; then
         TYPEDB_SERVER_NAME="TypeDB (Server)"
         TYPEDB_SERVER_MAIN=com.vaticle.typedb.core.server.TypeDBServer
