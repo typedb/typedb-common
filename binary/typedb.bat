@@ -67,7 +67,7 @@ set "G_CP=%TYPEDB_HOME%\server\conf\;%TYPEDB_HOME%\server\lib\common\*;%TYPEDB_H
 
 
 if exist .\server\ (
-  java %SERVER_JAVAOPTS% -cp "%G_CP%" -Dtypedb.dir="%TYPEDB_HOME%" -Dtypedb.conf="%TYPEDB_HOME%\%TYPEDB_CONFIG%" com.vaticle.typedb.server.TypeDBServer %2 %3 %4 %5 %6 %7 %8 %9
+  java %SERVER_JAVAOPTS% -cp "%G_CP%" -Dtypedb.dir="%TYPEDB_HOME%" -Dtypedb.conf="%TYPEDB_HOME%\%TYPEDB_CONFIG%" com.vaticle.typedb.core.server.TypeDBServer %2 %3 %4 %5 %6 %7 %8 %9
   goto exit
 ) else (
   echo TypeDB Server is not included in this TypeDB distribution^.

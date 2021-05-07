@@ -82,12 +82,12 @@ elif [[ "$1" = "server" ]] || [[ "$1" = "version" ]]; then
             exec $JAVA_BIN ${SERVER_JAVAOPTS} -ea -cp "${CLASSPATH}" \
                 -Dtypedb.dir="${TYPEDB_HOME}" -Dtypedb.conf="${TYPEDB_HOME}/${TYPEDB_CONFIG}" \
                 -Dlogback.configurationFile=logback-debug.xml \
-                com.vaticle.typedb.server.TypeDBServer "${@:2}"
+                com.vaticle.typedb.core.server.TypeDBServer "${@:2}"
         else
             CLASSPATH="${CLASSPATH}:${TYPEDB_HOME}/server/lib/prod/*"
             exec $JAVA_BIN ${SERVER_JAVAOPTS} -cp "${CLASSPATH}" \
                 -Dtypedb.dir="${TYPEDB_HOME}" -Dtypedb.conf="${TYPEDB_HOME}/${TYPEDB_CONFIG}" \
-                com.vaticle.typedb.server.TypeDBServer "${@:2}"
+                com.vaticle.typedb.core.server.TypeDBServer "${@:2}"
         fi
     else
         echo "TypeDB Server is not included in this TypeDB distribution."
