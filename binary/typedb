@@ -57,8 +57,7 @@ elif [ "$1" = "console" ]; then
     # exec replaces current shell process with java so no commands after this one will ever get executed
         exec $JAVA_BIN ${JAVAOPTS} -cp "${CLASSPATH}" -Dtypedb.dir="${TYPEDB_HOME}" com.vaticle.typedb.console.TypeDBConsole "${@:2}"
     else
-        echo "TypeDB Console is not included in this TypeDB distribution."
-        echo "You may want to install TypeDB Console or TypeDB (all)."
+        echo "TypeDB Console is not found. Make sure to install or download TypeDB Console or TypeDB (all)."
         exit 1
     fi
 elif [[ "$1" = "server" ]] || [[ "$1" = "node" ]]; then
@@ -104,8 +103,7 @@ elif [[ "$1" = "server" ]] || [[ "$1" = "node" ]]; then
                 ${TYPEDB_SERVER_CLASS} "${@:2}"
         fi
     else
-        echo "$TYPEDB_SERVER_NAME is not included in this TypeDB distribution."
-        echo "You may want to install $TYPEDB_SERVER_NAME or $TYPEDB_ALL_NAME."
+        echo "$TYPEDB_SERVER_NAME is not found. Make sure to install or download $TYPEDB_SERVER_NAME or $TYPEDB_ALL_NAME."
         exit 1
     fi
 else
