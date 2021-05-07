@@ -1,12 +1,12 @@
 #
-# Copyright (C) 2021 Grakn Labs
+# Copyright (C) 2021 Vaticle
 #
-# This unpublished material is proprietary to Grakn Labs.
+# This unpublished material is proprietary to Vaticle.
 # All rights reserved. The methods and
 # techniques described herein are considered trade secrets
 # and/or confidential. Reproduction or distribution, in whole
 # or in part, is forbidden except by express written permission
-# of Grakn Labs.
+# of Vaticle.
 #
 
 load("@vaticle_bazel_distribution//common:rules.bzl", "assemble_targz")
