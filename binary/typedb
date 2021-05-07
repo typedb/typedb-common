@@ -63,18 +63,20 @@ elif [ "$1" = "console" ]; then
     fi
 elif [[ "$1" = "server" ]] || [[ "$1" = "node" ]]; then
     if [[ "$1" = "server" ]]; then
+        TYPEDB_ALL_NAME="TypeDB (All)"
         TYPEDB_SERVER_NAME="TypeDB (Server)"
-        TYPEDB_SERVER_MAIN=com.vaticle.typedb.core.server.TypeDBServer
-        SERVER_DIR="${TYPEDB_HOME}/server"
+        TYPEDB_SERVER_CLASS=com.vaticle.typedb.core.server.TypeDBServer
+        TYPEDB_SERVER_DIR="${TYPEDB_HOME}/server"
     else
+        TYPEDB_ALL_NAME="TypeDB Cluster (All)"
         TYPEDB_SERVER_NAME="TypeDB Cluster (Node)"
-        TYPEDB_SERVER_MAIN=com.vaticle.typedb.cluster.node.TypeDBNode
-        SERVER_DIR="${TYPEDB_HOME}/node"
+        TYPEDB_SERVER_CLASS=com.vaticle.typedb.cluster.node.TypeDBNode
+        TYPEDB_SERVER_DIR="${TYPEDB_HOME}/node"
     fi
-    LIB_DIR="${SERVER_DIR}/lib"
-    CLASSPATH="${SERVER_DIR}/conf/:${LIB_DIR}/common/*"
+    TYPEDB_SERVER_LIB_DIR="${TYPEDB_SERVER_DIR}/lib"
+    CLASSPATH="${TYPEDB_SERVER_DIR}/conf/:${TYPEDB_SERVER_LIB_DIR}/common/*"
 
-    if [[ -d "${SERVER_DIR}" ]]; then
+    if [[ -d "${TYPEDB_SERVER_DIR}" ]]; then
         IDX=0
         while [[ "${@:IDX}" ]]; do
             case ${@:IDX:1} in
@@ -87,23 +89,23 @@ elif [[ "$1" = "server" ]] || [[ "$1" = "node" ]]; then
         # exec replaces current shell process with java so no commands after these ones will ever get executed
         if [ $DEBUG ]; then
             case "$(uname -s)" in
-                Darwin) CLASSPATH="${CLASSPATH}:$LIB_DIR/dev/*" ;;
+                Darwin) CLASSPATH="${CLASSPATH}:$TYPEDB_SERVER_LIB_DIR/dev/*" ;;
                 *) echo "WARNING: Debug mode RocksDB is not available in this platform. Fallback to production mode."
-                   CLASSPATH="${CLASSPATH}:$LIB_DIR/prod/*" ;;
+                   CLASSPATH="${CLASSPATH}:$TYPEDB_SERVER_LIB_DIR/prod/*" ;;
             esac
             exec $JAVA_BIN ${JAVAOPTS} -ea -cp "${CLASSPATH}" \
                 -Dtypedb.dir="${TYPEDB_HOME}" -Dtypedb.conf="${TYPEDB_HOME}/${TYPEDB_CONFIG}" \
                 -Dlogback.configurationFile=logback-debug.xml \
-                ${TYPEDB_SERVER_MAIN} "${@:2}"
+                ${TYPEDB_SERVER_CLASS} "${@:2}"
         else
-            CLASSPATH="${CLASSPATH}:$LIB_DIR/prod/*"
+            CLASSPATH="${CLASSPATH}:$TYPEDB_SERVER_LIB_DIR/prod/*"
             exec $JAVA_BIN ${JAVAOPTS} -cp "${CLASSPATH}" \
                 -Dtypedb.dir="${TYPEDB_HOME}" -Dtypedb.conf="${TYPEDB_HOME}/${TYPEDB_CONFIG}" \
-                ${TYPEDB_SERVER_MAIN} "${@:2}"
+                ${TYPEDB_SERVER_CLASS} "${@:2}"
         fi
     else
         echo "$TYPEDB_SERVER_NAME is not included in this TypeDB distribution."
-        echo "You may want to install $TYPEDB_SERVER_NAME or TypeDB (all)."
+        echo "You may want to install $TYPEDB_SERVER_NAME or $TYPEDB_ALL_NAME."
         exit 1
     fi
 else
