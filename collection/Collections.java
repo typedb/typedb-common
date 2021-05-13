@@ -101,7 +101,7 @@ public class Collections {
         return new Triple<>(first, second, third);
     }
 
-    public <T extends Comparable<T>> boolean hasIntersection(NavigableSet<T> set1, NavigableSet<T> set2) {
+    public static <T extends Comparable<T>> boolean hasIntersection(NavigableSet<T> set1, NavigableSet<T> set2) {
         NavigableSet<T> active = set1;
         NavigableSet<T> other = set2;
         if (active.isEmpty()) return false;
