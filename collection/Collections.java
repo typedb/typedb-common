@@ -17,6 +17,7 @@
 
 package com.vaticle.typedb.common.collection;
 
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -24,6 +25,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.NavigableSet;
 import java.util.Set;
 
 public class Collections {
@@ -97,5 +99,21 @@ public class Collections {
 
     public static <A, B, C> Triple<A, B, C> triple(A first, B second, C third) {
         return new Triple<>(first, second, third);
+    }
+
+    public <T extends Comparable<T>> boolean hasIntersection(NavigableSet<T> set1, NavigableSet<T> set2) {
+        NavigableSet<T> active = set1;
+        NavigableSet<T> other = set2;
+        if (active.isEmpty()) return false;
+        T currentKey = active.first();
+        while (currentKey != null) {
+            T otherKey = other.ceiling(currentKey);
+            if (otherKey != null && otherKey.equals(currentKey)) return true;
+            currentKey = otherKey;
+            NavigableSet<T> tmp = other;
+            other = active;
+            active = tmp;
+        }
+        return false;
     }
 }
