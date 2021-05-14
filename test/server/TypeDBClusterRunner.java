@@ -18,7 +18,7 @@
 
 package com.vaticle.typedb.common.test.server;
 
-import com.vaticle.typedb.common.collection.Pair;
+import com.vaticle.typedb.common.collection.Triple;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -27,21 +27,21 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeoutException;
 
 import static com.vaticle.typedb.common.collection.Collections.list;
-import static com.vaticle.typedb.common.collection.Collections.pair;
+import static com.vaticle.typedb.common.collection.Collections.triple;
 
 public class TypeDBClusterRunner extends TypeDBRunner {
 
-    private final Pair<Integer, Integer> ports;
-    private final List<Pair<Integer, Integer>> peerPorts;
+    private final Triple<Integer, Integer, Integer> ports;
+    private final List<Triple<Integer, Integer, Integer>> peerPorts;
 
-    public TypeDBClusterRunner(Pair<Integer, Integer> ports, List<Pair<Integer, Integer>> peerPorts) throws InterruptedException, TimeoutException, IOException {
+    public TypeDBClusterRunner(Triple<Integer, Integer, Integer> ports, List<Triple<Integer, Integer, Integer>> peerPorts) throws InterruptedException, TimeoutException, IOException {
         super();
         this.ports = ports;
         this.peerPorts = peerPorts;
     }
 
     public TypeDBClusterRunner(Integer port) throws InterruptedException, TimeoutException, IOException {
-        this(pair(port, port + 1), list(pair(port, port + 1)));
+        this(triple(port, port + 1, port + 2), list(triple(port, port + 1, port + 2)));
     }
 
     public TypeDBClusterRunner() throws InterruptedException, TimeoutException, IOException {
@@ -74,7 +74,7 @@ public class TypeDBClusterRunner extends TypeDBRunner {
         return command;
     }
 
-    private String getAddressString(Pair<Integer, Integer> ports) {
-        return "127.0.0.1" + ":" + ports.first() + ":" + ports.second();
+    private String getAddressString(Triple<Integer, Integer, Integer> ports) {
+        return "127.0.0.1" + ":" + ports.first() + ":" + ports.second() + ":" + ports.third();
     }
 }
