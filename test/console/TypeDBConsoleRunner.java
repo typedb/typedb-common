@@ -35,21 +35,6 @@ public class TypeDBConsoleRunner extends Runner {
         super();
     }
 
-    public int run(String address, boolean isCluster, Path scriptFile) {
-        return run(isCluster ? "--cluster" : "--server", address, "--script", scriptFile.toAbsolutePath().toString());
-    }
-
-    public int run(String address, boolean isCluster, String... consoleCommands) {
-        List<String> options = new ArrayList<>();
-        options.add(isCluster ? "--cluster" : "--server");
-        options.add(address);
-        for (String commandString : consoleCommands) {
-            options.add("--command");
-            options.add(commandString);
-        }
-        return run(options.toArray(new String[] {}));
-    }
-
     public int run(String... options) {
         try {
             StartedProcess consoleProcess = executor.command(command(options)).start();
