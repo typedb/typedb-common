@@ -25,6 +25,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
 
@@ -35,44 +36,34 @@ public class TypeDBConsoleRunner extends Runner {
     }
 
     public int run(String address, boolean isCluster, Path scriptFile) {
+        return run(isCluster ? "--cluster" : "--server", address, "--script", scriptFile.toAbsolutePath().toString());
+    }
+
+    public int run(String address, boolean isCluster, String... consoleCommands) {
+        List<String> options = new ArrayList<>();
+        options.add(isCluster ? "--cluster" : "--server");
+        options.add(address);
+        for (String commandString : consoleCommands) {
+            options.add("--command");
+            options.add(commandString);
+        }
+        return run(options.toArray(new String[] {}));
+    }
+
+    public int run(String... options) {
         try {
-            StartedProcess consoleProcess = executor.command(command(address, isCluster, scriptFile)).start();
+            StartedProcess consoleProcess = executor.command(command(options)).start();
             return consoleProcess.getProcess().waitFor();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    public int run(String address, boolean isCluster, String... commands) {
-        try {
-            StartedProcess consoleProcess = executor.command(command(address, isCluster, commands)).start();
-            return consoleProcess.getProcess().waitFor();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private List<String> command(String address, boolean isCluster, Path scriptFile) {
+    private List<String> command(String... options) {
         List<String> command = new ArrayList<>();
         command.addAll(getTypeDBBinary());
         command.add("console");
-        command.add(isCluster ? "--cluster" : "--server");
-        command.add(address);
-        command.add("--script");
-        command.add(scriptFile.toAbsolutePath().toString());
-        return command;
-    }
-
-    private List<String> command(String address, boolean isCluster, String... commands) {
-        List<String> command = new ArrayList<>();
-        command.addAll(getTypeDBBinary());
-        command.add("console");
-        command.add(isCluster ? "--cluster" : "--server");
-        command.add(address);
-        for (String commandString : commands) {
-            command.add("--command");
-            command.add(commandString);
-        }
+        command.addAll(Arrays.asList(options));
         return command;
     }
 
