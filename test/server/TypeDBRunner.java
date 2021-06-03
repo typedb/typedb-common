@@ -70,7 +70,7 @@ public abstract class TypeDBRunner extends Runner {
             boolean started = checkServerStarted().await(SERVER_STARTUP_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
             assertTrue(displayName() + " failed to start", started);
             System.out.println(displayName() + " database server started");
-        } catch (Exception e) {
+        } catch (Throwable e) {
             printLogs();
             throw new RuntimeException(e);
         }
