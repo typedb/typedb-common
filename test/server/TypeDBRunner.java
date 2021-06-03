@@ -67,10 +67,18 @@ public abstract class TypeDBRunner extends Runner {
             System.out.println(displayName() + ": starting... ");
             System.out.println(displayName() + ": database server is located at " + rootPath.toAbsolutePath().toString());
             System.out.println(displayName() + ": database directory is located at " + dataDir.toAbsolutePath());
+            System.out.println(displayName() + ": command = " + command());
             serverProcess = executor.command(command()).start();
             boolean started = checkServerStarted().await(SERVER_STARTUP_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
-            assertTrue(displayName() + " failed to start", started);
-            System.out.println(displayName() + " database server started");
+            if (!started) {
+                printLogs();
+                throw new RuntimeException(
+                        displayName() + " failed to start. " +
+                        "serverProcess.getProcess().isAlive(): " + serverProcess.getProcess().isAlive()
+                );
+            } else {
+                System.out.println(displayName() + " database server started");
+            }
         } catch (Throwable e) {
             printLogs();
             throw new RuntimeException(e);
