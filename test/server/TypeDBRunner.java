@@ -51,6 +51,10 @@ public abstract class TypeDBRunner extends Runner {
 
     protected abstract List<String> command();
 
+    private String displayName() {
+        return name() + "(" + address() + ")";
+    }
+
     protected abstract int port();
 
     public String address() {
@@ -59,12 +63,13 @@ public abstract class TypeDBRunner extends Runner {
 
     public void start() {
         try {
-            System.out.println("Starting " + name() + " database server at " + rootPath.toAbsolutePath().toString());
-            System.out.println("Database directory will be at " + dataDir.toAbsolutePath());
+            System.out.println(displayName() + ": starting... ");
+            System.out.println(displayName() + ": database server is located at " + rootPath.toAbsolutePath().toString());
+            System.out.println(displayName() + ": database directory is located at " + dataDir.toAbsolutePath());
             serverProcess = executor.command(command()).start();
             boolean started = checkServerStarted().await(SERVER_STARTUP_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
-            assertTrue(name() + " failed to start", started);
-            System.out.println(name() + " database server started");
+            assertTrue(displayName() + " failed to start", started);
+            System.out.println(displayName() + " database server started");
         } catch (Exception e) {
             printLogs();
             throw new RuntimeException(e);
@@ -81,8 +86,8 @@ public abstract class TypeDBRunner extends Runner {
             public void run() {
                 retryNumber++;
                 if (retryNumber % 4 == 0) {
-                    System.out.println(String.format("Waiting for %s server to start (%ds)...",
-                                                     name(), retryNumber * SERVER_ALIVE_POLL_INTERVAL_MILLIS / 1000));
+                    System.out.println(String.format("%s: waiting for server to start (%ds)...",
+                                                     displayName(), retryNumber * SERVER_ALIVE_POLL_INTERVAL_MILLIS / 1000));
                 }
                 if (isServerReady("localhost", port())) {
                     latch.countDown();
@@ -107,9 +112,9 @@ public abstract class TypeDBRunner extends Runner {
     public void stop() {
         if (serverProcess != null) {
             try {
-                System.out.println("Stopping " + name() + " database server");
+                System.out.println(displayName() + ": stopping...");
                 serverProcess.getProcess().destroyForcibly();
-                System.out.println(name() + " database server stopped");
+                System.out.println(displayName() + ": stopped.");
             } catch (Exception e) {
                 printLogs();
                 throw e;
@@ -119,13 +124,13 @@ public abstract class TypeDBRunner extends Runner {
 
     private void printLogs() {
         System.out.println("================");
-        System.out.println(name() + " Logs:");
+        System.out.println(displayName() + " Logs:");
         System.out.println("================");
         Path logPath = Paths.get(".", "logs", "typedb.log");
         try {
             executor.command("cat", logPath.toString()).execute();
         } catch (IOException | InterruptedException | TimeoutException e) {
-            System.out.println("Unable to print '" + logPath + "'");
+            System.out.println(displayName() + ": unable to print '" + logPath + "'");
             e.printStackTrace();
         }
     }
