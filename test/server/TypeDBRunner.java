@@ -25,7 +25,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.Socket;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -91,7 +90,14 @@ public abstract class TypeDBRunner extends Runner {
                     System.out.println(String.format("%s: waiting for server to start (%ds)...",
                                                      displayName(), retryNumber * SERVER_ALIVE_POLL_INTERVAL_MILLIS / 1000));
                 }
-                if (isServerReady("localhost", port())) {
+                if (!serverProcess.getProcess().isAlive()) {
+                    throw new RuntimeException(
+                            displayName() + ": process exited with code '" + serverProcess.getProcess().exitValue() +"'. " +
+                                    "stdout = '" + serverProcess.getProcess().getOutputStream().toString() + "'. " +
+                                    "stderr = '" + serverProcess.getProcess().getErrorStream().toString() + "'"
+                    );
+                }
+                if (isPortOpen("localhost", port())) {
                     latch.countDown();
                     timer.cancel();
                 }
@@ -101,7 +107,7 @@ public abstract class TypeDBRunner extends Runner {
         return latch;
     }
 
-    private static boolean isServerReady(String host, int port) {
+    private static boolean isPortOpen(String host, int port) {
         try {
             Socket s = new Socket(host, port);
             s.close();
