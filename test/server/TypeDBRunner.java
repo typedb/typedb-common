@@ -42,11 +42,13 @@ public abstract class TypeDBRunner extends Runner {
     private static final int SERVER_ALIVE_POLL_MAX_RETRIES = SERVER_STARTUP_TIMEOUT_MILLIS / SERVER_ALIVE_POLL_INTERVAL_MILLIS;
 
     protected final Path dataDir;
+    protected final Path logsDir;
     private StartedProcess serverProcess;
 
     public TypeDBRunner() throws InterruptedException, TimeoutException, IOException {
         super();
         this.dataDir = rootPath.resolve("server").resolve("data");
+        this.logsDir = rootPath.resolve("server").resolve("logs");
     }
 
     protected abstract List<String> command();
@@ -126,7 +128,7 @@ public abstract class TypeDBRunner extends Runner {
         System.out.println("================");
         System.out.println(displayName() + " Logs:");
         System.out.println("================");
-        Path logPath = Paths.get(".", "logs", "typedb.log");
+        Path logPath = logsDir.resolve("typedb.log").toAbsolutePath();
         try {
             executor.command("cat", logPath.toString()).execute();
         } catch (IOException | InterruptedException | TimeoutException e) {
