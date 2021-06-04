@@ -37,6 +37,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 public abstract class TypeDBRunner extends Runner {
@@ -61,14 +62,19 @@ public abstract class TypeDBRunner extends Runner {
         return name() + "(" + address() + ")";
     }
 
+    protected String host() {
+        return "127.0.0.1";
+    }
+
     protected abstract int port();
 
     public String address() {
-        return "127.0.0.1:" + port();
+        return host() + ":" + port();
     }
 
     public void start() {
         try {
+            assertFalse(isPortOpen(host(), port()));
             System.out.println(displayName() + ": starting... ");
             System.out.println(displayName() + ": database server is located at " + rootPath.toAbsolutePath().toString());
             System.out.println(displayName() + ": database directory is located at " + dataDir.toAbsolutePath());
@@ -76,7 +82,6 @@ public abstract class TypeDBRunner extends Runner {
             serverProcess = executor.command(command()).start();
             boolean started = checkServerStarted().await(SERVER_STARTUP_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
             if (!started) {
-                printLogs();
                 throw new RuntimeException(
                         displayName() + ": process exited with code '" + serverProcess.getProcess().exitValue() +"'. " +
                                 "stdout = '" + read(serverProcess.getProcess().getInputStream()) + "'. " +
@@ -104,7 +109,7 @@ public abstract class TypeDBRunner extends Runner {
                     System.out.println(String.format("%s: waiting for server to start (%ds)...",
                                                      displayName(), retryNumber * SERVER_ALIVE_POLL_INTERVAL_MILLIS / 1000));
                 }
-                if (isPortOpen("localhost", port())) {
+                if (isPortOpen(host(), port())) {
                     latch.countDown();
                     timer.cancel();
                 }
@@ -114,7 +119,7 @@ public abstract class TypeDBRunner extends Runner {
         return latch;
     }
 
-    private static boolean isPortOpen(String host, int port) {
+    protected static boolean isPortOpen(String host, int port) {
         try {
             Socket s = new Socket(host, port);
             s.close();
