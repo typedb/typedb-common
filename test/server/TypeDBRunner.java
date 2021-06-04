@@ -58,10 +58,6 @@ public abstract class TypeDBRunner extends Runner {
 
     protected abstract List<String> command();
 
-    private String displayName() {
-        return name() + "(" + address() + ")";
-    }
-
     protected String host() {
         return "127.0.0.1";
     }
@@ -74,21 +70,17 @@ public abstract class TypeDBRunner extends Runner {
 
     public void start() {
         try {
-            assertFalse(isPortOpen(host(), port()));
-            System.out.println(displayName() + ": starting... ");
-            System.out.println(displayName() + ": database server is located at " + rootPath.toAbsolutePath().toString());
-            System.out.println(displayName() + ": database directory is located at " + dataDir.toAbsolutePath());
-            System.out.println(displayName() + ": command = " + command());
+            assertFalse(name() + ": unable to start. port " + port() + " is still used.", isPortOpen(host(), port()));
+            System.out.println(name() + ": starting... ");
+            System.out.println(name() + ": distribution is located at " + rootPath.toAbsolutePath().toString());
+            System.out.println(name() + ": data directory is located at " + dataDir.toAbsolutePath());
+            System.out.println(name() + ": command = " + command());
             serverProcess = executor.command(command()).start();
             boolean started = checkServerStarted().await(SERVER_STARTUP_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
             if (!started) {
-                throw new RuntimeException(
-                        displayName() + ": process exited with code '" + serverProcess.getProcess().exitValue() +"'. " +
-                                "stdout = '" + read(serverProcess.getProcess().getInputStream()) + "'. " +
-                                "stderr = '" + read(serverProcess.getProcess().getErrorStream()) + "'"
-                );
+                throw new RuntimeException(name() + ": process exited with code '" + serverProcess.getProcess().exitValue() +"'.");
             } else {
-                System.out.println(displayName() + " database server started");
+                System.out.println(name() + ": started");
             }
         } catch (Throwable e) {
             printLogs();
@@ -107,7 +99,7 @@ public abstract class TypeDBRunner extends Runner {
                 retryNumber++;
                 if (retryNumber % 4 == 0) {
                     System.out.println(String.format("%s: waiting for server to start (%ds)...",
-                                                     displayName(), retryNumber * SERVER_ALIVE_POLL_INTERVAL_MILLIS / 1000));
+                                                     name(), retryNumber * SERVER_ALIVE_POLL_INTERVAL_MILLIS / 1000));
                 }
                 if (isPortOpen(host(), port())) {
                     latch.countDown();
@@ -132,9 +124,9 @@ public abstract class TypeDBRunner extends Runner {
     public void stop() {
         if (serverProcess != null) {
             try {
-                System.out.println(displayName() + ": stopping...");
+                System.out.println(name() + ": stopping...");
                 serverProcess.getProcess().destroyForcibly();
-                System.out.println(displayName() + ": stopped.");
+                System.out.println(name() + ": stopped.");
             } catch (Exception e) {
                 printLogs();
                 throw e;
@@ -144,13 +136,13 @@ public abstract class TypeDBRunner extends Runner {
 
     private void printLogs() {
         System.out.println("================");
-        System.out.println(displayName() + " Logs:");
+        System.out.println(name() + ": logs:");
         System.out.println("================");
         Path logPath = logsDir.resolve("typedb.log").toAbsolutePath();
         try {
             executor.command("cat", logPath.toString()).execute();
         } catch (IOException | InterruptedException | TimeoutException e) {
-            System.out.println(displayName() + ": unable to print '" + logPath + "'");
+            System.out.println(name() + ": unable to print '" + logPath + "'");
             e.printStackTrace();
         }
     }
@@ -160,11 +152,5 @@ public abstract class TypeDBRunner extends Runner {
         String[] args = System.getProperty("sun.java.command").split(" ");
         assert args.length > 1;
         return new File(args[1]);
-    }
-
-    private static String read(InputStream inputStream) {
-        return new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))
-                .lines()
-                .collect(Collectors.joining("\n"));
     }
 }

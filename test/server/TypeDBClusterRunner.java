@@ -51,7 +51,7 @@ public class TypeDBClusterRunner extends TypeDBRunner {
 
     @Override
     protected String name() {
-        return "TypeDB Cluster";
+        return "TypeDB Cluster (" + address() + ")";
     }
 
     @Override
@@ -61,8 +61,8 @@ public class TypeDBClusterRunner extends TypeDBRunner {
 
     @Override
     public void start() {
-        assertFalse(isPortOpen(host(), ports.second()));
-        assertFalse(isPortOpen(host(), ports.third()));
+        assertFalse(name() + ": unable to start. Port " + ports.second() + " is still used.", isPortOpen(host(), ports.second()));
+        assertFalse(name() + ": unable to start. Port " + ports.third() + " is still used.", isPortOpen(host(), ports.third()));
         super.start();
     }
 
