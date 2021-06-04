@@ -60,8 +60,8 @@ public class TypeDBClusterRunner extends TypeDBRunner {
 
     @Override
     public void start() {
-        if (isPortOpen(host(), ports.second())) throw new RuntimeException(address() + ": unable to start. Port " + ports.second() + " is still used.");
-        if (isPortOpen(host(), ports.third())) throw new RuntimeException(address() + ": unable to start. Port " + ports.third() + " is still used.");
+        if (isPortOpen(host(), ports.second())) throw new RuntimeException(address() + ": unable to start. Port " + ports.second() + " is used by another process.");
+        if (isPortOpen(host(), ports.third())) throw new RuntimeException(address() + ": unable to start. Port " + ports.third() + " is used by another process.");
         super.start();
     }
 
