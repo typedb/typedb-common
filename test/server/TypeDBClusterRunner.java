@@ -59,22 +59,29 @@ public class TypeDBClusterRunner extends TypeDBRunner {
     }
 
     @Override
+    public void start() {
+        verifyPortUnused(ports.second());
+        verifyPortUnused(ports.third());
+        super.start();
+    }
+
+    @Override
     protected List<String> command() {
         List<String> command = new ArrayList<>();
         command.addAll(getTypeDBBinary());
         command.add("server");
         command.add("--address");
-        command.add(getAddressString(ports));
+        command.add(getAddressTripletString(ports));
         peerPorts.forEach(peerPort -> {
             command.add("--peer");
-            command.add(getAddressString(peerPort));
+            command.add(getAddressTripletString(peerPort));
         });
         command.add("--data");
         command.add(dataDir.toAbsolutePath().toString());
         return command;
     }
 
-    private String getAddressString(Triple<Integer, Integer, Integer> ports) {
-        return "127.0.0.1" + ":" + ports.first() + ":" + ports.second() + ":" + ports.third();
+    private String getAddressTripletString(Triple<Integer, Integer, Integer> ports) {
+        return host() + ":" + ports.first() + ":" + ports.second() + ":" + ports.third();
     }
 }
