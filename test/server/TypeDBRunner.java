@@ -19,6 +19,7 @@
 package com.vaticle.typedb.common.test.server;
 
 import com.vaticle.typedb.common.test.Runner;
+import org.zeroturnaround.exec.ProcessResult;
 import org.zeroturnaround.exec.StartedProcess;
 
 import java.io.BufferedReader;
@@ -79,10 +80,11 @@ public abstract class TypeDBRunner extends Runner {
             boolean started = checkServerStarted().await(SERVER_STARTUP_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
             if (!started) {
                 String message = address() + ": unable to start. ";
-                if (!serverProcess.getFuture().isDone()) {
-                    message += address() + ": process exited with code '" + serverProcess.getProcess().exitValue() + "'. ";
-                    if (serverProcess.getFuture().get().hasOutput()) {
-                        message += "Output: " + serverProcess.getFuture().get().outputUTF8();
+                if (serverProcess.getFuture().isDone()) {
+                    ProcessResult processResult = serverProcess.getFuture().get();
+                    message += address() + ": process exited with code '" + processResult.getExitValue() + "'. ";
+                    if (processResult.hasOutput()) {
+                        message += "Output: " + processResult.outputUTF8();
                     }
                 }
                 throw new RuntimeException(message);
