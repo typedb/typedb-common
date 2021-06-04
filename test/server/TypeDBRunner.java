@@ -73,8 +73,9 @@ public abstract class TypeDBRunner extends Runner {
             if (!started) {
                 printLogs();
                 throw new RuntimeException(
-                        displayName() + " failed to start. " +
-                        "serverProcess.getProcess().isAlive(): " + serverProcess.getProcess().isAlive()
+                        displayName() + ": process exited with code '" + serverProcess.getProcess().exitValue() +"'. " +
+                                "stdout = '" + serverProcess.getProcess().getOutputStream().toString() + "'. " +
+                                "stderr = '" + serverProcess.getProcess().getErrorStream().toString() + "'"
                 );
             } else {
                 System.out.println(displayName() + " database server started");
@@ -97,13 +98,6 @@ public abstract class TypeDBRunner extends Runner {
                 if (retryNumber % 4 == 0) {
                     System.out.println(String.format("%s: waiting for server to start (%ds)...",
                                                      displayName(), retryNumber * SERVER_ALIVE_POLL_INTERVAL_MILLIS / 1000));
-                }
-                if (!serverProcess.getProcess().isAlive()) {
-                    throw new RuntimeException(
-                            displayName() + ": process exited with code '" + serverProcess.getProcess().exitValue() +"'. " +
-                                    "stdout = '" + serverProcess.getProcess().getOutputStream().toString() + "'. " +
-                                    "stderr = '" + serverProcess.getProcess().getErrorStream().toString() + "'"
-                    );
                 }
                 if (isPortOpen("localhost", port())) {
                     latch.countDown();
