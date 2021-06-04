@@ -69,7 +69,7 @@ public abstract class TypeDBRunner extends Runner {
     }
 
     public void start() {
-        if (isPortOpen(host(), port())) throw new RuntimeException(name() + ": unable to start. port " + port() + " is used by another process.");
+        verifyPortUnused(port());
         try {
             System.out.println(address() + ": starting... ");
             System.out.println(address() + ": distribution is located at " + rootPath.toAbsolutePath().toString());
@@ -112,16 +112,6 @@ public abstract class TypeDBRunner extends Runner {
         return latch;
     }
 
-    protected static boolean isPortOpen(String host, int port) {
-        try {
-            Socket s = new Socket(host, port);
-            s.close();
-            return true;
-        } catch (IOException e) {
-            return false;
-        }
-    }
-
     public void stop() {
         if (serverProcess != null) {
             try {
@@ -153,5 +143,19 @@ public abstract class TypeDBRunner extends Runner {
         String[] args = System.getProperty("sun.java.command").split(" ");
         assert args.length > 1;
         return new File(args[1]);
+    }
+
+    protected void verifyPortUnused(int port) {
+        if (isPortOpen(host(), port)) throw new RuntimeException(name() + ": unable to start. port " + port + " is used by another process.");
+    }
+
+    protected static boolean isPortOpen(String host, int port) {
+        try {
+            Socket s = new Socket(host, port);
+            s.close();
+            return true;
+        } catch (IOException e) {
+            return false;
+        }
     }
 }
