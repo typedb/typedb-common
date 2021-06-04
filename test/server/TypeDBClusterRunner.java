@@ -61,8 +61,8 @@ public class TypeDBClusterRunner extends TypeDBRunner {
 
     @Override
     public void start() {
-        assertFalse(name() + ": unable to start. Port " + ports.second() + " is still used.", isPortOpen(host(), ports.second()));
-        assertFalse(name() + ": unable to start. Port " + ports.third() + " is still used.", isPortOpen(host(), ports.third()));
+        if (isPortOpen(host(), ports.second())) throw new RuntimeException(name() + ": unable to start. Port " + ports.second() + " is still used.");
+        if (isPortOpen(host(), ports.third())) throw new RuntimeException(name() + ": unable to start. Port " + ports.third() + " is still used.");
         super.start();
     }
 

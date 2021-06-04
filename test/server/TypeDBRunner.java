@@ -69,8 +69,8 @@ public abstract class TypeDBRunner extends Runner {
     }
 
     public void start() {
+        if (isPortOpen(host(), port())) throw new RuntimeException(name() + ": unable to start. port " + port() + " is still used.");
         try {
-            assertFalse(name() + ": unable to start. port " + port() + " is still used.", isPortOpen(host(), port()));
             System.out.println(name() + ": starting... ");
             System.out.println(name() + ": distribution is located at " + rootPath.toAbsolutePath().toString());
             System.out.println(name() + ": data directory is located at " + dataDir.toAbsolutePath());
