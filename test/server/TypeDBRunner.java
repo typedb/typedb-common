@@ -78,8 +78,14 @@ public abstract class TypeDBRunner extends Runner {
             serverProcess = executor.command(command()).start();
             boolean started = checkServerStarted().await(SERVER_STARTUP_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
             if (!started) {
-                if (!serverProcess.getProcess().isAlive())
-                    throw new RuntimeException(address() + ": process exited with code '" + serverProcess.getProcess().exitValue() +"'.");
+                String message = address() + ": unable to start. ";
+                if (!serverProcess.getFuture().isDone()) {
+                    message += address() + ": process exited with code '" + serverProcess.getProcess().exitValue() + "'. ";
+                    if (serverProcess.getFuture().get().hasOutput()) {
+                        message += "Output: " + serverProcess.getFuture().get().outputUTF8();
+                    }
+                }
+                throw new RuntimeException(message);
             } else {
                 System.out.println(address() + ": started");
             }
