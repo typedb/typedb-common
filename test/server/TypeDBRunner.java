@@ -43,7 +43,7 @@ import static org.junit.Assert.assertTrue;
 
 public abstract class TypeDBRunner extends Runner {
 
-    private static final int SERVER_STARTUP_TIMEOUT_MILLIS = 30000;
+    private static final int SERVER_STARTUP_TIMEOUT_MILLIS = 300000;
     private static final int SERVER_ALIVE_POLL_INTERVAL_MILLIS = 500;
     private static final int SERVER_ALIVE_POLL_MAX_RETRIES = SERVER_STARTUP_TIMEOUT_MILLIS / SERVER_ALIVE_POLL_INTERVAL_MILLIS;
 
