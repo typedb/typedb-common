@@ -21,9 +21,13 @@ package com.vaticle.typedb.common.test.server;
 import com.vaticle.typedb.common.test.Runner;
 import org.zeroturnaround.exec.StartedProcess;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Timer;
@@ -31,6 +35,7 @@ import java.util.TimerTask;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertTrue;
 
@@ -74,8 +79,8 @@ public abstract class TypeDBRunner extends Runner {
                 printLogs();
                 throw new RuntimeException(
                         displayName() + ": process exited with code '" + serverProcess.getProcess().exitValue() +"'. " +
-                                "stdout = '" + serverProcess.getProcess().getOutputStream().toString() + "'. " +
-                                "stderr = '" + serverProcess.getProcess().getErrorStream().toString() + "'"
+                                "stdout = '" + read(serverProcess.getProcess().getInputStream()) + "'. " +
+                                "stderr = '" + read(serverProcess.getProcess().getErrorStream()) + "'"
                 );
             } else {
                 System.out.println(displayName() + " database server started");
@@ -150,5 +155,11 @@ public abstract class TypeDBRunner extends Runner {
         String[] args = System.getProperty("sun.java.command").split(" ");
         assert args.length > 1;
         return new File(args[1]);
+    }
+
+    private static String read(InputStream inputStream) {
+        return new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))
+                .lines()
+                .collect(Collectors.joining("\n"));
     }
 }
