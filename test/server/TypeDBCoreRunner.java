@@ -40,7 +40,7 @@ public class TypeDBCoreRunner extends TypeDBRunner {
 
     @Override
     protected String name() {
-        return "TypeDB (" + address() + ")";
+        return "TypeDB Core";
     }
 
     @Override

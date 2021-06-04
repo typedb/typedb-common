@@ -28,7 +28,6 @@ import java.util.concurrent.TimeoutException;
 
 import static com.vaticle.typedb.common.collection.Collections.list;
 import static com.vaticle.typedb.common.collection.Collections.triple;
-import static org.junit.Assert.assertFalse;
 
 public class TypeDBClusterRunner extends TypeDBRunner {
 
@@ -51,7 +50,7 @@ public class TypeDBClusterRunner extends TypeDBRunner {
 
     @Override
     protected String name() {
-        return "TypeDB Cluster (" + address() + ")";
+        return "TypeDB Cluster";
     }
 
     @Override
@@ -61,8 +60,8 @@ public class TypeDBClusterRunner extends TypeDBRunner {
 
     @Override
     public void start() {
-        if (isPortOpen(host(), ports.second())) throw new RuntimeException(name() + ": unable to start. Port " + ports.second() + " is still used.");
-        if (isPortOpen(host(), ports.third())) throw new RuntimeException(name() + ": unable to start. Port " + ports.third() + " is still used.");
+        if (isPortOpen(host(), ports.second())) throw new RuntimeException(address() + ": unable to start. Port " + ports.second() + " is still used.");
+        if (isPortOpen(host(), ports.third())) throw new RuntimeException(address() + ": unable to start. Port " + ports.third() + " is still used.");
         super.start();
     }
 
