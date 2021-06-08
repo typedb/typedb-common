@@ -69,7 +69,7 @@ public class TypeDBClusterRunner extends TypeDBRunner {
     protected List<String> command() {
         List<String> command = new ArrayList<>();
         command.addAll(getTypeDBBinary());
-        command.add("server");
+        command.add("cluster");
         command.add("--address");
         command.add(getAddressTripletString(ports));
         peerPorts.forEach(peerPort -> {
