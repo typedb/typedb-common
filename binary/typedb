@@ -61,12 +61,19 @@ elif [ "$1" = "console" ]; then
         exit 1
     fi
 elif [[ "$1" = "server" ]] || [[ "$1" = "cluster" ]]; then
+
+    TYPEDB_SERVER_DIR="${TYPEDB_HOME}/server"
+    TYPEDB_SERVER_LIB_DIR="${TYPEDB_SERVER_DIR}/lib"
+    TYPEDB_CLUSTER_SERVER_JAR=("${TYPEDB_SERVER_LIB_DIR}"/common/com-vaticle-typedb-typedb-cluster-server-*.jar)
+
+    CLASSPATH="${TYPEDB_SERVER_DIR}/conf/:${TYPEDB_SERVER_LIB_DIR}/common/*"
+
     if [[ "$1" = "server" ]]; then
         TYPEDB_ALL_NAME="TypeDB (All)"
         TYPEDB_SERVER_NAME="TypeDB (Server)"
         TYPEDB_SERVER_CLASS=com.vaticle.typedb.core.server.TypeDBServer
 
-        if [[ -f "com-vaticle-typedb-typedb-cluster-server-*.jar" ]]; then
+        if [[ -f "$TYPEDB_CLUSTER_SERVER_JAR" ]]; then
             echo "$TYPEDB_SERVER_NAME is not found. Make sure to install or download $TYPEDB_SERVER_NAME or $TYPEDB_ALL_NAME."
             exit 1
         fi
@@ -75,14 +82,11 @@ elif [[ "$1" = "server" ]] || [[ "$1" = "cluster" ]]; then
         TYPEDB_SERVER_NAME="TypeDB Cluster (Server)"
         TYPEDB_SERVER_CLASS=com.vaticle.typedb.cluster.server.TypeDBClusterServer
 
-        if [[ ! -f "com-vaticle-typedb-typedb-cluster-server-*.jar" ]]; then
+        if [[ ! -f "$TYPEDB_CLUSTER_SERVER_JAR" ]]; then
             echo "$TYPEDB_SERVER_NAME is not found. Make sure to install or download $TYPEDB_SERVER_NAME or $TYPEDB_ALL_NAME."
             exit 1
         fi
     fi
-    TYPEDB_SERVER_DIR="${TYPEDB_HOME}/server"
-    TYPEDB_SERVER_LIB_DIR="${TYPEDB_SERVER_DIR}/lib"
-    CLASSPATH="${TYPEDB_SERVER_DIR}/conf/:${TYPEDB_SERVER_LIB_DIR}/common/*"
 
     IDX=0
     while [[ "${@:IDX}" ]]; do
@@ -117,3 +121,4 @@ else
     echo "  Console:         typedb console [--help]"
     exit 1
 fi
+
