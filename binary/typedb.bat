@@ -85,7 +85,7 @@ if exist .\server\ (
   goto exit
 ) else (
   echo TypeDB Cluster is not included in this TypeDB distribution^.
-  echo You may want to install TypeDB Cluster or TypeDB ^(all^)^.
+  echo You may want to install TypeDB Cluster or TypeDB Cluster ^(all^)^.
   goto exiterror
 )
 
