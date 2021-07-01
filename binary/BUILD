@@ -60,7 +60,7 @@ assemble_apt(
         "var/log/typedb/",
     ],
     depends = [
-        "openjdk-8-jre"
+        "openjdk-11-jre"
     ],
     permissions = {
         "var/log/typedb/": "0777",
