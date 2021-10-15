@@ -85,6 +85,7 @@ checkstyle_test(
         "concurrent/actor/eventloop/*.java",
         "exception/*",
         "util/*",
+        "yaml/*.java"
     ]),
     license_type = "agpl",
 )
