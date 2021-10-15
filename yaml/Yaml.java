@@ -60,7 +60,7 @@ public class Yaml {
         return listYaml;
     }
 
-    public boolean isValue() {
+    public boolean isString() {
         return object instanceof String;
     }
 
@@ -68,7 +68,27 @@ public class Yaml {
         return (String) object;
     }
 
-    public Boolean asBoolean() {
+    public boolean isInt() {
+        return object instanceof Integer;
+    }
+
+    public int asInt() {
+        return (Integer) object;
+    }
+
+    public boolean isFloat() {
+        return object instanceof Float;
+    }
+
+    public float asFloat() {
+        return (Float) object;
+    }
+
+    public boolean isBoolean () {
+        return object instanceof Boolean;
+    }
+
+    public boolean asBoolean() {
         return (Boolean) object;
     }
 
