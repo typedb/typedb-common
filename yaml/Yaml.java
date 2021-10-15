@@ -17,6 +17,11 @@
 
 package com.vaticle.typedb.common.yaml;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -32,6 +37,11 @@ public class Yaml {
 
     public static Yaml create(String yaml) {
         return new Yaml(new org.yaml.snakeyaml.Yaml().<Object>load(yaml));
+    }
+
+    public static Yaml create(Path filePath) throws FileNotFoundException {
+        FileInputStream inputStream = new FileInputStream(filePath.toFile());
+        return new Yaml(new org.yaml.snakeyaml.Yaml().<Object>load(inputStream));
     }
 
     public boolean isMap() {
