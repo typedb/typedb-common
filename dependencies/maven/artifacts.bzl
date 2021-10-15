@@ -21,4 +21,5 @@ artifacts = [
   "junit:junit",
   "org.slf4j:slf4j-api",
   "org.zeroturnaround:zt-exec",
+  "org.yaml:snakeyaml",
 ]

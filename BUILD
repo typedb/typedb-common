@@ -33,10 +33,12 @@ java_library(
         "concurrent/actor/eventloop/*.java",
         "exception/*.java",
         "util/*.java",
+        "yaml/*.java",
     ]),
     deps = [
         "@maven//:com_google_code_findbugs_jsr305",
-        "@maven//:org_slf4j_slf4j_api"
+        "@maven//:org_slf4j_slf4j_api",
+        "@maven//:org_yaml_snakeyaml",
     ],
     visibility = ["//visibility:public"],
     tags = [
@@ -83,6 +85,7 @@ checkstyle_test(
         "concurrent/actor/eventloop/*.java",
         "exception/*",
         "util/*",
+        "yaml/*.java"
     ]),
     license_type = "agpl",
 )
