@@ -21,83 +21,134 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
 
-public class Yaml {
+public interface Yaml {
 
-    private final Object object;
-
-    private Yaml(Object yamlObject) {
-        object = yamlObject;
+    static Yaml create(String yaml) {
+        return wrap(new org.yaml.snakeyaml.Yaml().load(yaml));
     }
 
-    public static Yaml create(String yaml) {
-        return new Yaml(new org.yaml.snakeyaml.Yaml().<Object>load(yaml));
-    }
-
-    public static Yaml create(Path filePath) throws FileNotFoundException {
+    static Yaml create(Path filePath) throws FileNotFoundException {
         FileInputStream inputStream = new FileInputStream(filePath.toFile());
-        return new Yaml(new org.yaml.snakeyaml.Yaml().<Object>load(inputStream));
+        return wrap(new org.yaml.snakeyaml.Yaml().load(inputStream));
     }
 
-    public boolean isMap() {
-        return object instanceof Map;
+    static Yaml wrap(Object parsedYaml) {
+        if (parsedYaml instanceof java.util.Map) return Map.create((java.util.Map<String, Object>) parsedYaml);
+        else if (parsedYaml instanceof java.util.List) return List.create((java.util.List<Object>) parsedYaml);
+        else return Primitive.create(parsedYaml);
     }
 
-    public LinkedHashMap<String, Yaml> asMap() {
-        LinkedHashMap<String, Object> mapObject = (LinkedHashMap<String, Object>) object;
-        LinkedHashMap<String, Yaml> mapYaml = new LinkedHashMap<>();
-        for (String key : mapObject.keySet()) {
-            mapYaml.put(key, new Yaml(mapObject.get(key)));
+    default boolean isMap() {
+        return false;
+    }
+
+    default Map asMap() {
+        throw new ClassCastException();
+    }
+
+    default boolean isList() {
+        return false;
+    }
+
+    default List asList() {
+        throw new ClassCastException();
+    }
+
+    default boolean isPrimitive() {
+        return false;
+    }
+
+    default Primitive asPrimitive() {
+        throw new ClassCastException();
+    }
+
+    class Map extends java.util.LinkedHashMap<String, Yaml> implements Yaml {
+
+        static Map create(java.util.Map<String, Object> map) {
+            Map mapYaml = new Map();
+            for (String key : map.keySet()) {
+                mapYaml.put(key, Yaml.wrap(map.get(key)));
+            }
+            return mapYaml;
         }
-        return mapYaml;
-    }
 
-    public boolean isList() {
-        return object instanceof List;
-    }
-
-    public List<Yaml> asList() {
-        List<Object> listObject = (List<Object>) object;
-        List<Yaml> listYaml = new ArrayList<>();
-        for (Object e : listObject) {
-            listYaml.add(new Yaml(e));
+        @Override
+        public boolean isMap() {
+            return true;
         }
-        return listYaml;
+
+        @Override
+        public Map asMap() {
+            return this;
+        }
     }
 
-    public boolean isString() {
-        return object instanceof String;
+    class List extends ArrayList<Yaml> implements Yaml {
+
+        static List create(java.util.List<Object> list) {
+            List listYaml = new List();
+            for (Object e : list) {
+                listYaml.add(Yaml.wrap(e));
+            }
+            return listYaml;
+        }
+
+        @Override
+        public boolean isList() {
+            return true;
+        }
+
+        @Override
+        public List asList() {
+            return this;
+        }
     }
 
-    public String asString() {
-        return (String) object;
-    }
+    class Primitive implements Yaml {
 
-    public boolean isInt() {
-        return object instanceof Integer;
-    }
+        private final Object object;
 
-    public int asInt() {
-        return (Integer) object;
-    }
+        private Primitive(Object object) {
+            this.object = object;
+        }
 
-    public boolean isFloat() {
-        return object instanceof Float;
-    }
+        static Primitive create(Object object) {
+            assert object instanceof String || object instanceof Integer || object instanceof Float ||
+                    object instanceof Boolean;
+            return new Primitive(object);
+        }
 
-    public float asFloat() {
-        return (Float) object;
-    }
+        public boolean isString() {
+            return object instanceof String;
+        }
 
-    public boolean isBoolean () {
-        return object instanceof Boolean;
-    }
+        public String asString() {
+            return (String) object;
+        }
 
-    public boolean asBoolean() {
-        return (Boolean) object;
-    }
+        public boolean isInt() {
+            return object instanceof Integer;
+        }
 
+        public int asInt() {
+            return (Integer) object;
+        }
+
+        public boolean isFloat() {
+            return object instanceof Float;
+        }
+
+        public float asFloat() {
+            return (Float) object;
+        }
+
+        public boolean isBoolean() {
+            return object instanceof Boolean;
+        }
+
+        public boolean asBoolean() {
+            return (Boolean) object;
+        }
+    }
 }
