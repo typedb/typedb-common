@@ -22,6 +22,8 @@ import java.io.FileNotFoundException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 
+import static com.vaticle.typedb.common.util.Objects.className;
+
 public interface Yaml {
 
     static Yaml create(String yaml) {
@@ -113,10 +115,20 @@ public interface Yaml {
             this.object = object;
         }
 
-        static Primitive create(Object object) {
+        public static Primitive create(Object object) {
             assert object instanceof String || object instanceof Integer || object instanceof Float ||
                     object instanceof Boolean;
             return new Primitive(object);
+        }
+
+        @Override
+        public boolean isPrimitive() {
+            return true;
+        }
+
+        @Override
+        public Primitive asPrimitive() {
+            return this;
         }
 
         public boolean isString() {
@@ -149,6 +161,11 @@ public interface Yaml {
 
         public boolean asBoolean() {
             return (Boolean) object;
+        }
+
+        @Override
+        public String toString() {
+            return object + "[" + className(object.getClass()) + "]";
         }
     }
 }
