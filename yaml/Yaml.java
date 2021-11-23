@@ -46,7 +46,8 @@ public interface Yaml {
     }
 
     default Map asMap() {
-        throw new ClassCastException();
+        throw new ClassCastException(String.format("Illegal cast from '%s' to '%s'.", className(getClass()),
+                className(Map.class)));
     }
 
     default boolean isList() {
@@ -54,7 +55,8 @@ public interface Yaml {
     }
 
     default List asList() {
-        throw new ClassCastException();
+        throw new ClassCastException(String.format("Illegal cast from '%s' to '%s'.", className(getClass()),
+                className(List.class)));
     }
 
     default boolean isPrimitive() {
@@ -62,7 +64,8 @@ public interface Yaml {
     }
 
     default Primitive asPrimitive() {
-        throw new ClassCastException();
+        throw new ClassCastException(String.format("Illegal cast from '%s' to '%s'.", className(getClass()),
+                className(Primitive.class)));
     }
 
     class Map extends java.util.LinkedHashMap<String, Yaml> implements Yaml {
@@ -115,12 +118,11 @@ public interface Yaml {
             this.object = object;
         }
 
-        public static Primitive wrap(Object object) {
-            if (!(object instanceof String || object instanceof Integer || object instanceof Float ||
-                    object instanceof Boolean)) {
-                throw new ClassCastException();
+        public static Primitive wrap(Object obj) {
+            if (!(obj instanceof String || obj instanceof Integer || obj instanceof Float || obj instanceof Boolean)) {
+                throw new ClassCastException("Type '" + className(obj.getClass()) + "' is not a known yaml primitive.");
             }
-            return new Primitive(object);
+            return new Primitive(obj);
         }
 
         @Override
@@ -138,6 +140,10 @@ public interface Yaml {
         }
 
         public String asString() {
+            if (!isString()) {
+                throw new ClassCastException(String.format("Illegal cast from '%s' to '%s'.",
+                        className(getClass()), className(String.class)));
+            }
             return (String) object;
         }
 
@@ -146,6 +152,10 @@ public interface Yaml {
         }
 
         public int asInt() {
+            if (!isInt()) {
+                throw new ClassCastException(String.format("Illegal cast from '%s' to '%s'.",
+                        className(getClass()), className(Integer.class)));
+            }
             return (Integer) object;
         }
 
@@ -154,6 +164,10 @@ public interface Yaml {
         }
 
         public float asFloat() {
+            if (!isFloat()) {
+                throw new ClassCastException(String.format("Illegal cast from '%s' to '%s'.", className(getClass()),
+                        className(Float.class)));
+            }
             return (Float) object;
         }
 
@@ -162,6 +176,10 @@ public interface Yaml {
         }
 
         public boolean asBoolean() {
+            if (!isBoolean()) {
+                throw new ClassCastException(String.format("Illegal cast from '%s' to '%s'.", className(getClass()),
+                        className(Boolean.class)));
+            }
             return (Boolean) object;
         }
 
