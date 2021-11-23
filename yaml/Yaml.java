@@ -26,19 +26,19 @@ import static com.vaticle.typedb.common.util.Objects.className;
 
 public interface Yaml {
 
-    static Yaml create(String yaml) {
+    static Yaml load(String yaml) {
         return wrap(new org.yaml.snakeyaml.Yaml().load(yaml));
     }
 
-    static Yaml create(Path filePath) throws FileNotFoundException {
+    static Yaml load(Path filePath) throws FileNotFoundException {
         FileInputStream inputStream = new FileInputStream(filePath.toFile());
         return wrap(new org.yaml.snakeyaml.Yaml().load(inputStream));
     }
 
-    static Yaml wrap(Object parsedYaml) {
-        if (parsedYaml instanceof java.util.Map) return Map.create((java.util.Map<String, Object>) parsedYaml);
-        else if (parsedYaml instanceof java.util.List) return List.create((java.util.List<Object>) parsedYaml);
-        else return Primitive.create(parsedYaml);
+    static Yaml wrap(Object yamlCompatible) {
+        if (yamlCompatible instanceof java.util.Map) return Map.wrap((java.util.Map<String, Object>) yamlCompatible);
+        else if (yamlCompatible instanceof java.util.List) return List.wrap((java.util.List<Object>) yamlCompatible);
+        else return Primitive.wrap(yamlCompatible);
     }
 
     default boolean isMap() {
@@ -67,7 +67,7 @@ public interface Yaml {
 
     class Map extends java.util.LinkedHashMap<String, Yaml> implements Yaml {
 
-        static Map create(java.util.Map<String, Object> map) {
+        static Map wrap(java.util.Map<String, Object> map) {
             Map mapYaml = new Map();
             for (String key : map.keySet()) {
                 mapYaml.put(key, Yaml.wrap(map.get(key)));
@@ -88,7 +88,7 @@ public interface Yaml {
 
     class List extends ArrayList<Yaml> implements Yaml {
 
-        static List create(java.util.List<Object> list) {
+        static List wrap(java.util.List<Object> list) {
             List listYaml = new List();
             for (Object e : list) {
                 listYaml.add(Yaml.wrap(e));
@@ -115,9 +115,11 @@ public interface Yaml {
             this.object = object;
         }
 
-        public static Primitive create(Object object) {
-            assert object instanceof String || object instanceof Integer || object instanceof Float ||
-                    object instanceof Boolean;
+        public static Primitive wrap(Object object) {
+            if (!(object instanceof String || object instanceof Integer || object instanceof Float ||
+                    object instanceof Boolean)) {
+                throw new ClassCastException();
+            }
             return new Primitive(object);
         }
 
