@@ -24,6 +24,7 @@ import java.util.ArrayList;
 
 import static com.vaticle.typedb.common.util.Objects.className;
 
+// TODO make this an abstract class
 public interface Yaml {
 
     static Yaml load(String yaml) {
@@ -35,10 +36,13 @@ public interface Yaml {
         return wrap(new org.yaml.snakeyaml.Yaml().load(inputStream));
     }
 
-    static Yaml wrap(Object yamlCompatible) {
-        if (yamlCompatible instanceof java.util.Map) return Map.wrap((java.util.Map<String, Object>) yamlCompatible);
-        else if (yamlCompatible instanceof java.util.List) return List.wrap((java.util.List<Object>) yamlCompatible);
-        else return Primitive.wrap(yamlCompatible);
+    // TODO make this private
+    static Yaml wrap(Object yaml) {
+        if (yaml instanceof java.util.Map) {
+            assert ((java.util.Map) yaml).keySet().stream().allMatch(key -> key instanceof String);
+            return Map.wrap((java.util.Map<String, Object>) yaml);
+        } else if (yaml instanceof java.util.List) return List.wrap((java.util.List<Object>) yaml);
+        else return Primitive.wrap(yaml);
     }
 
     default boolean isMap() {
@@ -68,9 +72,11 @@ public interface Yaml {
                 className(Primitive.class)));
     }
 
+    // TODO don't extend and override built in types
     class Map extends java.util.LinkedHashMap<String, Yaml> implements Yaml {
 
         static Map wrap(java.util.Map<String, Object> map) {
+            // assert that all keys are strings
             Map mapYaml = new Map();
             for (String key : map.keySet()) {
                 mapYaml.put(key, Yaml.wrap(map.get(key)));
@@ -110,6 +116,7 @@ public interface Yaml {
         }
     }
 
+    // TODO dissolve into primitive types directly
     class Primitive implements Yaml {
 
         private final Object object;
@@ -118,10 +125,8 @@ public interface Yaml {
             this.object = object;
         }
 
-        public static Primitive wrap(Object obj) {
-            if (!(obj instanceof String || obj instanceof Integer || obj instanceof Float || obj instanceof Boolean)) {
-                throw new ClassCastException("Type '" + className(obj.getClass()) + "' is not a known yaml primitive.");
-            }
+        private static Primitive wrap(Object obj) {
+            assert obj instanceof String || obj instanceof Integer || obj instanceof Float || obj instanceof Boolean;
             return new Primitive(obj);
         }
 
