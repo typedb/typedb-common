@@ -21,67 +21,101 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 
 import static com.vaticle.typedb.common.util.Objects.className;
 
-// TODO make this an abstract class
-public interface Yaml {
+public abstract class Yaml {
 
-    static Yaml load(String yaml) {
+    public static Yaml load(java.lang.String yaml) {
         return wrap(new org.yaml.snakeyaml.Yaml().load(yaml));
     }
 
-    static Yaml load(Path filePath) throws FileNotFoundException {
+    public static Yaml load(Path filePath) throws FileNotFoundException {
         FileInputStream inputStream = new FileInputStream(filePath.toFile());
         return wrap(new org.yaml.snakeyaml.Yaml().load(inputStream));
     }
 
-    // TODO make this private
-    static Yaml wrap(Object yaml) {
+    private static Yaml wrap(Object yaml) {
         if (yaml instanceof java.util.Map) {
-            assert ((java.util.Map) yaml).keySet().stream().allMatch(key -> key instanceof String);
-            return Map.wrap((java.util.Map<String, Object>) yaml);
+            assert ((java.util.Map<Object, Object>) yaml).keySet().stream().allMatch(key -> key instanceof java.lang.String);
+            return Map.wrap((java.util.Map<java.lang.String, Object>) yaml);
         } else if (yaml instanceof java.util.List) return List.wrap((java.util.List<Object>) yaml);
-        else return Primitive.wrap(yaml);
+        else if (yaml instanceof java.lang.String) return new String((java.lang.String) yaml);
+        else if (yaml instanceof java.lang.Integer) return new Int((java.lang.Integer) yaml);
+        else if (yaml instanceof java.lang.Float) return new Float((java.lang.Float) yaml);
+        else if (yaml instanceof java.lang.Boolean) return new Boolean((java.lang.Boolean) yaml);
+        else throw new IllegalStateException();
     }
 
-    default boolean isMap() {
+    public boolean isMap() {
         return false;
     }
 
-    default Map asMap() {
-        throw new ClassCastException(String.format("Illegal cast from '%s' to '%s'.", className(getClass()),
+    public Map asMap() {
+        throw new ClassCastException(java.lang.String.format("Illegal cast from '%s' to '%s'.", className(getClass()),
                 className(Map.class)));
     }
 
-    default boolean isList() {
+    public boolean isList() {
         return false;
     }
 
-    default List asList() {
-        throw new ClassCastException(String.format("Illegal cast from '%s' to '%s'.", className(getClass()),
+    public List asList() {
+        throw new ClassCastException(java.lang.String.format("Illegal cast from '%s' to '%s'.", className(getClass()),
                 className(List.class)));
     }
 
-    default boolean isPrimitive() {
+    public boolean isString() {
         return false;
     }
 
-    default Primitive asPrimitive() {
-        throw new ClassCastException(String.format("Illegal cast from '%s' to '%s'.", className(getClass()),
-                className(Primitive.class)));
+    public String asString() {
+        throw new ClassCastException(java.lang.String.format("Illegal cast from '%s' to '%s'.", className(getClass()),
+                className(String.class)));
     }
 
-    // TODO don't extend and override built in types
-    class Map extends java.util.LinkedHashMap<String, Yaml> implements Yaml {
+    public boolean isInt() {
+        return false;
+    }
 
-        static Map wrap(java.util.Map<String, Object> map) {
-            // assert that all keys are strings
-            Map mapYaml = new Map();
-            for (String key : map.keySet()) {
-                mapYaml.put(key, Yaml.wrap(map.get(key)));
+    public Int asInt() {
+        throw new ClassCastException(java.lang.String.format("Illegal cast from '%s' to '%s'.", className(getClass()),
+                className(Int.class)));
+    }
+
+    public boolean isFloat() {
+        return false;
+    }
+
+    public Float asFloat() {
+        throw new ClassCastException(java.lang.String.format("Illegal cast from '%s' to '%s'.", className(getClass()),
+                className(Float.class)));
+    }
+
+    public boolean isBoolean() {
+        return false;
+    }
+
+    public Boolean asBoolean() {
+        throw new ClassCastException(java.lang.String.format("Illegal cast from '%s' to '%s'.", className(getClass()),
+                className(Boolean.class)));
+    }
+
+    public static class Map extends Yaml {
+
+        private final java.util.Map<java.lang.String, Yaml> map;
+
+        private Map(java.util.Map<java.lang.String, Yaml> map) {
+            this.map = map;
+        }
+
+        private static Map wrap(java.util.Map<java.lang.String, Object> yamlMap) {
+            java.util.Map<java.lang.String, Yaml> map = new LinkedHashMap<>();
+            for (java.lang.String key : yamlMap.keySet()) {
+                map.put(key, Yaml.wrap(map.get(key)));
             }
-            return mapYaml;
+            return new Map(map);
         }
 
         @Override
@@ -95,14 +129,20 @@ public interface Yaml {
         }
     }
 
-    class List extends ArrayList<Yaml> implements Yaml {
+    public static class List extends Yaml {
+
+        private final java.util.List<Yaml> list;
+
+        private List(java.util.List<Yaml> list) {
+            this.list = list;
+        }
 
         static List wrap(java.util.List<Object> list) {
-            List listYaml = new List();
+            java.util.List<Yaml> yamlList = new ArrayList<>();
             for (Object e : list) {
-                listYaml.add(Yaml.wrap(e));
+                yamlList.add(Yaml.wrap(e));
             }
-            return listYaml;
+            return new List(yamlList);
         }
 
         @Override
@@ -116,81 +156,109 @@ public interface Yaml {
         }
     }
 
-    // TODO dissolve into primitive types directly
-    class Primitive implements Yaml {
+    static class String extends Yaml {
 
-        private final Object object;
+        private final java.lang.String value;
 
-        private Primitive(Object object) {
-            this.object = object;
+        private String(java.lang.String string) {
+            this.value = string;
         }
 
-        private static Primitive wrap(Object obj) {
-            assert obj instanceof String || obj instanceof Integer || obj instanceof Float || obj instanceof Boolean;
-            return new Primitive(obj);
+        public java.lang.String value() {
+            return value;
         }
 
         @Override
-        public boolean isPrimitive() {
+        public boolean isString() {
             return true;
         }
 
         @Override
-        public Primitive asPrimitive() {
+        public String asString() {
             return this;
         }
 
-        public boolean isString() {
-            return object instanceof String;
+        @Override
+        public java.lang.String toString() {
+            return value + "[string]";
+        }
+    }
+
+    static class Int extends Yaml {
+
+        private final int value;
+
+        private Int(int value) {
+            this.value = value;
         }
 
-        public String asString() {
-            if (!isString()) {
-                throw new ClassCastException(String.format("Illegal cast from '%s' to '%s'.",
-                        className(getClass()), className(String.class)));
-            }
-            return (String) object;
+        public int value() {
+            return value;
         }
 
         public boolean isInt() {
-            return object instanceof Integer;
+            return true;
         }
 
-        public int asInt() {
-            if (!isInt()) {
-                throw new ClassCastException(String.format("Illegal cast from '%s' to '%s'.",
-                        className(getClass()), className(Integer.class)));
-            }
-            return (Integer) object;
-        }
-
-        public boolean isFloat() {
-            return object instanceof Float;
-        }
-
-        public float asFloat() {
-            if (!isFloat()) {
-                throw new ClassCastException(String.format("Illegal cast from '%s' to '%s'.", className(getClass()),
-                        className(Float.class)));
-            }
-            return (Float) object;
-        }
-
-        public boolean isBoolean() {
-            return object instanceof Boolean;
-        }
-
-        public boolean asBoolean() {
-            if (!isBoolean()) {
-                throw new ClassCastException(String.format("Illegal cast from '%s' to '%s'.", className(getClass()),
-                        className(Boolean.class)));
-            }
-            return (Boolean) object;
+        public Int asInt() {
+            return this;
         }
 
         @Override
-        public String toString() {
-            return object + "[" + className(object.getClass()) + "]";
+        public java.lang.String toString() {
+            return value + "[int]";
+        }
+    }
+
+    public static class Float extends Yaml {
+
+        private final float value;
+
+        private Float(float value) {
+            this.value = value;
+        }
+
+        public float value() {
+            return value;
+        }
+
+        public boolean isFloat() {
+            return true;
+        }
+
+        public Float asFloat() {
+            return this;
+        }
+
+        @Override
+        public java.lang.String toString() {
+            return value + "[float]";
+        }
+    }
+
+    public static class Boolean extends Yaml {
+
+        private final boolean value;
+
+        private Boolean(boolean value) {
+            this.value = value;
+        }
+
+        public boolean value() {
+            return value;
+        }
+
+        public boolean isBoolean() {
+            return true;
+        }
+
+        public Boolean asBoolean() {
+            return this;
+        }
+
+        @Override
+        public java.lang.String toString() {
+            return value + "[boolean]";
         }
     }
 }
