@@ -109,7 +109,7 @@ public abstract class Yaml {
 
         private final java.util.Map<java.lang.String, Yaml> map;
 
-        private Map(java.util.Map<java.lang.String, Yaml> map) {
+        public Map(java.util.Map<java.lang.String, Yaml> map) {
             this.map = map;
         }
 
