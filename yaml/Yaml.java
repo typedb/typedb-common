@@ -21,83 +21,276 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.Set;
+import java.util.function.BiConsumer;
 
-public class Yaml {
+import static com.vaticle.typedb.common.util.Objects.className;
 
-    private final Object object;
+public abstract class Yaml {
 
-    private Yaml(Object yamlObject) {
-        object = yamlObject;
+    public static Yaml load(java.lang.String yaml) {
+        return wrap(new org.yaml.snakeyaml.Yaml().load(yaml));
     }
 
-    public static Yaml create(String yaml) {
-        return new Yaml(new org.yaml.snakeyaml.Yaml().<Object>load(yaml));
-    }
-
-    public static Yaml create(Path filePath) throws FileNotFoundException {
+    public static Yaml load(Path filePath) throws FileNotFoundException {
         FileInputStream inputStream = new FileInputStream(filePath.toFile());
-        return new Yaml(new org.yaml.snakeyaml.Yaml().<Object>load(inputStream));
+        return wrap(new org.yaml.snakeyaml.Yaml().load(inputStream));
+    }
+
+    private static Yaml wrap(Object yaml) {
+        if (yaml instanceof java.util.Map) {
+            assert ((java.util.Map<Object, Object>) yaml).keySet().stream().allMatch(key -> key instanceof java.lang.String);
+            return Map.wrap((java.util.Map<java.lang.String, Object>) yaml);
+        } else if (yaml instanceof java.util.List) return List.wrap((java.util.List<Object>) yaml);
+        else if (yaml instanceof java.lang.String) return new String((java.lang.String) yaml);
+        else if (yaml instanceof java.lang.Integer) return new Int((int) yaml);
+        else if (yaml instanceof java.lang.Float) return new Float((float) yaml);
+        else if (yaml instanceof java.lang.Boolean) return new Boolean((boolean) yaml);
+        else throw new IllegalStateException();
     }
 
     public boolean isMap() {
-        return object instanceof Map;
+        return false;
     }
 
-    public LinkedHashMap<String, Yaml> asMap() {
-        LinkedHashMap<String, Object> mapObject = (LinkedHashMap<String, Object>) object;
-        LinkedHashMap<String, Yaml> mapYaml = new LinkedHashMap<>();
-        for (String key : mapObject.keySet()) {
-            mapYaml.put(key, new Yaml(mapObject.get(key)));
-        }
-        return mapYaml;
+    public Map asMap() {
+        throw classCastException(getClass(), Map.class);
     }
 
     public boolean isList() {
-        return object instanceof List;
+        return false;
     }
 
-    public List<Yaml> asList() {
-        List<Object> listObject = (List<Object>) object;
-        List<Yaml> listYaml = new ArrayList<>();
-        for (Object e : listObject) {
-            listYaml.add(new Yaml(e));
-        }
-        return listYaml;
+    public List asList() {
+        throw classCastException(getClass(), List.class);
     }
 
     public boolean isString() {
-        return object instanceof String;
+        return false;
     }
 
     public String asString() {
-        return (String) object;
+        throw classCastException(getClass(), String.class);
     }
 
     public boolean isInt() {
-        return object instanceof Integer;
+        return false;
     }
 
-    public int asInt() {
-        return (Integer) object;
+    public Int asInt() {
+        throw classCastException(getClass(), Int.class);
     }
 
     public boolean isFloat() {
-        return object instanceof Float;
+        return false;
     }
 
-    public float asFloat() {
-        return (Float) object;
+    public Float asFloat() {
+        throw classCastException(getClass(), Float.class);
     }
 
-    public boolean isBoolean () {
-        return object instanceof Boolean;
+    public boolean isBoolean() {
+        return false;
     }
 
-    public boolean asBoolean() {
-        return (Boolean) object;
+    public Boolean asBoolean() {
+        throw classCastException(getClass(), Boolean.class);
     }
 
+    private ClassCastException classCastException(Class<?> from, Class<?> to) {
+        return new ClassCastException(java.lang.String.format("Illegal cast from '%s' to '%s'.", className(from),
+                className(to)));
+    }
+
+    public static class Map extends Yaml {
+
+        private final java.util.Map<java.lang.String, Yaml> map;
+
+        public Map(java.util.Map<java.lang.String, Yaml> map) {
+            this.map = map;
+        }
+
+        private static Map wrap(java.util.Map<java.lang.String, Object> yamlMap) {
+            java.util.Map<java.lang.String, Yaml> map = new LinkedHashMap<>();
+            for (java.lang.String key : yamlMap.keySet()) {
+                map.put(key, Yaml.wrap(map.get(key)));
+            }
+            return new Map(map);
+        }
+
+        public boolean containsKey(java.lang.String key) {
+            return map.containsKey(key);
+        }
+
+        public Set<java.lang.String> keys() {
+            return map.keySet();
+        }
+
+        public Yaml get(java.lang.String key) {
+            return map.get(key);
+        }
+
+        public void put(java.lang.String key, Yaml value) {
+            map.put(key, value);
+        }
+
+        public void forEach(BiConsumer<java.lang.String, Yaml> consumer) {
+            map.forEach(consumer);
+        }
+
+        @Override
+        public boolean isMap() {
+            return true;
+        }
+
+        @Override
+        public Map asMap() {
+            return this;
+        }
+    }
+
+    public static class List extends Yaml {
+
+        private final java.util.List<Yaml> list;
+
+        private List(java.util.List<Yaml> list) {
+            this.list = list;
+        }
+
+        static List wrap(java.util.List<Object> list) {
+            java.util.List<Yaml> yamlList = new ArrayList<>();
+            for (Object e : list) {
+                yamlList.add(Yaml.wrap(e));
+            }
+            return new List(yamlList);
+        }
+
+        public Iterator<Yaml> iterator() {
+            return list.iterator();
+        }
+
+        @Override
+        public boolean isList() {
+            return true;
+        }
+
+        @Override
+        public List asList() {
+            return this;
+        }
+    }
+
+    public static class String extends Yaml {
+
+        private final java.lang.String value;
+
+        private String(java.lang.String string) {
+            this.value = string;
+        }
+
+        public java.lang.String value() {
+            return value;
+        }
+
+        @Override
+        public boolean isString() {
+            return true;
+        }
+
+        @Override
+        public String asString() {
+            return this;
+        }
+
+        @Override
+        public java.lang.String toString() {
+            return value + "[string]";
+        }
+    }
+
+    public static class Int extends Yaml {
+
+        private final int value;
+
+        private Int(int value) {
+            this.value = value;
+        }
+
+        public int value() {
+            return value;
+        }
+
+        @Override
+        public boolean isInt() {
+            return true;
+        }
+
+        @Override
+        public Int asInt() {
+            return this;
+        }
+
+        @Override
+        public java.lang.String toString() {
+            return value + "[int]";
+        }
+    }
+
+    public static class Float extends Yaml {
+
+        private final float value;
+
+        private Float(float value) {
+            this.value = value;
+        }
+
+        public float value() {
+            return value;
+        }
+
+        @Override
+        public boolean isFloat() {
+            return true;
+        }
+
+        @Override
+        public Float asFloat() {
+            return this;
+        }
+
+        @Override
+        public java.lang.String toString() {
+            return value + "[float]";
+        }
+    }
+
+    public static class Boolean extends Yaml {
+
+        private final boolean value;
+
+        private Boolean(boolean value) {
+            this.value = value;
+        }
+
+        public boolean value() {
+            return value;
+        }
+
+        @Override
+        public boolean isBoolean() {
+            return true;
+        }
+
+        @Override
+        public Boolean asBoolean() {
+            return this;
+        }
+
+        @Override
+        public java.lang.String toString() {
+            return value + "[boolean]";
+        }
+    }
 }
