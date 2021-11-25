@@ -56,8 +56,7 @@ public abstract class Yaml {
     }
 
     public Map asMap() {
-        throw new ClassCastException(java.lang.String.format("Illegal cast from '%s' to '%s'.", className(getClass()),
-                className(Map.class)));
+        throw classCastException(getClass(), Map.class);
     }
 
     public boolean isList() {
@@ -65,8 +64,7 @@ public abstract class Yaml {
     }
 
     public List asList() {
-        throw new ClassCastException(java.lang.String.format("Illegal cast from '%s' to '%s'.", className(getClass()),
-                className(List.class)));
+        throw classCastException(getClass(), List.class);
     }
 
     public boolean isString() {
@@ -74,8 +72,7 @@ public abstract class Yaml {
     }
 
     public String asString() {
-        throw new ClassCastException(java.lang.String.format("Illegal cast from '%s' to '%s'.", className(getClass()),
-                className(String.class)));
+        throw classCastException(getClass(), String.class);
     }
 
     public boolean isInt() {
@@ -83,8 +80,7 @@ public abstract class Yaml {
     }
 
     public Int asInt() {
-        throw new ClassCastException(java.lang.String.format("Illegal cast from '%s' to '%s'.", className(getClass()),
-                className(Int.class)));
+        throw classCastException(getClass(), Int.class);
     }
 
     public boolean isFloat() {
@@ -92,8 +88,7 @@ public abstract class Yaml {
     }
 
     public Float asFloat() {
-        throw new ClassCastException(java.lang.String.format("Illegal cast from '%s' to '%s'.", className(getClass()),
-                className(Float.class)));
+        throw classCastException(getClass(), Float.class);
     }
 
     public boolean isBoolean() {
@@ -101,8 +96,12 @@ public abstract class Yaml {
     }
 
     public Boolean asBoolean() {
-        throw new ClassCastException(java.lang.String.format("Illegal cast from '%s' to '%s'.", className(getClass()),
-                className(Boolean.class)));
+        throw classCastException(getClass(), Boolean.class);
+    }
+
+    private ClassCastException classCastException(Class<?> from, Class<?> to) {
+        return new ClassCastException(java.lang.String.format("Illegal cast from '%s' to '%s'.", className(from),
+                className(to)));
     }
 
     public static class Map extends Yaml {
