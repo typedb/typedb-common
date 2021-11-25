@@ -21,7 +21,10 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.Set;
+import java.util.function.BiConsumer;
 
 import static com.vaticle.typedb.common.util.Objects.className;
 
@@ -118,6 +121,26 @@ public abstract class Yaml {
             return new Map(map);
         }
 
+        public boolean containsKey(java.lang.String key) {
+            return map.containsKey(key);
+        }
+
+        public Set<java.lang.String> keys() {
+            return map.keySet();
+        }
+
+        public Yaml get(java.lang.String key) {
+            return map.get(key);
+        }
+
+        public void put(java.lang.String key, Yaml value) {
+            map.put(key, value);
+        }
+
+        public void forEach(BiConsumer<java.lang.String, Yaml> consumer) {
+            map.forEach(consumer);
+        }
+
         @Override
         public boolean isMap() {
             return true;
@@ -145,6 +168,10 @@ public abstract class Yaml {
             return new List(yamlList);
         }
 
+        public Iterator<Yaml> iterator() {
+            return list.iterator();
+        }
+
         @Override
         public boolean isList() {
             return true;
@@ -156,7 +183,7 @@ public abstract class Yaml {
         }
     }
 
-    static class String extends Yaml {
+    public static class String extends Yaml {
 
         private final java.lang.String value;
 
@@ -184,7 +211,7 @@ public abstract class Yaml {
         }
     }
 
-    static class Int extends Yaml {
+    public static class Int extends Yaml {
 
         private final int value;
 
@@ -196,10 +223,12 @@ public abstract class Yaml {
             return value;
         }
 
+        @Override
         public boolean isInt() {
             return true;
         }
 
+        @Override
         public Int asInt() {
             return this;
         }
@@ -222,10 +251,12 @@ public abstract class Yaml {
             return value;
         }
 
+        @Override
         public boolean isFloat() {
             return true;
         }
 
+        @Override
         public Float asFloat() {
             return this;
         }
@@ -248,10 +279,12 @@ public abstract class Yaml {
             return value;
         }
 
+        @Override
         public boolean isBoolean() {
             return true;
         }
 
+        @Override
         public Boolean asBoolean() {
             return this;
         }
