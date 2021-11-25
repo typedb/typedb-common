@@ -45,9 +45,9 @@ public abstract class Yaml {
             return Map.wrap((java.util.Map<java.lang.String, Object>) yaml);
         } else if (yaml instanceof java.util.List) return List.wrap((java.util.List<Object>) yaml);
         else if (yaml instanceof java.lang.String) return new String((java.lang.String) yaml);
-        else if (yaml instanceof java.lang.Integer) return new Int((java.lang.Integer) yaml);
-        else if (yaml instanceof java.lang.Float) return new Float((java.lang.Float) yaml);
-        else if (yaml instanceof java.lang.Boolean) return new Boolean((java.lang.Boolean) yaml);
+        else if (yaml instanceof java.lang.Integer) return new Int((int) yaml);
+        else if (yaml instanceof java.lang.Float) return new Float((float) yaml);
+        else if (yaml instanceof java.lang.Boolean) return new Boolean((boolean) yaml);
         else throw new IllegalStateException();
     }
 
