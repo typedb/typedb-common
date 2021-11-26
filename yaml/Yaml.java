@@ -112,10 +112,10 @@ public abstract class Yaml {
             this.map = map;
         }
 
-        private static Map wrap(java.util.Map<java.lang.String, Object> yamlMap) {
+        private static Map wrap(java.util.Map<java.lang.String, Object> source) {
             java.util.Map<java.lang.String, Yaml> map = new LinkedHashMap<>();
-            for (java.lang.String key : yamlMap.keySet()) {
-                map.put(key, Yaml.wrap(map.get(key)));
+            for (java.lang.String key : source.keySet()) {
+                map.put(key, Yaml.wrap(source.get(key)));
             }
             return new Map(map);
         }
@@ -159,9 +159,9 @@ public abstract class Yaml {
             this.list = list;
         }
 
-        static List wrap(java.util.List<Object> list) {
+        static List wrap(java.util.List<Object> source) {
             java.util.List<Yaml> yamlList = new ArrayList<>();
-            for (Object e : list) {
+            for (Object e : source) {
                 yamlList.add(Yaml.wrap(e));
             }
             return new List(yamlList);
