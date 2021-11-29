@@ -23,7 +23,6 @@ if [[ ! -z "$JAVA_HOME" ]]; then
 fi
 [[ $(readlink $0) ]] && path=$(readlink $0) || path=$0
 TYPEDB_HOME=$(cd "$(dirname "${path}")" && pwd -P)
-TYPEDB_CONFIG="server/conf/typedb.properties"
 
 # ================================================
 # common helper functions
@@ -104,14 +103,11 @@ elif [[ "$1" = "server" ]] || [[ "$1" = "cluster" ]]; then
             *) echo "WARNING: Debug mode RocksDB is not available in this platform. Fallback to production mode."
                CLASSPATH="${CLASSPATH}:$TYPEDB_SERVER_LIB_DIR/prod/*" ;;
         esac
-        exec $JAVA_BIN ${JAVAOPTS} -ea -cp "${CLASSPATH}" \
-            -Dtypedb.dir="${TYPEDB_HOME}" -Dtypedb.conf="${TYPEDB_HOME}/${TYPEDB_CONFIG}" \
-            -Dlogback.configurationFile=logback-debug.xml \
+        exec $JAVA_BIN ${JAVAOPTS} -ea -cp "${CLASSPATH}" \ -Dtypedb.dir="${TYPEDB_HOME}" \
             ${TYPEDB_SERVER_CLASS} "${@:2}"
     else
         CLASSPATH="${CLASSPATH}:$TYPEDB_SERVER_LIB_DIR/prod/*"
-        exec $JAVA_BIN ${JAVAOPTS} -cp "${CLASSPATH}" \
-            -Dtypedb.dir="${TYPEDB_HOME}" -Dtypedb.conf="${TYPEDB_HOME}/${TYPEDB_CONFIG}" \
+        exec $JAVA_BIN ${JAVAOPTS} -cp "${CLASSPATH}" \ -Dtypedb.dir="${TYPEDB_HOME}" - \
             ${TYPEDB_SERVER_CLASS} "${@:2}"
     fi
 else
