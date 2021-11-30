@@ -115,6 +115,9 @@ public abstract class Yaml {
         private static Map wrap(java.util.Map<java.lang.String, Object> source) {
             java.util.Map<java.lang.String, Yaml> map = new LinkedHashMap<>();
             for (java.lang.String key : source.keySet()) {
+                if (source.get(key) == null) {
+                    throw new IllegalArgumentException("Illegal null value for key: " + key + ".");
+                }
                 map.put(key, Yaml.wrap(source.get(key)));
             }
             return new Map(map);
@@ -162,6 +165,9 @@ public abstract class Yaml {
         static List wrap(java.util.List<Object> source) {
             java.util.List<Yaml> yamlList = new ArrayList<>();
             for (Object e : source) {
+                if (e == null) {
+                    throw new IllegalArgumentException("Illegal null value encountered in list.");
+                }
                 yamlList.add(Yaml.wrap(e));
             }
             return new List(yamlList);
