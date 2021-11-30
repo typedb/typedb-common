@@ -165,6 +165,9 @@ public abstract class Yaml {
         static List wrap(java.util.List<Object> source) {
             java.util.List<Yaml> yamlList = new ArrayList<>();
             for (Object e : source) {
+                if (e == null) {
+                    throw new IllegalArgumentException("Illegal null value encountered in list.");
+                }
                 yamlList.add(Yaml.wrap(e));
             }
             return new List(yamlList);
