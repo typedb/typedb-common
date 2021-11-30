@@ -115,6 +115,9 @@ public abstract class Yaml {
         private static Map wrap(java.util.Map<java.lang.String, Object> source) {
             java.util.Map<java.lang.String, Yaml> map = new LinkedHashMap<>();
             for (java.lang.String key : source.keySet()) {
+                if (source.get(key) == null) {
+                    throw new IllegalArgumentException("Illegal null value for key: " + key + ".");
+                }
                 map.put(key, Yaml.wrap(source.get(key)));
             }
             return new Map(map);
