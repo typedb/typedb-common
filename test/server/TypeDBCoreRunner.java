@@ -48,9 +48,9 @@ public class TypeDBCoreRunner extends TypeDBRunner {
         List<String> command = new ArrayList<>();
         command.addAll(getTypeDBBinary());
         command.add("server");
-        command.add("--port");
-        command.add(Integer.toString(port));
-        command.add("--data");
+        command.add("--server.address");
+        command.add("0.0.0.0:" + port);
+        command.add("--storage.data");
         command.add(dataDir.toAbsolutePath().toString());
         return command;
     }
