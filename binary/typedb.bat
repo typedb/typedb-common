@@ -18,8 +18,6 @@ REM
 SET "TYPEDB_HOME=%cd%"
 
 
-SET "TYPEDB_CONFIG=server\conf\typedb.properties"
-
 where java >NUL 2>NUL
 if %ERRORLEVEL% GEQ 1 (
     echo Java is not installed on this machine.
@@ -68,7 +66,7 @@ set "G_CP=%TYPEDB_HOME%\server\conf\;%TYPEDB_HOME%\server\lib\common\*;%TYPEDB_H
 
 
 if exist .\server\ (
-  java %SERVER_JAVAOPTS% -cp "%G_CP%" -Dtypedb.dir="%TYPEDB_HOME%" -Dtypedb.conf="%TYPEDB_HOME%\%TYPEDB_CONFIG%" com.vaticle.typedb.core.server.TypeDBServer %2 %3 %4 %5 %6 %7 %8 %9
+  java %SERVER_JAVAOPTS% -cp "%G_CP%" -Dtypedb.dir="%TYPEDB_HOME%" com.vaticle.typedb.core.server.TypeDBServer %2 %3 %4 %5 %6 %7 %8 %9
   goto exit
 ) else (
   echo TypeDB Server is not included in this TypeDB distribution^.
@@ -81,7 +79,7 @@ if exist .\server\ (
 set "G_CP=%TYPEDB_HOME%\server\conf\;%TYPEDB_HOME%\server\lib\common\*;%TYPEDB_HOME%\server\lib\prod\*"
 
 if exist .\server\ (
-  java %SERVER_JAVAOPTS% -cp "%G_CP%" -Dtypedb.dir="%TYPEDB_HOME%" -Dtypedb.conf="%TYPEDB_HOME%\%TYPEDB_CONFIG%" com.vaticle.typedb.cluster.server.TypeDBClusterServer %2 %3 %4 %5 %6 %7 %8 %9
+  java %SERVER_JAVAOPTS% -cp "%G_CP%" -Dtypedb.dir="%TYPEDB_HOME%" com.vaticle.typedb.cluster.server.TypeDBClusterServer %2 %3 %4 %5 %6 %7 %8 %9
   goto exit
 ) else (
   echo TypeDB Cluster is not included in this TypeDB distribution^.
