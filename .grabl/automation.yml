@@ -26,25 +26,25 @@ build:
       owner: vaticle
       branch: master
     build-analysis:
-      image: vaticle-ubuntu-20.04
+      image: vaticle-ubuntu-21.04
       command: |
         SONARCLOUD_CODE_ANALYSIS_CREDENTIAL=$SONARCLOUD_CREDENTIAL \
           bazel run @vaticle_dependencies//tool/sonarcloud:code-analysis -- \
           --project-key=vaticle_typedb_common \
           --branch=$GRABL_BRANCH --commit-id=$GRABL_COMMIT
     dependency-analysis:
-      image: vaticle-ubuntu-20.04
+      image: vaticle-ubuntu-21.04
       command: |
         bazel run @vaticle_dependencies//factory/analysis:dependency-analysis
   correctness:
     build:
-      image: vaticle-ubuntu-20.04
+      image: vaticle-ubuntu-21.04
       command: |
         bazel build //... --test_output=errors
         bazel run @vaticle_dependencies//tool/checkstyle:test-coverage
         bazel test $(bazel query 'kind(checkstyle_test, //...)')
     build-dependency:
-      image: vaticle-ubuntu-20.04
+      image: vaticle-ubuntu-21.04
       command: |
         dependencies/maven/update.sh
         git diff --exit-code dependencies/maven/artifacts.snapshot
@@ -53,7 +53,7 @@ build:
       filter:
         owner: vaticle
         branch: master
-      image: vaticle-ubuntu-20.04
+      image: vaticle-ubuntu-21.04
       dependencies: [build]
       command: |
         export DEPLOY_MAVEN_USERNAME=$REPO_VATICLE_USERNAME
@@ -63,7 +63,7 @@ build:
       filter:
         owner: vaticle
         branch: master
-      image: vaticle-ubuntu-20.04
+      image: vaticle-ubuntu-21.04
       dependencies: [build]
       command: |
         export DEPLOY_APT_USERNAME=$REPO_VATICLE_USERNAME
@@ -81,7 +81,7 @@ release:
     branch: master
   deployment:
     deploy-github:
-      image: vaticle-ubuntu-20.04
+      image: vaticle-ubuntu-21.04
       command: |
         pyenv install -s 3.6.10
         pyenv global 3.6.10 system
@@ -91,14 +91,14 @@ release:
         export DEPLOY_GITHUB_TOKEN=$REPO_GITHUB_TOKEN
         bazel run --define version=$(cat VERSION) //:deploy-github -- $GRABL_COMMIT
     deploy-maven-release:
-      image: vaticle-ubuntu-20.04
+      image: vaticle-ubuntu-21.04
       dependencies: [deploy-github]
       command: |
         export DEPLOY_MAVEN_USERNAME=$REPO_VATICLE_USERNAME
         export DEPLOY_MAVEN_PASSWORD=$REPO_VATICLE_PASSWORD
         bazel run --define version=$(cat VERSION) //:deploy-maven -- release
     deploy-apt-release:
-      image: vaticle-ubuntu-20.04
+      image: vaticle-ubuntu-21.04
       dependencies: [deploy-github]
       command: |
         cat VERSION
