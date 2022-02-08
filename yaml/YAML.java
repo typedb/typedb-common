@@ -123,7 +123,7 @@ public abstract class YAML {
             return new Map(map);
         }
 
-        public java.util.Map<java.lang.String, YAML> get() {
+        public java.util.Map<java.lang.String, YAML> content() {
             return map;
         }
 
@@ -177,7 +177,7 @@ public abstract class YAML {
             return new List(yamlList);
         }
 
-        public java.util.List<YAML> get() {
+        public java.util.List<YAML> content() {
             return list;
         }
 
