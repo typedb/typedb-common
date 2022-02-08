@@ -123,6 +123,10 @@ public abstract class YAML {
             return new Map(map);
         }
 
+        public java.util.Map<java.lang.String, YAML> get() {
+            return map;
+        }
+
         public boolean containsKey(java.lang.String key) {
             return map.containsKey(key);
         }
@@ -171,6 +175,10 @@ public abstract class YAML {
                 yamlList.add(YAML.wrap(e));
             }
             return new List(yamlList);
+        }
+
+        public java.util.List<YAML> get() {
+            return list;
         }
 
         public Iterator<YAML> iterator() {
