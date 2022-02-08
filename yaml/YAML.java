@@ -28,18 +28,18 @@ import java.util.function.BiConsumer;
 
 import static com.vaticle.typedb.common.util.Objects.className;
 
-public abstract class Yaml {
+public abstract class YAML {
 
-    public static Yaml load(java.lang.String yaml) {
+    public static YAML load(java.lang.String yaml) {
         return wrap(new org.yaml.snakeyaml.Yaml().load(yaml));
     }
 
-    public static Yaml load(Path filePath) throws FileNotFoundException {
+    public static YAML load(Path filePath) throws FileNotFoundException {
         FileInputStream inputStream = new FileInputStream(filePath.toFile());
         return wrap(new org.yaml.snakeyaml.Yaml().load(inputStream));
     }
 
-    private static Yaml wrap(Object yaml) {
+    private static YAML wrap(Object yaml) {
         if (yaml instanceof java.util.Map) {
             assert ((java.util.Map<Object, Object>) yaml).keySet().stream().allMatch(key -> key instanceof java.lang.String);
             return Map.wrap((java.util.Map<java.lang.String, Object>) yaml);
@@ -104,21 +104,21 @@ public abstract class Yaml {
                 className(to)));
     }
 
-    public static class Map extends Yaml {
+    public static class Map extends YAML {
 
-        private final java.util.Map<java.lang.String, Yaml> map;
+        private final java.util.Map<java.lang.String, YAML> map;
 
-        public Map(java.util.Map<java.lang.String, Yaml> map) {
+        public Map(java.util.Map<java.lang.String, YAML> map) {
             this.map = map;
         }
 
         private static Map wrap(java.util.Map<java.lang.String, Object> source) {
-            java.util.Map<java.lang.String, Yaml> map = new LinkedHashMap<>();
+            java.util.Map<java.lang.String, YAML> map = new LinkedHashMap<>();
             for (java.lang.String key : source.keySet()) {
                 if (source.get(key) == null) {
                     throw new IllegalArgumentException("Illegal null value for key: " + key + ".");
                 }
-                map.put(key, Yaml.wrap(source.get(key)));
+                map.put(key, YAML.wrap(source.get(key)));
             }
             return new Map(map);
         }
@@ -131,15 +131,15 @@ public abstract class Yaml {
             return map.keySet();
         }
 
-        public Yaml get(java.lang.String key) {
+        public YAML get(java.lang.String key) {
             return map.get(key);
         }
 
-        public void put(java.lang.String key, Yaml value) {
+        public void put(java.lang.String key, YAML value) {
             map.put(key, value);
         }
 
-        public void forEach(BiConsumer<java.lang.String, Yaml> consumer) {
+        public void forEach(BiConsumer<java.lang.String, YAML> consumer) {
             map.forEach(consumer);
         }
 
@@ -154,26 +154,26 @@ public abstract class Yaml {
         }
     }
 
-    public static class List extends Yaml {
+    public static class List extends YAML {
 
-        private final java.util.List<Yaml> list;
+        private final java.util.List<YAML> list;
 
-        private List(java.util.List<Yaml> list) {
+        private List(java.util.List<YAML> list) {
             this.list = list;
         }
 
         static List wrap(java.util.List<Object> source) {
-            java.util.List<Yaml> yamlList = new ArrayList<>();
+            java.util.List<YAML> yamlList = new ArrayList<>();
             for (Object e : source) {
                 if (e == null) {
                     throw new IllegalArgumentException("Illegal null value encountered in list.");
                 }
-                yamlList.add(Yaml.wrap(e));
+                yamlList.add(YAML.wrap(e));
             }
             return new List(yamlList);
         }
 
-        public Iterator<Yaml> iterator() {
+        public Iterator<YAML> iterator() {
             return list.iterator();
         }
 
@@ -188,7 +188,7 @@ public abstract class Yaml {
         }
     }
 
-    public static class String extends Yaml {
+    public static class String extends YAML {
 
         private final java.lang.String value;
 
@@ -216,7 +216,7 @@ public abstract class Yaml {
         }
     }
 
-    public static class Int extends Yaml {
+    public static class Int extends YAML {
 
         private final int value;
 
@@ -244,7 +244,7 @@ public abstract class Yaml {
         }
     }
 
-    public static class Float extends Yaml {
+    public static class Float extends YAML {
 
         private final float value;
 
@@ -272,7 +272,7 @@ public abstract class Yaml {
         }
     }
 
-    public static class Boolean extends Yaml {
+    public static class Boolean extends YAML {
 
         private final boolean value;
 
