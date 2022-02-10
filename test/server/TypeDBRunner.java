@@ -51,7 +51,7 @@ public abstract class TypeDBRunner extends Runner {
 
     protected abstract List<String> command();
 
-    protected String host() {
+    protected static String host() {
         return "127.0.0.1";
     }
 
@@ -62,10 +62,10 @@ public abstract class TypeDBRunner extends Runner {
     }
 
     public void start() {
-        verifyPortUnused(port());
+        verifyPortUnused();
         try {
             System.out.println(address() + ": starting... ");
-            System.out.println(address() + ": distribution is located at " + rootPath.toAbsolutePath().toString());
+            System.out.println(address() + ": distribution is located at " + rootPath.toAbsolutePath());
             System.out.println(address() + ": data directory is located at " + dataDir.toAbsolutePath());
             System.out.println(address() + ": command = " + command());
             serverProcess = executor.command(command()).start();
@@ -143,6 +143,10 @@ public abstract class TypeDBRunner extends Runner {
         String[] args = System.getProperty("sun.java.command").split(" ");
         assert args.length > 1;
         return new File(args[1]);
+    }
+
+    protected void verifyPortUnused() {
+        verifyPortUnused(port());
     }
 
     protected void verifyPortUnused(int port) {
