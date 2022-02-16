@@ -18,7 +18,6 @@
 
 package com.vaticle.typedb.common.test.server;
 
-import javax.sound.sampled.Port;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -117,8 +116,8 @@ public class TypeDBClusterRunner extends TypeDBRunner {
     @Override
     protected List<String> command() {
         Map<String, String> options = new HashMap<>();
-        addOptions(options, server);
-        addOptions(options, peers);
+        options.putAll(serverOptions(server));
+        options.putAll(peerOptions(peers));
         options.putAll(remainingOptions);
 
         List<String> command = new ArrayList<>();
@@ -128,13 +127,16 @@ public class TypeDBClusterRunner extends TypeDBRunner {
         return command;
     }
 
-    private static void addOptions(Map<String, String> options, Ports serverPorts) {
+    private static Map<String, String> serverOptions(Ports serverPorts) {
+        Map<String, String> options = new HashMap<>();
         options.put(OPT_ADDR, host() + ":" + serverPorts.port());
         options.put(OPT_INTERNAL_ADDR_ZMQ, host() + ":" + serverPorts.internalZMQ());
         options.put(OPT_INTERNAL_ADDR_GRPC, host() + ":" + serverPorts.internalGRPC());
+        return options;
     }
 
-    private static void addOptions(Map<String, String> options, Set<Ports> peerPorts) {
+    private static Map<String, String> peerOptions(Set<Ports> peerPorts) {
+        Map<String, String> options = new HashMap<>();
         int index = 0;
         for (Ports peer: peerPorts) {
             String addrKey = OPT_PEERS_ADDR.replace("{index}", "" + index);
@@ -145,6 +147,7 @@ public class TypeDBClusterRunner extends TypeDBRunner {
             options.put(intlAddrGRPCKey, host() + ":" + peer.internalGRPC());
             index++;
         }
+        return options;
     }
 
     public static class Ports {
@@ -152,6 +155,7 @@ public class TypeDBClusterRunner extends TypeDBRunner {
 
         private final int internalZMQ;
         private final int internalGRPC;
+
         public Ports(int port, int internalZMQ, int internalGRPC) {
             this.port = port;
             this.internalZMQ = internalZMQ;
