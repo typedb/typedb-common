@@ -34,13 +34,18 @@ public class TypeDBCoreRunner extends TypeDBRunner {
     }
 
     @Override
+    protected String name() {
+        return "TypeDB Core";
+    }
+
+    @Override
     protected int port() {
         return port;
     }
 
     @Override
-    protected String name() {
-        return "TypeDB Core";
+    protected void verifyPortUnused() {
+        verifyPortUnused(port());
     }
 
     @Override

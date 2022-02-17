@@ -49,23 +49,46 @@ public abstract class TypeDBRunner extends Runner {
         this.logsDir = rootPath.resolve("server").resolve("logs");
     }
 
-    protected abstract List<String> command();
-
-    protected String host() {
-        return "127.0.0.1";
+    @Override
+    protected File distributionArchive() {
+        String[] args = System.getProperty("sun.java.command").split(" ");
+        assert args.length > 1;
+        return new File(args[1]);
     }
 
-    protected abstract int port();
+    protected abstract List<String> command();
 
     public String address() {
         return host() + ":" + port();
     }
 
+    protected static String host() {
+        return "127.0.0.1";
+    }
+
+    protected abstract int port();
+
+    protected abstract void verifyPortUnused();
+
+    protected void verifyPortUnused(int port) {
+        if (isPortOpen(host(), port)) throw new RuntimeException(name() + ": unable to start. port " + port + " is used by another process.");
+    }
+
+    protected static boolean isPortOpen(String host, int port) {
+        try {
+            Socket s = new Socket(host, port);
+            s.close();
+            return true;
+        } catch (IOException e) {
+            return false;
+        }
+    }
+
     public void start() {
-        verifyPortUnused(port());
+        verifyPortUnused();
         try {
             System.out.println(address() + ": starting... ");
-            System.out.println(address() + ": distribution is located at " + rootPath.toAbsolutePath().toString());
+            System.out.println(address() + ": distribution is located at " + rootPath.toAbsolutePath());
             System.out.println(address() + ": data directory is located at " + dataDir.toAbsolutePath());
             System.out.println(address() + ": command = " + command());
             serverProcess = executor.command(command()).start();
@@ -135,27 +158,6 @@ public abstract class TypeDBRunner extends Runner {
         } catch (IOException | InterruptedException | TimeoutException e) {
             System.out.println(address() + ": unable to print '" + logPath + "'");
             e.printStackTrace();
-        }
-    }
-
-    @Override
-    protected File distributionArchive() {
-        String[] args = System.getProperty("sun.java.command").split(" ");
-        assert args.length > 1;
-        return new File(args[1]);
-    }
-
-    protected void verifyPortUnused(int port) {
-        if (isPortOpen(host(), port)) throw new RuntimeException(name() + ": unable to start. port " + port + " is used by another process.");
-    }
-
-    protected static boolean isPortOpen(String host, int port) {
-        try {
-            Socket s = new Socket(host, port);
-            s.close();
-            return true;
-        } catch (IOException e) {
-            return false;
         }
     }
 }
