@@ -33,10 +33,10 @@ import static com.vaticle.typedb.common.collection.Collections.set;
 
 public class TypeDBClusterRunner extends TypeDBRunner {
 
-    public static final String OPT_ADDR = "--server.address";
+    private static final String OPT_ADDR = "--server.address";
     private static final String OPT_INTERNAL_ADDR_ZMQ = "--server.internal-address.zeromq";
     private static final String OPT_INTERNAL_ADDR_GRPC = "--server.internal-address.grpc";
-    public static final String OPT_PEERS_ADDR = "--server.peers.server-{peer-id}.address";
+    private static final String OPT_PEERS_ADDR = "--server.peers.server-{peer-id}.address";
     private static final String OPT_PEERS_INTERNAL_ADDR_ZMQ = "--server.peers.server-{peer-id}.internal-address.zeromq";
     private static final String OPT_PEERS_INTERNAL_ADDR_GRPC = "--server.peers.server-{peer-id}.internal-address.grpc";
 
@@ -47,23 +47,23 @@ public class TypeDBClusterRunner extends TypeDBRunner {
     public static TypeDBClusterRunner create() throws InterruptedException, TimeoutException, IOException {
         int port = ThreadLocalRandom.current().nextInt(40000, 60000);
         Ports server = new Ports(port, port+1, port+2);
-        return TypeDBClusterRunner.create(server);
+        return create(server);
     }
 
     public static TypeDBClusterRunner create(Map<String, String> remainingServerOpts)
             throws IOException, InterruptedException, TimeoutException {
         int port = ThreadLocalRandom.current().nextInt(40000, 60000);
         Ports server = new Ports(port, port+1, port+2);
-        return TypeDBClusterRunner.create(server, remainingServerOpts);
+        return create(server, remainingServerOpts);
     }
 
     public static TypeDBClusterRunner create(Ports ports) throws IOException, InterruptedException, TimeoutException {
-        return TypeDBClusterRunner.create(ports, set());
+        return create(ports, set());
     }
 
     public static TypeDBClusterRunner create(Ports ports, Set<Ports> peers)
             throws IOException, InterruptedException, TimeoutException {
-        return TypeDBClusterRunner.create(ports, peers, map());
+        return create(ports, peers, map());
     }
 
     public static TypeDBClusterRunner create(Ports ports, Map<String, String> remainingServerOpts)
@@ -108,9 +108,9 @@ public class TypeDBClusterRunner extends TypeDBRunner {
 
     @Override
     protected void verifyPortUnused() {
-        super.verifyPortUnused(port());
-        super.verifyPortUnused(ports().internalZMQ());
-        super.verifyPortUnused(ports().internalGRPC());
+        verifyPortUnused(port());
+        verifyPortUnused(ports().internalZMQ());
+        verifyPortUnused(ports().internalGRPC());
     }
 
     @Override
@@ -151,8 +151,8 @@ public class TypeDBClusterRunner extends TypeDBRunner {
     }
 
     public static class Ports {
-        private final int external;
 
+        private final int external;
         private final int internalZMQ;
         private final int internalGRPC;
 
