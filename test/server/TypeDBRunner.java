@@ -49,7 +49,18 @@ public abstract class TypeDBRunner extends Runner {
         this.logsDir = rootPath.resolve("server").resolve("logs");
     }
 
+    @Override
+    protected File distributionArchive() {
+        String[] args = System.getProperty("sun.java.command").split(" ");
+        assert args.length > 1;
+        return new File(args[1]);
+    }
+
     protected abstract List<String> command();
+
+    public String address() {
+        return host() + ":" + port();
+    }
 
     protected static String host() {
         return "127.0.0.1";
@@ -57,8 +68,20 @@ public abstract class TypeDBRunner extends Runner {
 
     protected abstract int port();
 
-    public String address() {
-        return host() + ":" + port();
+    protected abstract void verifyPortUnused();
+
+    protected void verifyPortUnused(int port) {
+        if (isPortOpen(host(), port)) throw new RuntimeException(name() + ": unable to start. port " + port + " is used by another process.");
+    }
+
+    protected static boolean isPortOpen(String host, int port) {
+        try {
+            Socket s = new Socket(host, port);
+            s.close();
+            return true;
+        } catch (IOException e) {
+            return false;
+        }
     }
 
     public void start() {
@@ -135,31 +158,6 @@ public abstract class TypeDBRunner extends Runner {
         } catch (IOException | InterruptedException | TimeoutException e) {
             System.out.println(address() + ": unable to print '" + logPath + "'");
             e.printStackTrace();
-        }
-    }
-
-    @Override
-    protected File distributionArchive() {
-        String[] args = System.getProperty("sun.java.command").split(" ");
-        assert args.length > 1;
-        return new File(args[1]);
-    }
-
-    protected void verifyPortUnused() {
-        verifyPortUnused(port());
-    }
-
-    protected void verifyPortUnused(int port) {
-        if (isPortOpen(host(), port)) throw new RuntimeException(name() + ": unable to start. port " + port + " is used by another process.");
-    }
-
-    protected static boolean isPortOpen(String host, int port) {
-        try {
-            Socket s = new Socket(host, port);
-            s.close();
-            return true;
-        } catch (IOException e) {
-            return false;
         }
     }
 }

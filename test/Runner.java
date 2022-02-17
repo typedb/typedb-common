@@ -49,7 +49,7 @@ public abstract class Runner {
             throw new IllegalArgumentException("TypeDB distribution file is missing from " + distributionArchive.getAbsolutePath());
         }
 
-        checkAndDeleteExistingDistribution(distributionArchive);
+        checkAndDeleteExistingDistribution();
 
         String distributionArchiveFormat = distributionFormat(distributionArchive);
         Path distributionDir = distributionTarget();
@@ -62,6 +62,10 @@ public abstract class Runner {
         rootPath = distributionSetup(distributionDir, distributionArchiveFormat, distributionArchive);
         System.out.println(name() + " runner constructed");
     }
+
+    protected abstract String name();
+
+    protected abstract File distributionArchive();
 
     private String distributionFormat(File distributionFile) {
         if (distributionFile.toString().endsWith(TAR_GZ)) {
@@ -78,9 +82,9 @@ public abstract class Runner {
         return Files.createTempDirectory("typedb");
     }
 
-    private void checkAndDeleteExistingDistribution(File distributionFile) throws IOException {
+    private void checkAndDeleteExistingDistribution() throws IOException {
         Path target = distributionTarget();
-        System.out.println("Checking for existing distribution at " + target.toAbsolutePath().toString());
+        System.out.println("Checking for existing distribution at " + target.toAbsolutePath());
         if (target.toFile().exists()) {
             System.out.println("An existing distribution found. Deleting...");
             FileUtils.deleteDirectory(target.toFile());
@@ -111,8 +115,4 @@ public abstract class Runner {
     protected List<String> getTypeDBBinary() {
         return System.getProperty("os.name").toLowerCase().contains("win") ? Arrays.asList("cmd.exe", "/c", "typedb.bat") : Collections.singletonList("typedb");
     }
-
-    protected abstract File distributionArchive();
-
-    protected abstract String name();
 }
