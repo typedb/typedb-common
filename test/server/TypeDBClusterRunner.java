@@ -36,9 +36,9 @@ public class TypeDBClusterRunner extends TypeDBRunner {
     private static final String OPT_ADDR = "--server.address";
     private static final String OPT_INTERNAL_ADDR_ZMQ = "--server.internal-address.zeromq";
     private static final String OPT_INTERNAL_ADDR_GRPC = "--server.internal-address.grpc";
-    private static final String OPT_PEERS_ADDR = "--server.peers.server-{peer-id}.address";
-    private static final String OPT_PEERS_INTERNAL_ADDR_ZMQ = "--server.peers.server-{peer-id}.internal-address.zeromq";
-    private static final String OPT_PEERS_INTERNAL_ADDR_GRPC = "--server.peers.server-{peer-id}.internal-address.grpc";
+    private static final String OPT_PEERS_ADDR = "--server.peers.server-peer-%d.address";
+    private static final String OPT_PEERS_INTERNAL_ADDR_ZMQ = "--server.peers.server-peer-%d.internal-address.zeromq";
+    private static final String OPT_PEERS_INTERNAL_ADDR_GRPC = "--server.peers.server-peer-%d.internal-address.grpc";
 
     private final Ports ports;
     private final Set<Ports> peers;
@@ -139,9 +139,9 @@ public class TypeDBClusterRunner extends TypeDBRunner {
         Map<String, String> options = new HashMap<>();
         int index = 0;
         for (Ports peer: peers) {
-            String addrKey = OPT_PEERS_ADDR.replace("{peer-id}", "peer-" + index);
-            String intAddrZMQKey = OPT_PEERS_INTERNAL_ADDR_ZMQ.replace("{peer-id}", "peer-" + index);
-            String intlAddrGRPCKey = OPT_PEERS_INTERNAL_ADDR_GRPC.replace("{peer-id}", "peer-" + index);
+            String addrKey = String.format(OPT_PEERS_ADDR, index);
+            String intAddrZMQKey = String.format(OPT_PEERS_INTERNAL_ADDR_ZMQ, index);
+            String intlAddrGRPCKey = String.format(OPT_PEERS_INTERNAL_ADDR_GRPC, index);
             options.put(addrKey, host() + ":" + peer.external());
             options.put(intAddrZMQKey, host() + ":" + peer.internalZMQ());
             options.put(intlAddrGRPCKey, host() + ":" + peer.internalGRPC());
