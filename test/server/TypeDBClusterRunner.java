@@ -36,13 +36,13 @@ public class TypeDBClusterRunner extends TypeDBRunner {
     public static final String OPT_ADDR = "--server.address";
     private static final String OPT_INTERNAL_ADDR_ZMQ = "--server.internal-address.zeromq";
     private static final String OPT_INTERNAL_ADDR_GRPC = "--server.internal-address.grpc";
-    public static final String OPT_PEERS_ADDR = "--server.peers.server-{index}.address";
-    private static final String OPT_PEERS_INTERNAL_ADDR_ZMQ = "--server.peers.server-{index}.internal-address.zeromq";
-    private static final String OPT_PEERS_INTERNAL_ADDR_GRPC = "--server.peers.server-{index}.internal-address.grpc";
+    public static final String OPT_PEERS_ADDR = "--server.peers.server-{peer-id}.address";
+    private static final String OPT_PEERS_INTERNAL_ADDR_ZMQ = "--server.peers.server-{peer-id}.internal-address.zeromq";
+    private static final String OPT_PEERS_INTERNAL_ADDR_GRPC = "--server.peers.server-{peer-id}.internal-address.grpc";
 
-    private final Ports server;
+    private final Ports ports;
     private final Set<Ports> peers;
-    private final Map<String, String> remainingOptions;
+    private final Map<String, String> remainingServerOpts;
 
     public static TypeDBClusterRunner create() throws InterruptedException, TimeoutException, IOException {
         int port = ThreadLocalRandom.current().nextInt(40000, 60000);
@@ -50,38 +50,38 @@ public class TypeDBClusterRunner extends TypeDBRunner {
         return TypeDBClusterRunner.create(server);
     }
 
-    public static TypeDBClusterRunner create(Map<String, String> remainingOptions)
+    public static TypeDBClusterRunner create(Map<String, String> remainingServerOpts)
             throws IOException, InterruptedException, TimeoutException {
         int port = ThreadLocalRandom.current().nextInt(40000, 60000);
         Ports server = new Ports(port, port+1, port+2);
-        return TypeDBClusterRunner.create(server, remainingOptions);
+        return TypeDBClusterRunner.create(server, remainingServerOpts);
     }
 
-    public static TypeDBClusterRunner create(Ports server) throws IOException, InterruptedException, TimeoutException {
-        return TypeDBClusterRunner.create(server, set());
+    public static TypeDBClusterRunner create(Ports ports) throws IOException, InterruptedException, TimeoutException {
+        return TypeDBClusterRunner.create(ports, set());
     }
 
-    public static TypeDBClusterRunner create(Ports server, Set<Ports> peers)
+    public static TypeDBClusterRunner create(Ports ports, Set<Ports> peers)
             throws IOException, InterruptedException, TimeoutException {
-        return TypeDBClusterRunner.create(server, peers, map());
+        return TypeDBClusterRunner.create(ports, peers, map());
     }
 
-    public static TypeDBClusterRunner create(Ports server, Map<String, String> remainingOptions)
+    public static TypeDBClusterRunner create(Ports ports, Map<String, String> remainingServerOpts)
             throws IOException, InterruptedException, TimeoutException {
-        return new TypeDBClusterRunner(server, set(), remainingOptions);
+        return new TypeDBClusterRunner(ports, set(), remainingServerOpts);
     }
 
-    public static TypeDBClusterRunner create(Ports server, Set<Ports> peers, Map<String, String> remainingOptions)
+    public static TypeDBClusterRunner create(Ports ports, Set<Ports> peers, Map<String, String> remainingServerOpts)
             throws IOException, InterruptedException, TimeoutException {
-        return new TypeDBClusterRunner(server, peers, remainingOptions);
+        return new TypeDBClusterRunner(ports, peers, remainingServerOpts);
     }
 
-    private TypeDBClusterRunner(Ports server, Set<Ports> peers, Map<String, String> remainingOptions)
+    private TypeDBClusterRunner(Ports ports, Set<Ports> peers, Map<String, String> remainingServerOpts)
             throws InterruptedException, TimeoutException, IOException {
         super();
-        this.server = server;
+        this.ports = ports;
         this.peers = peers;
-        this.remainingOptions = remainingOptions;
+        this.remainingServerOpts = remainingServerOpts;
     }
 
     @Override
@@ -91,19 +91,19 @@ public class TypeDBClusterRunner extends TypeDBRunner {
 
     @Override
     protected int port() {
-        return server.port();
+        return ports.external();
     }
 
     public Ports ports() {
-        return server;
+        return ports;
     }
 
     public Set<Ports> peers() {
         return peers;
     }
 
-    public Map<String, String> remainingOptions() {
-        return remainingOptions;
+    public Map<String, String> remainingServerOpts() {
+        return remainingServerOpts;
     }
 
     @Override
@@ -115,34 +115,34 @@ public class TypeDBClusterRunner extends TypeDBRunner {
 
     @Override
     protected List<String> command() {
-        Map<String, String> options = new HashMap<>();
-        options.putAll(serverOptions(server));
-        options.putAll(peerOptions(peers));
-        options.putAll(remainingOptions);
+        Map<String, String> serverOpts = new HashMap<>();
+        serverOpts.putAll(portOptions(ports));
+        serverOpts.putAll(peerOptions(peers));
+        serverOpts.putAll(remainingServerOpts);
 
         List<String> command = new ArrayList<>();
         command.addAll(getTypeDBBinary());
         command.add("cluster");
-        options.forEach((key, value) -> command.add(key + "=" + value));
+        serverOpts.forEach((key, value) -> command.add(key + "=" + value));
         return command;
     }
 
-    private static Map<String, String> serverOptions(Ports serverPorts) {
+    private static Map<String, String> portOptions(Ports ports) {
         Map<String, String> options = new HashMap<>();
-        options.put(OPT_ADDR, host() + ":" + serverPorts.port());
-        options.put(OPT_INTERNAL_ADDR_ZMQ, host() + ":" + serverPorts.internalZMQ());
-        options.put(OPT_INTERNAL_ADDR_GRPC, host() + ":" + serverPorts.internalGRPC());
+        options.put(OPT_ADDR, host() + ":" + ports.external());
+        options.put(OPT_INTERNAL_ADDR_ZMQ, host() + ":" + ports.internalZMQ());
+        options.put(OPT_INTERNAL_ADDR_GRPC, host() + ":" + ports.internalGRPC());
         return options;
     }
 
-    private static Map<String, String> peerOptions(Set<Ports> peerPorts) {
+    private static Map<String, String> peerOptions(Set<Ports> peers) {
         Map<String, String> options = new HashMap<>();
         int index = 0;
-        for (Ports peer: peerPorts) {
-            String addrKey = OPT_PEERS_ADDR.replace("{index}", "" + index);
-            String intAddrZMQKey = OPT_PEERS_INTERNAL_ADDR_ZMQ.replace("{index}", "" + index);
-            String intlAddrGRPCKey = OPT_PEERS_INTERNAL_ADDR_GRPC.replace("{index}", "" + index);
-            options.put(addrKey, host() + ":" + peer.port());
+        for (Ports peer: peers) {
+            String addrKey = OPT_PEERS_ADDR.replace("{peer-id}", "peer-" + index);
+            String intAddrZMQKey = OPT_PEERS_INTERNAL_ADDR_ZMQ.replace("{peer-id}", "peer-" + index);
+            String intlAddrGRPCKey = OPT_PEERS_INTERNAL_ADDR_GRPC.replace("{peer-id}", "peer-" + index);
+            options.put(addrKey, host() + ":" + peer.external());
             options.put(intAddrZMQKey, host() + ":" + peer.internalZMQ());
             options.put(intlAddrGRPCKey, host() + ":" + peer.internalGRPC());
             index++;
@@ -151,19 +151,19 @@ public class TypeDBClusterRunner extends TypeDBRunner {
     }
 
     public static class Ports {
-        private final int port;
+        private final int external;
 
         private final int internalZMQ;
         private final int internalGRPC;
 
-        public Ports(int port, int internalZMQ, int internalGRPC) {
-            this.port = port;
+        public Ports(int external, int internalZMQ, int internalGRPC) {
+            this.external = external;
             this.internalZMQ = internalZMQ;
             this.internalGRPC = internalGRPC;
         }
 
-        public int port() {
-            return port;
+        public int external() {
+            return external;
         }
 
         public int internalZMQ() {
@@ -179,12 +179,12 @@ public class TypeDBClusterRunner extends TypeDBRunner {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             Ports ports = (Ports) o;
-            return port == ports.port && internalZMQ == ports.internalZMQ && internalGRPC == ports.internalGRPC;
+            return external == ports.external && internalZMQ == ports.internalZMQ && internalGRPC == ports.internalGRPC;
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(port, internalZMQ, internalGRPC);
+            return Objects.hash(external, internalZMQ, internalGRPC);
         }
     }
 }
