@@ -49,7 +49,7 @@ def native_artifact_paths_and_labels(mac_artifact, linux_artifact, windows_artif
     native_artifact_paths = {}
     native_artifact_labels = {}
     for key in native_artifacts.keys():
-        native_artifact_labels[key] = [ Label(native_artifacts[key], relative_to_caller_repository=True) ]
+        native_artifact_labels[key] = [ Label(native_artifacts[key]) ]
         native_artifact_paths[key] = [ "$(location {})".format(native_artifacts[key]) ]
     return native_artifact_paths, native_artifact_labels
 
