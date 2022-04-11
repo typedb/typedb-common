@@ -70,18 +70,6 @@ public abstract class TypeDBRunner extends Runner {
 
     protected abstract int port();
 
-    protected boolean isPortOpen(String host, int port) {
-        Socket s = null;
-        try {
-            s = new Socket(host, port);
-            s.close();
-            return true;
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
-
     protected static List<Integer> findUnusedPorts(int count) {
         assert count > 0;
         try {
@@ -92,11 +80,9 @@ public abstract class TypeDBRunner extends Runner {
                 ports.add(seed.getLocalPort());
                 seed.close();
                 for (int i = 1; i < count; i++) {
-                    try {
-                        ServerSocket socket = new ServerSocket(ports.get(0) + i);
-                        ports.add(socket.getLocalPort());
-                        socket.close();
-                    } catch (IOException e) {
+                    if (isPortUnused(ports.get(0) + i)) {
+                        ports.add(ports.get(0) + i);
+                    } else {
                         break;
                     }
                 }
@@ -104,6 +90,16 @@ public abstract class TypeDBRunner extends Runner {
             }
         } catch (IOException e) {
             throw new RuntimeException("Error while searching for unused port.");
+        }
+    }
+
+    private static boolean isPortUnused(int port) {
+        try {
+            ServerSocket socket = new ServerSocket(port);
+            socket.close();
+            return true;
+        } catch (IOException e) {
+            return false;
         }
     }
 
@@ -147,11 +143,22 @@ public abstract class TypeDBRunner extends Runner {
                     System.out.println(String.format("%s: waiting for server to start (%ds)...",
                                                      address(), retryNumber * SERVER_ALIVE_POLL_INTERVAL_MILLIS / 1000));
                 }
-                if (isPortOpen(host(), port())) {
+                if (canConnectToServer()) {
                     latch.countDown();
                     timer.cancel();
                 }
                 if (retryNumber > SERVER_ALIVE_POLL_MAX_RETRIES) timer.cancel();
+            }
+
+            private boolean canConnectToServer() {
+                try {
+                    Socket s = new Socket(host(), port());
+                    s.close();
+                    return true;
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                return false;
             }
         }, 0, 500);
         return latch;
