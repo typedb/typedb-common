@@ -24,8 +24,10 @@ import org.zeroturnaround.exec.StartedProcess;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -68,24 +70,44 @@ public abstract class TypeDBRunner extends Runner {
 
     protected abstract int port();
 
-    protected abstract void verifyPortUnused();
-
-    protected void verifyPortUnused(int port) {
-        if (isPortOpen(host(), port)) throw new RuntimeException(name() + ": unable to start. port " + port + " is used by another process.");
-    }
-
-    protected static boolean isPortOpen(String host, int port) {
+    protected boolean isPortOpen(String host, int port) {
+        Socket s = null;
         try {
-            Socket s = new Socket(host, port);
+            s = new Socket(host, port);
             s.close();
             return true;
         } catch (IOException e) {
-            return false;
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    protected static List<Integer> findUnusedPorts(int count) {
+        assert count > 0;
+        try {
+            while (true) {
+                List<Integer> ports = new ArrayList<>(count);
+                // using port 0 automatically allocates a valid free port
+                ServerSocket seed = new ServerSocket(0);
+                ports.add(seed.getLocalPort());
+                seed.close();
+                for (int i = 1; i < count; i++) {
+                    try {
+                        ServerSocket socket = new ServerSocket(ports.get(0) + i);
+                        ports.add(socket.getLocalPort());
+                        socket.close();
+                    } catch (IOException e) {
+                        break;
+                    }
+                }
+                if (ports.size() == count) return ports;
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Error while searching for unused port.");
         }
     }
 
     public void start() {
-        verifyPortUnused();
         try {
             System.out.println(address() + ": starting... ");
             System.out.println(address() + ": distribution is located at " + rootPath.toAbsolutePath());

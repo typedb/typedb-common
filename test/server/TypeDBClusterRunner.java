@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeoutException;
 
 import static com.vaticle.typedb.common.collection.Collections.map;
@@ -45,15 +44,15 @@ public class TypeDBClusterRunner extends TypeDBRunner {
     private final Map<String, String> remainingServerOpts;
 
     public static TypeDBClusterRunner create() throws InterruptedException, TimeoutException, IOException {
-        int port = ThreadLocalRandom.current().nextInt(40000, 60000);
-        Ports server = new Ports(port, port+1, port+2);
+        List<Integer> ports = findUnusedPorts(3);
+        Ports server = new Ports(ports.get(0), ports.get(1), ports.get(2));
         return create(server);
     }
 
     public static TypeDBClusterRunner create(Map<String, String> remainingServerOpts)
             throws IOException, InterruptedException, TimeoutException {
-        int port = ThreadLocalRandom.current().nextInt(40000, 60000);
-        Ports server = new Ports(port, port+1, port+2);
+        List<Integer> ports = findUnusedPorts(3);
+        Ports server = new Ports(ports.get(0), ports.get(1), ports.get(2));
         return create(server, remainingServerOpts);
     }
 
@@ -107,13 +106,6 @@ public class TypeDBClusterRunner extends TypeDBRunner {
     }
 
     @Override
-    protected void verifyPortUnused() {
-        verifyPortUnused(port());
-        verifyPortUnused(ports().internalZMQ());
-        verifyPortUnused(ports().internalGRPC());
-    }
-
-    @Override
     protected List<String> command() {
         Map<String, String> serverOpts = new HashMap<>();
         serverOpts.putAll(portOptions(ports));
@@ -138,7 +130,7 @@ public class TypeDBClusterRunner extends TypeDBRunner {
     private static Map<String, String> peerOptions(Set<Ports> peers) {
         Map<String, String> options = new HashMap<>();
         int index = 0;
-        for (Ports peer: peers) {
+        for (Ports peer : peers) {
             String addrKey = String.format(OPT_PEERS_ADDR, index);
             String intAddrZMQKey = String.format(OPT_PEERS_INTERNAL_ADDR_ZMQ, index);
             String intlAddrGRPCKey = String.format(OPT_PEERS_INTERNAL_ADDR_GRPC, index);
