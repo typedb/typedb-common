@@ -61,7 +61,7 @@ public class TypeDBConsoleRunner {
 
     private List<String> command(String... options) {
         List<String> command = new ArrayList<>();
-        command.addAll(RunnerUtil.distributionBin());
+        command.addAll(RunnerUtil.bin());
         command.add("console");
         command.addAll(Arrays.asList(options));
         return command;
