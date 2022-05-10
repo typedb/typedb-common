@@ -39,7 +39,7 @@ public abstract class TypeDBRunner extends Runner {
 
     private static final int SERVER_STARTUP_TIMEOUT_MILLIS = 30000;
     private static final int SERVER_ALIVE_POLL_INTERVAL_MILLIS = 500;
-    private static final int PORT_ALLOCATION_RETRIES = 15;
+    private static final int PORT_ALLOCATION_MAX_RETRIES = 15;
     private static final int SERVER_ALIVE_POLL_MAX_RETRIES = SERVER_STARTUP_TIMEOUT_MILLIS / SERVER_ALIVE_POLL_INTERVAL_MILLIS;
 
     protected final Path dataDir;
@@ -74,7 +74,7 @@ public abstract class TypeDBRunner extends Runner {
     protected static List<Integer> findUnusedPorts(int count) {
         assert count > 0;
         try {
-            for (int retries = 0; retries < PORT_ALLOCATION_RETRIES; retries++) {
+            for (int retries = 0; retries < PORT_ALLOCATION_MAX_RETRIES; retries++) {
                 List<Integer> ports = new ArrayList<>(count);
                 // using port 0 automatically allocates a valid free port
                 ServerSocket seed = new ServerSocket(0);
@@ -89,7 +89,7 @@ public abstract class TypeDBRunner extends Runner {
                 }
                 if (ports.size() == count) return ports;
             }
-            throw new RuntimeException("Failed to allocate ports within  " + PORT_ALLOCATION_RETRIES + " retries");
+            throw new RuntimeException("Failed to allocate ports within  " + PORT_ALLOCATION_MAX_RETRIES + " retries");
         } catch (IOException e) {
             throw new RuntimeException("Error while searching for unused port.");
         }
