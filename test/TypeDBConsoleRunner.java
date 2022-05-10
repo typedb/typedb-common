@@ -40,7 +40,7 @@ public class TypeDBConsoleRunner {
         if (!archive.exists()) {
             throw new IllegalArgumentException("Distribution archive missing: " + archive.getAbsolutePath());
         }
-        distribution = DistributionUtil.unarchive(name(), archive);
+        distribution = RunnerUtil.distributionSetup(name(), archive);
         executor = new ProcessExecutor()
                 .directory(distribution.toFile())
                 .redirectOutput(System.out)
@@ -61,7 +61,7 @@ public class TypeDBConsoleRunner {
 
     private List<String> command(String... options) {
         List<String> command = new ArrayList<>();
-        command.addAll(DistributionUtil.getBinary());
+        command.addAll(RunnerUtil.distributionBin());
         command.add("console");
         command.addAll(Arrays.asList(options));
         return command;

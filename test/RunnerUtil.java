@@ -15,12 +15,12 @@ import java.util.concurrent.TimeoutException;
 
 import static org.junit.Assert.fail;
 
-class DistributionUtil {
+class RunnerUtil {
 
     private static final String TAR_GZ = ".tar.gz";
     private static final String ZIP = ".zip";
 
-    static Path unarchive(String name, File archive) throws IOException, TimeoutException, InterruptedException {
+    static Path distributionSetup(String name, File archive) throws IOException, TimeoutException, InterruptedException {
         System.out.println("Unarchiving " + name + " distribution.");
         Path runnerDir = createRunnerDir();
         ProcessExecutor executor = new ProcessExecutor()
@@ -66,7 +66,7 @@ class DistributionUtil {
         }
     }
 
-    static List<String> getBinary() {
+    static List<String> distributionBin() {
         if (!System.getProperty("os.name").toLowerCase().contains("win")) {
             return Collections.singletonList("typedb");
         } else {

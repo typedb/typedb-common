@@ -45,7 +45,7 @@ public class TypeDBCoreRunner extends TypeDBRunner {
     @Override
     protected List<String> command() {
         List<String> command = new ArrayList<>();
-        command.addAll(DistributionUtil.getBinary());
+        command.addAll(RunnerUtil.distributionBin());
         command.add("server");
         command.add("--server.address");
         command.add(address());

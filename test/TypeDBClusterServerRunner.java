@@ -113,7 +113,7 @@ public class TypeDBClusterServerRunner extends TypeDBRunner {
         serverOpts.putAll(remainingServerOpts);
 
         List<String> command = new ArrayList<>();
-        command.addAll(DistributionUtil.getBinary());
+        command.addAll(RunnerUtil.distributionBin());
         command.add("cluster");
         serverOpts.forEach((key, value) -> command.add(key + "=" + value));
         return command;
