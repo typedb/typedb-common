@@ -21,7 +21,6 @@ package com.vaticle.typedb.common.test.server;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeoutException;
 
 public class TypeDBCoreRunner extends TypeDBRunner {
@@ -30,7 +29,7 @@ public class TypeDBCoreRunner extends TypeDBRunner {
 
     public TypeDBCoreRunner() throws InterruptedException, TimeoutException, IOException {
         super();
-        this.port = ThreadLocalRandom.current().nextInt(40000, 60000);
+        this.port = findUnusedPorts(1).get(0);
     }
 
     @Override
@@ -44,17 +43,12 @@ public class TypeDBCoreRunner extends TypeDBRunner {
     }
 
     @Override
-    protected void verifyPortUnused() {
-        verifyPortUnused(port());
-    }
-
-    @Override
     protected List<String> command() {
         List<String> command = new ArrayList<>();
         command.addAll(getTypeDBBinary());
         command.add("server");
         command.add("--server.address");
-        command.add("0.0.0.0:" + port);
+        command.add(address());
         command.add("--storage.data");
         command.add(dataDir.toAbsolutePath().toString());
         return command;

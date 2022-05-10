@@ -24,8 +24,10 @@ import org.zeroturnaround.exec.StartedProcess;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -37,6 +39,7 @@ public abstract class TypeDBRunner extends Runner {
 
     private static final int SERVER_STARTUP_TIMEOUT_MILLIS = 30000;
     private static final int SERVER_ALIVE_POLL_INTERVAL_MILLIS = 500;
+    private static final int PORT_ALLOCATION_MAX_RETRIES = 15;
     private static final int SERVER_ALIVE_POLL_MAX_RETRIES = SERVER_STARTUP_TIMEOUT_MILLIS / SERVER_ALIVE_POLL_INTERVAL_MILLIS;
 
     protected final Path dataDir;
@@ -68,16 +71,34 @@ public abstract class TypeDBRunner extends Runner {
 
     protected abstract int port();
 
-    protected abstract void verifyPortUnused();
-
-    protected void verifyPortUnused(int port) {
-        if (isPortOpen(host(), port)) throw new RuntimeException(name() + ": unable to start. port " + port + " is used by another process.");
+    protected static List<Integer> findUnusedPorts(int count) {
+        assert count > 0;
+        try {
+            for (int retries = 0; retries < PORT_ALLOCATION_MAX_RETRIES; retries++) {
+                List<Integer> ports = new ArrayList<>(count);
+                // using port 0 automatically allocates a valid free port
+                ServerSocket seed = new ServerSocket(0);
+                ports.add(seed.getLocalPort());
+                seed.close();
+                for (int i = 1; i < count; i++) {
+                    if (isPortUnused(ports.get(0) + i)) {
+                        ports.add(ports.get(0) + i);
+                    } else {
+                        break;
+                    }
+                }
+                if (ports.size() == count) return ports;
+            }
+            throw new RuntimeException("Failed to allocate ports within  " + PORT_ALLOCATION_MAX_RETRIES + " retries");
+        } catch (IOException e) {
+            throw new RuntimeException("Error while searching for unused port.");
+        }
     }
 
-    protected static boolean isPortOpen(String host, int port) {
+    private static boolean isPortUnused(int port) {
         try {
-            Socket s = new Socket(host, port);
-            s.close();
+            ServerSocket socket = new ServerSocket(port);
+            socket.close();
             return true;
         } catch (IOException e) {
             return false;
@@ -85,7 +106,6 @@ public abstract class TypeDBRunner extends Runner {
     }
 
     public void start() {
-        verifyPortUnused();
         try {
             System.out.println(address() + ": starting... ");
             System.out.println(address() + ": distribution is located at " + rootPath.toAbsolutePath());
@@ -125,11 +145,22 @@ public abstract class TypeDBRunner extends Runner {
                     System.out.println(String.format("%s: waiting for server to start (%ds)...",
                                                      address(), retryNumber * SERVER_ALIVE_POLL_INTERVAL_MILLIS / 1000));
                 }
-                if (isPortOpen(host(), port())) {
+                if (canConnectToServer()) {
                     latch.countDown();
                     timer.cancel();
                 }
                 if (retryNumber > SERVER_ALIVE_POLL_MAX_RETRIES) timer.cancel();
+            }
+
+            private boolean canConnectToServer() {
+                try {
+                    Socket s = new Socket(host(), port());
+                    s.close();
+                    return true;
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                return false;
             }
         }, 0, 500);
         return latch;
