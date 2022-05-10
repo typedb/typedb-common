@@ -30,7 +30,7 @@ import java.util.concurrent.TimeoutException;
 import static com.vaticle.typedb.common.collection.Collections.map;
 import static com.vaticle.typedb.common.collection.Collections.set;
 
-public class TypeDBClusterRunner extends TypeDBRunner {
+public class TypeDBClusterServerRunner extends TypeDBRunner {
 
     private static final String OPT_ADDR = "--server.address";
     private static final String OPT_INTERNAL_ADDR_ZMQ = "--server.internal-address.zeromq";
@@ -43,39 +43,39 @@ public class TypeDBClusterRunner extends TypeDBRunner {
     private final Set<Ports> peers;
     private final Map<String, String> remainingServerOpts;
 
-    public static TypeDBClusterRunner create() throws InterruptedException, TimeoutException, IOException {
+    public static TypeDBClusterServerRunner create() throws InterruptedException, TimeoutException, IOException {
         List<Integer> ports = findUnusedPorts(3);
         Ports server = new Ports(ports.get(0), ports.get(1), ports.get(2));
         return create(server);
     }
 
-    public static TypeDBClusterRunner create(Map<String, String> remainingServerOpts)
+    public static TypeDBClusterServerRunner create(Map<String, String> remainingServerOpts)
             throws IOException, InterruptedException, TimeoutException {
         List<Integer> ports = findUnusedPorts(3);
         Ports server = new Ports(ports.get(0), ports.get(1), ports.get(2));
         return create(server, remainingServerOpts);
     }
 
-    public static TypeDBClusterRunner create(Ports ports) throws IOException, InterruptedException, TimeoutException {
+    public static TypeDBClusterServerRunner create(Ports ports) throws IOException, InterruptedException, TimeoutException {
         return create(ports, set());
     }
 
-    public static TypeDBClusterRunner create(Ports ports, Set<Ports> peers)
+    public static TypeDBClusterServerRunner create(Ports ports, Set<Ports> peers)
             throws IOException, InterruptedException, TimeoutException {
         return create(ports, peers, map());
     }
 
-    public static TypeDBClusterRunner create(Ports ports, Map<String, String> remainingServerOpts)
+    public static TypeDBClusterServerRunner create(Ports ports, Map<String, String> remainingServerOpts)
             throws IOException, InterruptedException, TimeoutException {
-        return new TypeDBClusterRunner(ports, set(), remainingServerOpts);
+        return new TypeDBClusterServerRunner(ports, set(), remainingServerOpts);
     }
 
-    public static TypeDBClusterRunner create(Ports ports, Set<Ports> peers, Map<String, String> remainingServerOpts)
+    public static TypeDBClusterServerRunner create(Ports ports, Set<Ports> peers, Map<String, String> remainingServerOpts)
             throws IOException, InterruptedException, TimeoutException {
-        return new TypeDBClusterRunner(ports, peers, remainingServerOpts);
+        return new TypeDBClusterServerRunner(ports, peers, remainingServerOpts);
     }
 
-    private TypeDBClusterRunner(Ports ports, Set<Ports> peers, Map<String, String> remainingServerOpts)
+    private TypeDBClusterServerRunner(Ports ports, Set<Ports> peers, Map<String, String> remainingServerOpts)
             throws InterruptedException, TimeoutException, IOException {
         super();
         this.ports = ports;
