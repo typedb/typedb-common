@@ -16,9 +16,9 @@
  *
  */
 
-package com.vaticle.typedb.common.test.console;
+package com.vaticle.typedb.common.test;
 
-import com.vaticle.typedb.common.test.Runner;
+import org.zeroturnaround.exec.ProcessExecutor;
 import org.zeroturnaround.exec.StartedProcess;
 
 import java.io.File;
@@ -29,10 +29,25 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
 
-public class TypeDBConsoleRunner extends Runner {
+public class TypeDBConsoleRunner {
+
+    protected final Path distribution;
+    protected ProcessExecutor executor;
 
     public TypeDBConsoleRunner() throws InterruptedException, TimeoutException, IOException {
-        super();
+        System.out.println("Constructing " + name() + " runner");
+        File archive = archive();
+        if (!archive.exists()) {
+            throw new IllegalArgumentException("Distribution archive missing: " + archive.getAbsolutePath());
+        }
+        distribution = DistributionUtil.unarchive(name(), archive);
+        executor = new ProcessExecutor()
+                .directory(distribution.toFile())
+                .redirectOutput(System.out)
+                .redirectError(System.err)
+                .readOutput(true)
+                .destroyOnExit();
+        System.out.println(name() + " runner constructed");
     }
 
     public int run(String... options) {
@@ -46,21 +61,19 @@ public class TypeDBConsoleRunner extends Runner {
 
     private List<String> command(String... options) {
         List<String> command = new ArrayList<>();
-        command.addAll(getTypeDBBinary());
+        command.addAll(DistributionUtil.getBinary());
         command.add("console");
         command.addAll(Arrays.asList(options));
         return command;
     }
 
-    @Override
-    protected File distributionArchive() {
+    private File archive() {
         String[] args = System.getProperty("sun.java.command").split(" ");
         assert args.length > 2;
         return new File(args[2]);
     }
 
-    @Override
-    protected String name() {
+    private String name() {
         return "TypeDB Console";
     }
 }

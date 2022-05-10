@@ -16,7 +16,7 @@
  *
  */
 
-package com.vaticle.typedb.common.test.server;
+package com.vaticle.typedb.common.test;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -113,7 +113,7 @@ public class TypeDBClusterServerRunner extends TypeDBRunner {
         serverOpts.putAll(remainingServerOpts);
 
         List<String> command = new ArrayList<>();
-        command.addAll(getTypeDBBinary());
+        command.addAll(DistributionUtil.getBinary());
         command.add("cluster");
         serverOpts.forEach((key, value) -> command.add(key + "=" + value));
         return command;

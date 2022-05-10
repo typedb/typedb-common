@@ -16,9 +16,9 @@
  *
  */
 
-package com.vaticle.typedb.common.test.server;
+package com.vaticle.typedb.common.test;
 
-import com.vaticle.typedb.common.test.Runner;
+import org.zeroturnaround.exec.ProcessExecutor;
 import org.zeroturnaround.exec.ProcessResult;
 import org.zeroturnaround.exec.StartedProcess;
 
@@ -35,25 +35,40 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-public abstract class TypeDBRunner extends Runner {
+public abstract class TypeDBRunner {
 
     private static final int SERVER_STARTUP_TIMEOUT_MILLIS = 30000;
     private static final int SERVER_ALIVE_POLL_INTERVAL_MILLIS = 500;
     private static final int PORT_ALLOCATION_MAX_RETRIES = 15;
     private static final int SERVER_ALIVE_POLL_MAX_RETRIES = SERVER_STARTUP_TIMEOUT_MILLIS / SERVER_ALIVE_POLL_INTERVAL_MILLIS;
 
+    protected final Path distribution;
     protected final Path dataDir;
     protected final Path logsDir;
     private StartedProcess serverProcess;
+    protected ProcessExecutor executor;
 
     public TypeDBRunner() throws InterruptedException, TimeoutException, IOException {
-        super();
-        this.dataDir = rootPath.resolve("server").resolve("data");
-        this.logsDir = rootPath.resolve("server").resolve("logs");
+        System.out.println("Constructing " + name() + " runner");
+        File archive = archive();
+        if (!archive.exists()) {
+            throw new IllegalArgumentException("Distribution archive missing: " + archive.getAbsolutePath());
+        }
+        distribution = DistributionUtil.unarchive(name(), archive);
+        dataDir = distribution.resolve("server").resolve("data");
+        logsDir = distribution.resolve("server").resolve("logs");
+        executor = new ProcessExecutor()
+                .directory(distribution.toFile())
+                .redirectOutput(System.out)
+                .redirectError(System.err)
+                .readOutput(true)
+                .destroyOnExit();
+        System.out.println(name() + " runner constructed");
     }
 
-    @Override
-    protected File distributionArchive() {
+    protected abstract String name();
+
+    protected File archive() {
         String[] args = System.getProperty("sun.java.command").split(" ");
         assert args.length > 1;
         return new File(args[1]);
@@ -108,7 +123,7 @@ public abstract class TypeDBRunner extends Runner {
     public void start() {
         try {
             System.out.println(address() + ": starting... ");
-            System.out.println(address() + ": distribution is located at " + rootPath.toAbsolutePath());
+            System.out.println(address() + ": distribution is located at " + distribution.toAbsolutePath());
             System.out.println(address() + ": data directory is located at " + dataDir.toAbsolutePath());
             System.out.println(address() + ": command = " + command());
             serverProcess = executor.command(command()).start();
