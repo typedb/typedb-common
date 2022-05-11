@@ -18,8 +18,5 @@
 
 package com.vaticle.typedb.common.test;
 
-public class TypeDBClusterRunner {
-    private static class Server {
-
-    }
+public abstract class TypeDBClusterRunner implements TypeDBRunner {
 }

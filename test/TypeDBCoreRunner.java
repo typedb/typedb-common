@@ -29,7 +29,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-public class TypeDBCoreRunner {
+public class TypeDBCoreRunner implements TypeDBRunner {
 
     private final Path distribution;
     private final Path dataDir;
@@ -71,6 +71,7 @@ public class TypeDBCoreRunner {
         return port;
     }
 
+    @Override
     public void start() {
         try {
             System.out.println(address() + ": " +  name() + "is starting... ");
@@ -110,6 +111,7 @@ public class TypeDBCoreRunner {
         return command;
     }
 
+    @Override
     public void stop() {
         if (process != null) {
             try {

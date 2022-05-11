@@ -38,7 +38,7 @@ import static com.vaticle.typedb.common.collection.Collections.map;
 import static com.vaticle.typedb.common.collection.Collections.set;
 import static com.vaticle.typedb.common.test.RunnerUtil.findUnusedPorts;
 
-public class TypeDBClusterServerRunner {
+public class TypeDBClusterServerRunner implements TypeDBRunner {
 
     private static final String OPT_ADDR = "--server.address";
     private static final String OPT_INTERNAL_ADDR_ZMQ = "--server.internal-address.zeromq";
@@ -117,7 +117,7 @@ public class TypeDBClusterServerRunner {
         return host() + ":" + port();
     }
 
-    public static String host() {
+    public String host() {
         return "127.0.0.1";
     }
 
@@ -137,6 +137,7 @@ public class TypeDBClusterServerRunner {
         return remainingServerOpts;
     }
 
+    @Override
     public void start() {
         try {
             System.out.println(address() + ": " +  name() + "is starting... ");
@@ -178,7 +179,7 @@ public class TypeDBClusterServerRunner {
         return command;
     }
 
-    private static Map<String, String> portOptions(Ports ports) {
+    private Map<String, String> portOptions(Ports ports) {
         Map<String, String> options = new HashMap<>();
         options.put(OPT_ADDR, host() + ":" + ports.external());
         options.put(OPT_INTERNAL_ADDR_ZMQ, host() + ":" + ports.internalZMQ());
@@ -186,7 +187,7 @@ public class TypeDBClusterServerRunner {
         return options;
     }
 
-    private static Map<String, String> peerOptions(Set<Ports> peers) {
+    private Map<String, String> peerOptions(Set<Ports> peers) {
         Map<String, String> options = new HashMap<>();
         int index = 0;
         for (Ports peer : peers) {
@@ -201,6 +202,7 @@ public class TypeDBClusterServerRunner {
         return options;
     }
 
+    @Override
     public void stop() {
         if (process != null) {
             try {
