@@ -22,7 +22,6 @@ import org.zeroturnaround.exec.ProcessExecutor;
 import org.zeroturnaround.exec.ProcessResult;
 import org.zeroturnaround.exec.StartedProcess;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -36,24 +35,24 @@ public class TypeDBCoreRunner {
     private final Path dataDir;
     private final Path logsDir;
     private final int port;
-    private StartedProcess serverProcess;
+    private StartedProcess process;
     private final ProcessExecutor executor;
 
     public TypeDBCoreRunner() throws InterruptedException, TimeoutException, IOException {
-        System.out.println("Constructing " + name() + " runner");
-        System.out.println("Extracting " + name() + " distribution archive...");
-        distribution = RunnerUtil.distributionSetup();
-        System.out.println(name() + " distribution archive extracted.");
+        port = RunnerUtil.findUnusedPorts(1).get(0);
+        System.out.println(address() + ": Constructing " + name() + " runner");
+        System.out.println(address() + ": Extracting distribution archive...");
+        distribution = RunnerUtil.unarchive();
+        System.out.println(address() + ": distribution archive extracted.");
         dataDir = distribution.resolve("server").resolve("data");
         logsDir = distribution.resolve("server").resolve("logs");
-        port = RunnerUtil.findUnusedPorts(1).get(0);
         executor = new ProcessExecutor()
                 .directory(distribution.toFile())
                 .redirectOutput(System.out)
                 .redirectError(System.err)
                 .readOutput(true)
                 .destroyOnExit();
-        System.out.println(name() + " runner constructed");
+        System.out.println(address() + ": runner constructed");
     }
 
     private String name() {
@@ -75,24 +74,24 @@ public class TypeDBCoreRunner {
     public void start() {
         try {
             System.out.println(address() + ": " +  name() + "is starting... ");
-            System.out.println(address() + ": distribution is located at " + distribution.toAbsolutePath());
-            System.out.println(address() + ": data directory is located at " + dataDir.toAbsolutePath());
-            System.out.println(address() + ": command = " + command());
-            serverProcess = executor.command(command()).start();
-            boolean started = RunnerUtil.checkServerStarted(host(), port())
+            System.out.println(address() + ": Distribution is located at " + distribution.toAbsolutePath());
+            System.out.println(address() + ": Data directory is located at " + dataDir.toAbsolutePath());
+            System.out.println(address() + ": Bootup command = " + command());
+            process = executor.command(command()).start();
+            boolean started = RunnerUtil.waitUntilPortUsed(host(), port())
                     .await(RunnerUtil.SERVER_STARTUP_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
             if (!started) {
-                String message = address() + ": unable to start. ";
-                if (serverProcess.getFuture().isDone()) {
-                    ProcessResult processResult = serverProcess.getFuture().get();
-                    message += address() + ": process exited with code '" + processResult.getExitValue() + "'. ";
+                String message = address() + ": Unable to start. ";
+                if (process.getFuture().isDone()) {
+                    ProcessResult processResult = process.getFuture().get();
+                    message += address() + ": Process exited with code '" + processResult.getExitValue() + "'. ";
                     if (processResult.hasOutput()) {
                         message += "Output: " + processResult.outputUTF8();
                     }
                 }
                 throw new RuntimeException(message);
             } else {
-                System.out.println(address() + ": started");
+                System.out.println(address() + ": Started");
             }
         } catch (Throwable e) {
             printLogs();
@@ -112,11 +111,11 @@ public class TypeDBCoreRunner {
     }
 
     public void stop() {
-        if (serverProcess != null) {
+        if (process != null) {
             try {
-                System.out.println(address() + ": stopping...");
-                serverProcess.getProcess().destroyForcibly();
-                System.out.println(address() + ": stopped.");
+                System.out.println(address() + ": Stopping...");
+                process.getProcess().destroyForcibly();
+                System.out.println(address() + ": Stopped.");
             } catch (Exception e) {
                 printLogs();
                 throw e;
@@ -125,15 +124,15 @@ public class TypeDBCoreRunner {
     }
 
     private void printLogs() {
-        System.out.println("================");
+        System.out.println(address() + ": ================");
         System.out.println(address() + ": logs:");
         Path logPath = logsDir.resolve("typedb.log").toAbsolutePath();
         try {
             executor.command("cat", logPath.toString()).execute();
         } catch (IOException | InterruptedException | TimeoutException e) {
-            System.out.println(address() + ": unable to print '" + logPath + "'");
+            System.out.println(address() + ": Unable to print '" + logPath + "'");
             e.printStackTrace();
         }
-        System.out.println("================");
+        System.out.println(address() + ": ================");
     }
 }

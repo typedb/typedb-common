@@ -55,7 +55,7 @@ public abstract class TypeDBRunner {
             throw new IllegalArgumentException("Distribution archive missing: " + archive.getAbsolutePath());
         }
         System.out.println("Extracting " + name() + " distribution archive.");
-        distribution = RunnerUtil.distributionSetup(archive);
+        distribution = RunnerUtil.unarchive(archive);
         System.out.println(name() + " distribution archive extracted.");
         dataDir = distribution.resolve("server").resolve("data");
         logsDir = distribution.resolve("server").resolve("logs");

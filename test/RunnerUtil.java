@@ -47,11 +47,11 @@ class RunnerUtil {
     private static final int SERVER_ALIVE_POLL_INTERVAL_MILLIS = 500;
     private static final int SERVER_ALIVE_POLL_MAX_RETRIES = SERVER_STARTUP_TIMEOUT_MILLIS / SERVER_ALIVE_POLL_INTERVAL_MILLIS;
 
-    static Path distributionSetup() throws IOException, InterruptedException, TimeoutException {
-        return distributionSetup(getArchive());
+    static Path unarchive() throws IOException, InterruptedException, TimeoutException {
+        return unarchive(getArchive());
     }
 
-    static Path distributionSetup(File archive) throws IOException, TimeoutException, InterruptedException {
+    static Path unarchive(File archive) throws IOException, TimeoutException, InterruptedException {
         Path runnerDir = Files.createTempDirectory("typedb");
         ProcessExecutor executor = new ProcessExecutor()
                 .directory(Paths.get(".").toAbsolutePath().toFile())
@@ -81,7 +81,7 @@ class RunnerUtil {
         }
     }
 
-    static CountDownLatch checkServerStarted(String host, int port) {
+    static CountDownLatch waitUntilPortUsed(String host, int port) {
         CountDownLatch latch = new CountDownLatch(1);
         Timer timer = new Timer();
         timer.scheduleAtFixedRate(new TimerTask() {
