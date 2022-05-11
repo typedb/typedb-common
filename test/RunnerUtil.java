@@ -18,7 +18,6 @@
 
 package com.vaticle.typedb.common.test;
 
-import org.apache.commons.io.FileUtils;
 import org.zeroturnaround.exec.ProcessExecutor;
 
 import java.io.File;
@@ -55,7 +54,7 @@ class RunnerUtil {
     }
 
     static Path distributionSetup(File archive) throws IOException, TimeoutException, InterruptedException {
-        Path runnerDir = createRunnerDir();
+        Path runnerDir = Files.createTempDirectory("typedb");
         extract(archive, runnerDir);
         // The TypeDB Cluster archive extracts to a folder inside TYPEDB_TARGET_DIRECTORY named
         // typedb-server-{platform}-{version}. We know it's the only folder, so we can retrieve it using Files.list.
@@ -67,16 +66,7 @@ class RunnerUtil {
     }
 
     private static Path createRunnerDir() throws IOException {
-        Path runnerDir = Files.createTempDirectory("typedb"); // TODO: rename directory from "typedb" to "runner"
-        System.out.println("Checking for existing distribution at " + runnerDir.toAbsolutePath());
-        if (runnerDir.toFile().exists()) {
-            System.out.println("An existing distribution found. Deleting...");
-            FileUtils.deleteDirectory(runnerDir.toFile());
-            System.out.println("Existing distribution deleted");
-        } else {
-            System.out.println("There is no existing distribution");
-        }
-        return runnerDir;
+        return Files.createTempDirectory("typedb");
     }
 
     private static void extract(File archive, Path outputDir) throws IOException, InterruptedException, TimeoutException {
