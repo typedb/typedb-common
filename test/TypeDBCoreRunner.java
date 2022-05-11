@@ -63,11 +63,11 @@ public class TypeDBCoreRunner {
         return host() + ":" + port();
     }
 
-    private static String host() {
+    public String host() {
         return "127.0.0.1";
     }
 
-    private int port() {
+    public int port() {
         return port;
     }
 

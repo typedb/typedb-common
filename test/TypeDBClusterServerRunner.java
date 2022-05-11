@@ -18,19 +18,27 @@
 
 package com.vaticle.typedb.common.test;
 
+import org.zeroturnaround.exec.ProcessExecutor;
+import org.zeroturnaround.exec.ProcessResult;
+import org.zeroturnaround.exec.StartedProcess;
+
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import static com.vaticle.typedb.common.collection.Collections.map;
 import static com.vaticle.typedb.common.collection.Collections.set;
+import static com.vaticle.typedb.common.test.RunnerUtil.findUnusedPorts;
 
-public class TypeDBClusterServerRunner extends TypeDBRunner {
+public class TypeDBClusterServerRunner {
 
     private static final String OPT_ADDR = "--server.address";
     private static final String OPT_INTERNAL_ADDR_ZMQ = "--server.internal-address.zeromq";
@@ -39,9 +47,14 @@ public class TypeDBClusterServerRunner extends TypeDBRunner {
     private static final String OPT_PEERS_INTERNAL_ADDR_ZMQ = "--server.peers.server-peer-%d.internal-address.zeromq";
     private static final String OPT_PEERS_INTERNAL_ADDR_GRPC = "--server.peers.server-peer-%d.internal-address.grpc";
 
+    protected final Path distribution;
+    protected final Path dataDir;
+    protected final Path logsDir;
     private final Ports ports;
     private final Set<Ports> peers;
     private final Map<String, String> remainingServerOpts;
+    private StartedProcess process;
+    protected ProcessExecutor executor;
 
     public static TypeDBClusterServerRunner create() throws InterruptedException, TimeoutException, IOException {
         List<Integer> ports = findUnusedPorts(3);
@@ -77,19 +90,38 @@ public class TypeDBClusterServerRunner extends TypeDBRunner {
 
     private TypeDBClusterServerRunner(Ports ports, Set<Ports> peers, Map<String, String> remainingServerOpts)
             throws InterruptedException, TimeoutException, IOException {
-        super();
+        System.out.println("Constructing " + name() + " runner");
+        System.out.println(address() + ": Constructing " + name() + " runner");
+        System.out.println(address() + ": Extracting distribution archive...");
+        distribution = RunnerUtil.unarchive();
+        System.out.println(address() + ": distribution archive extracted.");
+        dataDir = distribution.resolve("server").resolve("data");
+        logsDir = distribution.resolve("server").resolve("logs");
         this.ports = ports;
         this.peers = peers;
         this.remainingServerOpts = remainingServerOpts;
+        executor = new ProcessExecutor()
+                .directory(distribution.toFile())
+                .redirectOutput(System.out)
+                .redirectError(System.err)
+                .readOutput(true)
+                .destroyOnExit();
+        System.out.println(name() + ": runner constructed");
     }
 
-    @Override
-    protected String name() {
+    private String name() {
         return "TypeDB Cluster";
     }
 
-    @Override
-    protected int port() {
+    public String address() {
+        return host() + ":" + port();
+    }
+
+    public static String host() {
+        return "127.0.0.1";
+    }
+
+    public int port() {
         return ports.external();
     }
 
@@ -105,8 +137,35 @@ public class TypeDBClusterServerRunner extends TypeDBRunner {
         return remainingServerOpts;
     }
 
-    @Override
-    protected List<String> command() {
+    public void start() {
+        try {
+            System.out.println(address() + ": " +  name() + "is starting... ");
+            System.out.println(address() + ": Distribution is located at " + distribution.toAbsolutePath());
+            System.out.println(address() + ": Data directory is located at " + dataDir.toAbsolutePath());
+            System.out.println(address() + ": Bootup command = " + command());
+            process = executor.command(command()).start();
+            boolean started = RunnerUtil.waitUntilPortUsed(host(), port())
+                    .await(RunnerUtil.SERVER_STARTUP_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
+            if (!started) {
+                String message = address() + ": Unable to start. ";
+                if (process.getFuture().isDone()) {
+                    ProcessResult processResult = process.getFuture().get();
+                    message += address() + ": Process exited with code '" + processResult.getExitValue() + "'. ";
+                    if (processResult.hasOutput()) {
+                        message += "Output: " + processResult.outputUTF8();
+                    }
+                }
+                throw new RuntimeException(message);
+            } else {
+                System.out.println(address() + ": Started");
+            }
+        } catch (Throwable e) {
+            printLogs();
+            throw new RuntimeException(e);
+        }
+    }
+
+    private List<String> command() {
         Map<String, String> serverOpts = new HashMap<>();
         serverOpts.putAll(portOptions(ports));
         serverOpts.putAll(peerOptions(peers));
@@ -140,6 +199,32 @@ public class TypeDBClusterServerRunner extends TypeDBRunner {
             index++;
         }
         return options;
+    }
+
+    public void stop() {
+        if (process != null) {
+            try {
+                System.out.println(address() + ": Stopping...");
+                process.getProcess().destroyForcibly();
+                System.out.println(address() + ": Stopped.");
+            } catch (Exception e) {
+                printLogs();
+                throw e;
+            }
+        }
+    }
+
+    private void printLogs() {
+        System.out.println(address() + ": ================");
+        System.out.println(address() + ": logs:");
+        Path logPath = logsDir.resolve("typedb.log").toAbsolutePath();
+        try {
+            executor.command("cat", logPath.toString()).execute();
+        } catch (IOException | InterruptedException | TimeoutException e) {
+            System.out.println(address() + ": Unable to print '" + logPath + "'");
+            e.printStackTrace();
+        }
+        System.out.println(address() + ": ================");
     }
 
     public static class Ports {
