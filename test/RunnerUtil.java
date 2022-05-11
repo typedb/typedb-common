@@ -36,6 +36,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeoutException;
+import java.util.stream.Stream;
 
 import static org.junit.Assert.fail;
 
@@ -57,7 +58,9 @@ class RunnerUtil {
         extract(archive, runnerDir);
         // The TypeDB Cluster archive extracts to a folder inside TYPEDB_TARGET_DIRECTORY named
         // typedb-server-{platform}-{version}. We know it's the only folder, so we can retrieve it using Files.list.
-        return Files.list(runnerDir).findFirst().get().toAbsolutePath();
+        Stream<Path> list = Files.list(runnerDir);
+        System.out.println("after list");
+        return list.findFirst().get().toAbsolutePath();
     }
 
     private static Path createRunnerDir() throws IOException {
