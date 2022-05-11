@@ -35,8 +35,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeoutException;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static org.junit.Assert.fail;
 
@@ -55,21 +53,6 @@ class RunnerUtil {
 
     static Path distributionSetup(File archive) throws IOException, TimeoutException, InterruptedException {
         Path runnerDir = Files.createTempDirectory("typedb");
-        extract(archive, runnerDir);
-        // The TypeDB Cluster archive extracts to a folder inside TYPEDB_TARGET_DIRECTORY named
-        // typedb-server-{platform}-{version}. We know it's the only folder, so we can retrieve it using Files.list.
-        List<Path> parentDirContent = Files.list(runnerDir.getParent().getParent()).collect(Collectors.toList());
-        System.out.println("parentDirContent: " + parentDirContent);
-        Stream<Path> runnerDirContent = Files.list(runnerDir);
-        System.out.println("after list");
-        return runnerDirContent.findFirst().get().toAbsolutePath();
-    }
-
-    private static Path createRunnerDir() throws IOException {
-        return Files.createTempDirectory("typedb");
-    }
-
-    private static void extract(File archive, Path outputDir) throws IOException, InterruptedException, TimeoutException {
         ProcessExecutor executor = new ProcessExecutor()
                 .directory(Paths.get(".").toAbsolutePath().toFile())
                 .redirectOutput(System.out)
@@ -78,13 +61,16 @@ class RunnerUtil {
                 .destroyOnExit();
         if (archive.toString().endsWith(TAR_GZ)) {
             executor.command("tar", "-xf", archive.toString(),
-                    "-C", outputDir.toString()).execute();
+                    "-C", runnerDir.toString()).execute();
         } else if (archive.toString().endsWith(ZIP)) {
             executor.command("unzip", "-q", archive.toString(),
-                    "-d", outputDir.toString()).execute();
+                    "-d", runnerDir.toString()).execute();
         } else {
             throw new IllegalStateException(String.format("The distribution archive format must be either %s or %s", TAR_GZ, ZIP));
         }
+        // The TypeDB Cluster archive extracts to a folder inside TYPEDB_TARGET_DIRECTORY named
+        // typedb-server-{platform}-{version}. We know it's the only folder, so we can retrieve it using Files.list.
+        return Files.list(runnerDir).findFirst().get().toAbsolutePath();
     }
 
     static List<String> bin() {
