@@ -49,11 +49,11 @@ public class TypeDBCoreRunner implements TypeDBRunner {
         System.out.println(address() + ": Constructing " + name() + " runner");
         System.out.println(address() + ": Extracting distribution archive...");
         distribution = unarchive();
-        System.out.println(address() + ": distribution archive extracted.");
+        System.out.println(address() + ": Distribution archive extracted.");
         dataDir = distribution.resolve("server").resolve("data");
         logsDir = distribution.resolve("server").resolve("logs");
         executor = createProcessExecutor(distribution);
-        System.out.println(address() + ": runner constructed");
+        System.out.println(address() + ": Runner constructed");
     }
 
     private String name() {
@@ -127,7 +127,7 @@ public class TypeDBCoreRunner implements TypeDBRunner {
 
     private void printLogs() {
         System.out.println(address() + ": ================");
-        System.out.println(address() + ": logs:");
+        System.out.println(address() + ": Logs:");
         Path logPath = logsDir.resolve("typedb.log").toAbsolutePath();
         try {
             executor.command("cat", logPath.toString()).execute();
