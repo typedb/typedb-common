@@ -24,10 +24,10 @@ import org.zeroturnaround.exec.StartedProcess;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
+
+import static com.vaticle.typedb.common.collection.Collections.list;
 
 public class TypeDBConsoleRunner {
 
@@ -62,11 +62,8 @@ public class TypeDBConsoleRunner {
     }
 
     private List<String> command(String... options) {
-        List<String> command = new ArrayList<>();
-        command.addAll(RunnerUtil.bin());
-        command.add("console");
-        command.addAll(Arrays.asList(options));
-        return command;
+        List<String> cmd = list((List<String>) list("console"), list(options));
+        return RunnerUtil.typeDBCommand(cmd);
     }
 
     private File archive() {

@@ -22,7 +22,6 @@ import org.zeroturnaround.exec.ProcessExecutor;
 import org.zeroturnaround.exec.ProcessResult;
 import org.zeroturnaround.exec.StartedProcess;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -36,7 +35,12 @@ import java.util.concurrent.TimeoutException;
 
 import static com.vaticle.typedb.common.collection.Collections.map;
 import static com.vaticle.typedb.common.collection.Collections.set;
+import static com.vaticle.typedb.common.test.RunnerUtil.SERVER_STARTUP_TIMEOUT_MILLIS;
+import static com.vaticle.typedb.common.test.RunnerUtil.createProcessExecutor;
 import static com.vaticle.typedb.common.test.RunnerUtil.findUnusedPorts;
+import static com.vaticle.typedb.common.test.RunnerUtil.typeDBCommand;
+import static com.vaticle.typedb.common.test.RunnerUtil.unarchive;
+import static com.vaticle.typedb.common.test.RunnerUtil.waitUntilPortUsed;
 
 public class TypeDBClusterServerRunner implements TypeDBRunner {
 
@@ -94,18 +98,13 @@ public class TypeDBClusterServerRunner implements TypeDBRunner {
         System.out.println("Constructing " + name() + " runner");
         System.out.println(address() + ": Constructing " + name() + " runner");
         System.out.println(address() + ": Extracting distribution archive...");
-        distribution = RunnerUtil.unarchive();
+        distribution = unarchive();
         System.out.println(address() + ": distribution archive extracted.");
         dataDir = distribution.resolve("server").resolve("data");
         logsDir = distribution.resolve("server").resolve("logs");
         this.peers = peers;
         this.remainingServerOpts = remainingServerOpts;
-        executor = new ProcessExecutor()
-                .directory(distribution.toFile())
-                .redirectOutput(System.out)
-                .redirectError(System.err)
-                .readOutput(true)
-                .destroyOnExit();
+        executor = createProcessExecutor(distribution);
         System.out.println(name() + ": runner constructed");
     }
 
@@ -145,8 +144,8 @@ public class TypeDBClusterServerRunner implements TypeDBRunner {
             System.out.println(address() + ": Data directory is located at " + dataDir.toAbsolutePath());
             System.out.println(address() + ": Bootup command = " + command());
             process = executor.command(command()).start();
-            boolean started = RunnerUtil.waitUntilPortUsed(host(), port())
-                    .await(RunnerUtil.SERVER_STARTUP_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
+            boolean started = waitUntilPortUsed(host(), port())
+                    .await(SERVER_STARTUP_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
             if (!started) {
                 String message = address() + ": Unable to start. ";
                 if (process.getFuture().isDone()) {
@@ -172,11 +171,10 @@ public class TypeDBClusterServerRunner implements TypeDBRunner {
         serverOpts.putAll(peerOptions(peers));
         serverOpts.putAll(remainingServerOpts);
 
-        List<String> command = new ArrayList<>();
-        command.addAll(RunnerUtil.bin());
-        command.add("cluster");
-        serverOpts.forEach((key, value) -> command.add(key + "=" + value));
-        return command;
+        List<String> cmd = new ArrayList<>();
+        cmd.add("cluster");
+        serverOpts.forEach((key, value) -> cmd.add(key + "=" + value));
+        return typeDBCommand(cmd);
     }
 
     private Map<String, String> portOptions(Ports ports) {

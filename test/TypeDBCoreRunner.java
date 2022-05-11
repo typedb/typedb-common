@@ -24,10 +24,16 @@ import org.zeroturnaround.exec.StartedProcess;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+
+import static com.vaticle.typedb.common.test.RunnerUtil.SERVER_STARTUP_TIMEOUT_MILLIS;
+import static com.vaticle.typedb.common.test.RunnerUtil.createProcessExecutor;
+import static com.vaticle.typedb.common.test.RunnerUtil.findUnusedPorts;
+import static com.vaticle.typedb.common.test.RunnerUtil.typeDBCommand;
+import static com.vaticle.typedb.common.test.RunnerUtil.unarchive;
+import static com.vaticle.typedb.common.test.RunnerUtil.waitUntilPortUsed;
 
 public class TypeDBCoreRunner implements TypeDBRunner {
 
@@ -39,19 +45,14 @@ public class TypeDBCoreRunner implements TypeDBRunner {
     private final ProcessExecutor executor;
 
     public TypeDBCoreRunner() throws InterruptedException, TimeoutException, IOException {
-        port = RunnerUtil.findUnusedPorts(1).get(0);
+        port = findUnusedPorts(1).get(0);
         System.out.println(address() + ": Constructing " + name() + " runner");
         System.out.println(address() + ": Extracting distribution archive...");
-        distribution = RunnerUtil.unarchive();
+        distribution = unarchive();
         System.out.println(address() + ": distribution archive extracted.");
         dataDir = distribution.resolve("server").resolve("data");
         logsDir = distribution.resolve("server").resolve("logs");
-        executor = new ProcessExecutor()
-                .directory(distribution.toFile())
-                .redirectOutput(System.out)
-                .redirectError(System.err)
-                .readOutput(true)
-                .destroyOnExit();
+        executor = createProcessExecutor(distribution);
         System.out.println(address() + ": runner constructed");
     }
 
@@ -79,8 +80,8 @@ public class TypeDBCoreRunner implements TypeDBRunner {
             System.out.println(address() + ": Data directory is located at " + dataDir.toAbsolutePath());
             System.out.println(address() + ": Bootup command = " + command());
             process = executor.command(command()).start();
-            boolean started = RunnerUtil.waitUntilPortUsed(host(), port())
-                    .await(RunnerUtil.SERVER_STARTUP_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
+            boolean started = waitUntilPortUsed(host(), port())
+                    .await(SERVER_STARTUP_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
             if (!started) {
                 String message = address() + ": Unable to start. ";
                 if (process.getFuture().isDone()) {
@@ -101,14 +102,13 @@ public class TypeDBCoreRunner implements TypeDBRunner {
     }
 
     private List<String> command() {
-        List<String> command = new ArrayList<>();
-        command.addAll(RunnerUtil.bin());
-        command.add("server");
-        command.add("--server.address");
-        command.add(address());
-        command.add("--storage.data");
-        command.add(dataDir.toAbsolutePath().toString());
-        return command;
+        return typeDBCommand(
+                "server",
+                "--server.address",
+                address(),
+                "--storage.data",
+                dataDir.toAbsolutePath().toString()
+        );
     }
 
     @Override

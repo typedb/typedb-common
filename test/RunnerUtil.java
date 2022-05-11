@@ -73,6 +73,26 @@ class RunnerUtil {
         return Files.list(runnerDir).findFirst().get().toAbsolutePath();
     }
 
+    static ProcessExecutor createProcessExecutor(Path distribution) {
+        return new ProcessExecutor()
+                .directory(distribution.toFile())
+                .redirectOutput(System.out)
+                .redirectError(System.err)
+                .readOutput(true)
+                .destroyOnExit();
+    }
+
+    static List<String> typeDBCommand(String... c) {
+        return typeDBCommand(Arrays.asList(c));
+    }
+
+    static List<String> typeDBCommand(List<String> c) {
+        List<String> command = new ArrayList<>();
+        command.addAll(bin());
+        command.addAll(c);
+        return command;
+    }
+
     static List<String> bin() {
         if (!System.getProperty("os.name").toLowerCase().contains("win")) {
             return Collections.singletonList("typedb");
