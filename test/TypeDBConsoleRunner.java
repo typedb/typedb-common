@@ -40,7 +40,9 @@ public class TypeDBConsoleRunner {
         if (!archive.exists()) {
             throw new IllegalArgumentException("Distribution archive missing: " + archive.getAbsolutePath());
         }
-        distribution = RunnerUtil.distributionSetup(name(), archive);
+        System.out.println("Extracting " + name() + " distribution archive.");
+        distribution = RunnerUtil.distributionSetup(archive);
+        System.out.println(name() + " distribution archive extracted.");
         executor = new ProcessExecutor()
                 .directory(distribution.toFile())
                 .redirectOutput(System.out)

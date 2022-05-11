@@ -37,15 +37,13 @@ public class TypeDBCoreRunner {
     private final Path logsDir;
     private final int port;
     private StartedProcess serverProcess;
-    private ProcessExecutor executor;
+    private final ProcessExecutor executor;
 
     public TypeDBCoreRunner() throws InterruptedException, TimeoutException, IOException {
         System.out.println("Constructing " + name() + " runner");
-        File archive = archive();
-        if (!archive.exists()) {
-            throw new IllegalArgumentException("Distribution archive missing: " + archive.getAbsolutePath());
-        }
-        distribution = RunnerUtil.distributionSetup(name(), archive);
+        System.out.println("Extracting " + name() + " distribution archive...");
+        distribution = RunnerUtil.distributionSetup();
+        System.out.println(name() + " distribution archive extracted.");
         dataDir = distribution.resolve("server").resolve("data");
         logsDir = distribution.resolve("server").resolve("logs");
         port = RunnerUtil.findUnusedPorts(1).get(0);
@@ -60,23 +58,6 @@ public class TypeDBCoreRunner {
 
     private String name() {
         return "TypeDB Core";
-    }
-
-    private File archive() {
-        String[] args = System.getProperty("sun.java.command").split(" ");
-        assert args.length > 1;
-        return new File(args[1]);
-    }
-
-    private List<String> command() {
-        List<String> command = new ArrayList<>();
-        command.addAll(RunnerUtil.bin());
-        command.add("server");
-        command.add("--server.address");
-        command.add(address());
-        command.add("--storage.data");
-        command.add(dataDir.toAbsolutePath().toString());
-        return command;
     }
 
     public String address() {
@@ -117,6 +98,17 @@ public class TypeDBCoreRunner {
             printLogs();
             throw new RuntimeException(e);
         }
+    }
+
+    private List<String> command() {
+        List<String> command = new ArrayList<>();
+        command.addAll(RunnerUtil.bin());
+        command.add("server");
+        command.add("--server.address");
+        command.add(address());
+        command.add("--storage.data");
+        command.add(dataDir.toAbsolutePath().toString());
+        return command;
     }
 
     public void stop() {

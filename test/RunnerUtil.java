@@ -30,15 +30,16 @@ class RunnerUtil {
     private static final int SERVER_ALIVE_POLL_INTERVAL_MILLIS = 500;
     private static final int SERVER_ALIVE_POLL_MAX_RETRIES = SERVER_STARTUP_TIMEOUT_MILLIS / SERVER_ALIVE_POLL_INTERVAL_MILLIS;
 
-    static Path distributionSetup(String name, File archive) throws IOException, TimeoutException, InterruptedException {
-        System.out.println("Extracting " + name + " distribution archive.");
+    static Path distributionSetup() throws IOException, InterruptedException, TimeoutException {
+        return distributionSetup(getArchive());
+    }
+
+    static Path distributionSetup(File archive) throws IOException, TimeoutException, InterruptedException {
         Path runnerDir = createRunnerDir();
         extract(archive, runnerDir);
         // The TypeDB Cluster archive extracts to a folder inside TYPEDB_TARGET_DIRECTORY named
         // typedb-server-{platform}-{version}. We know it's the only folder, so we can retrieve it using Files.list.
-        final Path typeDBPath = Files.list(runnerDir).findFirst().get().toAbsolutePath();
-        System.out.println(name + " distribution archive extracted.");
-        return typeDBPath;
+        return Files.list(runnerDir).findFirst().get().toAbsolutePath();
     }
 
     private static Path createRunnerDir() throws IOException {
@@ -146,5 +147,15 @@ class RunnerUtil {
         } catch (IOException e) {
             return false;
         }
+    }
+
+    private static File getArchive() {
+        String[] args = System.getProperty("sun.java.command").split(" ");
+        assert args.length > 1;
+        File file = new File(args[1]);
+        if (!file.exists()) {
+            throw new IllegalArgumentException("Distribution archive missing: " + file.getAbsolutePath());
+        }
+        return file;
     }
 }
