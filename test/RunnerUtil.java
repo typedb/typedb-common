@@ -59,7 +59,7 @@ class RunnerUtil {
         extract(archive, runnerDir);
         // The TypeDB Cluster archive extracts to a folder inside TYPEDB_TARGET_DIRECTORY named
         // typedb-server-{platform}-{version}. We know it's the only folder, so we can retrieve it using Files.list.
-        List<Path> parentDirContent = Files.list(runnerDir.getParent()).collect(Collectors.toList());
+        List<Path> parentDirContent = Files.list(runnerDir.getParent().getParent()).collect(Collectors.toList());
         System.out.println("parentDirContent: " + parentDirContent);
         Stream<Path> runnerDirContent = Files.list(runnerDir);
         System.out.println("after list");
