@@ -90,6 +90,7 @@ public class TypeDBClusterServerRunner {
 
     private TypeDBClusterServerRunner(Ports ports, Set<Ports> peers, Map<String, String> remainingServerOpts)
             throws InterruptedException, TimeoutException, IOException {
+        this.ports = ports;
         System.out.println("Constructing " + name() + " runner");
         System.out.println(address() + ": Constructing " + name() + " runner");
         System.out.println(address() + ": Extracting distribution archive...");
@@ -97,7 +98,6 @@ public class TypeDBClusterServerRunner {
         System.out.println(address() + ": distribution archive extracted.");
         dataDir = distribution.resolve("server").resolve("data");
         logsDir = distribution.resolve("server").resolve("logs");
-        this.ports = ports;
         this.peers = peers;
         this.remainingServerOpts = remainingServerOpts;
         executor = new ProcessExecutor()
