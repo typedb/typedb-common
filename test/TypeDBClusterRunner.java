@@ -164,7 +164,7 @@ public class TypeDBClusterRunner implements TypeDBRunner {
     }
 
     public static class ServerRunnerFactory {
-        ServerRunner createServerRunner(Path locationBase, Address address, List<Address> peers) {
+        protected ServerRunner createServerRunner(Path locationBase, Address address, List<Address> peers) {
             try {
                 return ServerRunner.create(
                         address, new HashSet<>(peers)
