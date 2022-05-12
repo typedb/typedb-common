@@ -22,5 +22,7 @@ public interface TypeDBRunner {
 
     void start();
 
+    boolean isStopped();
+
     void stop();
 }

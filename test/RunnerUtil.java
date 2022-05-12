@@ -127,7 +127,7 @@ class RunnerUtil {
                     s.close();
                     return true;
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    System.out.println(host + ":" + port + ": Can't yet connect to server...");
                 }
                 return false;
             }

@@ -112,6 +112,11 @@ public class TypeDBCoreRunner implements TypeDBRunner {
     }
 
     @Override
+    public boolean isStopped() {
+        return !process.getProcess().isAlive();
+    }
+
+    @Override
     public void stop() {
         if (process != null) {
             try {
