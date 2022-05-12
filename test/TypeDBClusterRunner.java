@@ -50,7 +50,6 @@ import static com.vaticle.typedb.common.collection.Collections.pair;
 import static com.vaticle.typedb.common.collection.Collections.set;
 import static com.vaticle.typedb.common.test.RunnerUtil.SERVER_STARTUP_TIMEOUT_MILLIS;
 import static com.vaticle.typedb.common.test.RunnerUtil.createProcessExecutor;
-import static com.vaticle.typedb.common.test.RunnerUtil.findUnusedPorts;
 import static com.vaticle.typedb.common.test.RunnerUtil.typeDBCommand;
 import static com.vaticle.typedb.common.test.RunnerUtil.unarchive;
 import static com.vaticle.typedb.common.test.RunnerUtil.waitUntilPortUsed;
@@ -71,26 +70,26 @@ public class TypeDBClusterRunner implements TypeDBRunner {
     private static final String LOG_OUTPUT_FILE_DIRECTORY = "--log.output.file.directory";
     private static final String HOST = "127.0.0.1";
 
-    protected final List<Address> srvAddrs;
-    protected final Map<String, ServerRunner> srvRunners;
-    private final Map<String, ExecutorService> srvRunnerExecSrvs;
-    private final ServerRunner.Factory srvRunnerFactory;
+    protected final Set<Address> serverAddrs;
+    protected final Map<Address, ServerRunner> serverRunners;
+    private final Map<Address, ExecutorService> serverRunnerES;
+    private final ServerRunner.Factory serverRunnerFactory;
 
-    public TypeDBClusterRunner(Path locationBase, int srvCount) {
-        this(locationBase, srvCount, new ServerRunner.Factory());
+    public TypeDBClusterRunner(int serverCount) {
+        this(serverCount, new ServerRunner.Factory());
     }
 
-    public TypeDBClusterRunner(Path locationBase, int srvCount, ServerRunner.Factory srvRunnerFactory) {
-        assert srvCount >= 1;
-        srvAddrs = allocateAddresses(srvCount);
-        this.srvRunnerFactory = srvRunnerFactory;
-        srvRunnerExecSrvs = createExecutorServices(srvAddrs);
-        srvRunners = createServerRunners(locationBase, srvAddrs);
+    public TypeDBClusterRunner(int serverCount, ServerRunner.Factory serverRunnerFactory) {
+        assert serverCount >= 1;
+        serverAddrs = allocateAddresses(serverCount);
+        this.serverRunnerFactory = serverRunnerFactory;
+        serverRunnerES = createServerRunnerES(serverAddrs);
+        serverRunners = createServerRunners(serverAddrs);
     }
 
-    private List<Address> allocateAddresses(int srvCount) {
-        List<Address> addresses = new ArrayList<>();
-        for (int i = 0; i < srvCount; i++) {
+    private Set<Address> allocateAddresses(int serverCount) {
+        Set<Address> addresses = new HashSet<>();
+        for (int i = 0; i < serverCount; i++) {
             String host = "127.0.0.1";
             int externalPort = 40000 + i * 1111;
             int internalPortZMQ = 50000 + i * 1111;
@@ -100,54 +99,67 @@ public class TypeDBClusterRunner implements TypeDBRunner {
         return addresses;
     }
 
-    private Map<String, ExecutorService> createExecutorServices(List<Address> srvAddrs) {
-        Map<String, ExecutorService> executorServices = new ConcurrentHashMap<>();
-        for (Address address: srvAddrs) {
-            ExecutorService executorService = Executors.newSingleThreadExecutor(NamedThreadFactory.create(address.external() + "::cluster-runner"));
-            executorServices.put(address.external(), executorService);
+    private Map<Address, ExecutorService> createServerRunnerES(Set<Address> serverAddrs) {
+        Map<Address, ExecutorService> executorServices = new ConcurrentHashMap<>();
+        for (Address addr: serverAddrs) {
+            NamedThreadFactory threadFactory = NamedThreadFactory.create(addr.external() + "::server-runner");
+            ExecutorService executorService = Executors.newSingleThreadExecutor(threadFactory);
+            executorServices.put(addr, executorService);
         }
         return executorServices;
     }
 
-    private Map<String, ServerRunner> createServerRunners(Path locationBase, List<Address> srvAddrs) {
-        Map<String, ServerRunner> runners = new ConcurrentHashMap<>();
-        for (Address address: srvAddrs) {
+    private Map<Address, ServerRunner> createServerRunners(Set<Address> serverAddrs) {
+        Map<Address, ServerRunner> srvRunners = new ConcurrentHashMap<>();
+        for (Address addr: serverAddrs) {
             try {
-                ServerRunner serverRunner = srvRunnerExecSrvs.get(address.external()).submit(() ->
-                        srvRunnerFactory.createServerRunner(locationBase.resolve(address.external()).toAbsolutePath(), address, srvAddrs)
+                ExecutorService es = serverRunnerES.get(addr);
+                Path srvRunnerDir = clusterRunnerDir.resolve(addr.external()).toAbsolutePath();
+                ServerRunner srvRunner = es.submit(() ->
+                        serverRunnerFactory.createServerRunner(srvRunnerDir, addr, serverAddrs)
                 ).get();
-                runners.put(address.external(), serverRunner);
+                srvRunners.put(addr, srvRunner);
             } catch (ExecutionException | InterruptedException e) {
                 throw new RuntimeException(e);
             }
         }
-        return runners;
+        return srvRunners;
     }
 
     @Override
     public void start() {
-        start(srvRunners);
-    }
-
-    private void start(Map<String, ServerRunner> srvs) {
-        List<Future<?>> startFutures = new ArrayList<>();
-        for (ServerRunner serverRunner : srvs.values()) {
-            startFutures.add(srvRunnerExecSrvs.get(serverRunner.address()).submit(serverRunner::start));
+        List<Future<?>> tasks = new ArrayList<>();
+        for (ServerRunner runner : serverRunners.values()) {
+            ExecutorService es = serverRunnerES.get(runner.address());
+            tasks.add(es.submit(runner::start));
         }
-        join(startFutures);
+        join(tasks);
     }
 
     public void start(String externalAddr) {
-        join(srvRunnerExecSrvs.get(externalAddr).submit(() -> srvRunners.get(externalAddr).start()));
+        Address addr = serverAddrs
+                .stream()
+                .filter(addr2 -> addr2.external().equals(externalAddr))
+                .findAny()
+                .orElseThrow(() -> new RuntimeException("Server '" + externalAddr + "' not found"));
+        Future<?> task = serverRunnerES.get(addr)
+                .submit(() -> serverRunners.get(addr).start());
+        join(task);
     }
 
     @Override
     public boolean isStopped() {
-        return srvRunners.values().stream().allMatch(TypeDBRunner::isStopped);
+        return serverRunners.values().stream().allMatch(TypeDBRunner::isStopped);
     }
 
     public void stop(String externalAddr) {
-        join(srvRunnerExecSrvs.get(externalAddr).submit(() -> srvRunners.get(externalAddr).stop()));
+        Address addr = serverAddrs
+                .stream()
+                .filter(addr2 -> addr2.external().equals(externalAddr))
+                .findAny()
+                .orElseThrow(() -> new RuntimeException("Server '" + externalAddr + "' not found"));
+        Future<?> task = serverRunnerES.get(addr).submit(() -> serverRunners.get(addr).stop());
+        join(task);
         try {
             Thread.sleep(10000); // NOTE: add sleep since the port isn't immediately available after stopping the server
         } catch (InterruptedException e) {
@@ -157,9 +169,10 @@ public class TypeDBClusterRunner implements TypeDBRunner {
 
     @Override
     public void stop() {
-        for (ServerRunner serverRunner : srvRunners.values()) {
+        for (ServerRunner serverRunner : serverRunners.values()) {
             if (!serverRunner.isStopped()) {
-                join(srvRunnerExecSrvs.get(serverRunner.address()).submit(serverRunner::stop));
+                Future<?> task = serverRunnerES.get(serverRunner.address()).submit(serverRunner::stop);
+                join(task);
             } else {
                 LOG.debug("not stopping server {} - it is already stopped.", serverRunner.address());
             }
@@ -178,77 +191,53 @@ public class TypeDBClusterRunner implements TypeDBRunner {
         }
     }
 
+    public Set<Address> addresses() {
+        return serverAddrs;
+    }
+
     public Set<String> externalAddresses() {
-        return srvAddrs.stream().map(Address::external).collect(Collectors.toSet());
+        return serverAddrs.stream().map(Address::external).collect(Collectors.toSet());
     }
 
     public interface ServerRunner extends TypeDBRunner {
 
-        String address();
+        Map<String, String> options();
+
+        Address address();
 
         class Default implements ServerRunner {
 
             protected final Path distribution;
-            protected final Path dataDir;
-            protected final Path logsDir;
-            private final Address ports;
-            private final Set<Address> peers;
-            private final Map<String, String> remainingServerOpts;
+            protected final Map<String, String> options;
             private StartedProcess process;
             protected ProcessExecutor executor;
-
-            public static Default create() throws InterruptedException, TimeoutException, IOException {
-                List<Integer> ports = findUnusedPorts(3);
-                Address server = new Address(HOST, ports.get(0), ports.get(1), ports.get(2));
-                return create(server);
-            }
-
-            public static Default create(Map<String, String> remainingServerOpts)
-                    throws IOException, InterruptedException, TimeoutException {
-                List<Integer> ports = findUnusedPorts(3);
-                Address server = new Address(HOST, ports.get(0), ports.get(1), ports.get(2));
-                return create(server, remainingServerOpts);
-            }
-
-            public static Default create(Address ports) throws IOException, InterruptedException, TimeoutException {
-                return create(ports, set());
-            }
 
             public static Default create(Address address, Set<Address> peers)
                     throws IOException, InterruptedException, TimeoutException {
                 return create(address, peers, map());
             }
 
-            public static Default create(Address address, Map<String, String> remainingServerOpts)
-                    throws IOException, InterruptedException, TimeoutException {
-                return new Default(address, set(), remainingServerOpts);
-            }
-
             public static Default create(Address address, Set<Address> peers, Map<String, String> remainingServerOpts)
                     throws IOException, InterruptedException, TimeoutException {
-                return new Default(address, peers, remainingServerOpts);
+                Map<String, String> options = new HashMap<>();
+                options.putAll(addressOpt(address));
+                options.putAll(peersOpt(peers));
+                options.putAll(remainingServerOpts);
+                return new Default(options);
             }
 
-            private Default(Address address, Set<Address> peers, Map<String, String> remainingServerOpts)
-                    throws InterruptedException, TimeoutException, IOException {
-                this.ports = address;
-                System.out.println(address() + ": Constructing " + name() + " runner");
-                System.out.println(address() + ": Constructing " + name() + " runner");
-                System.out.println(address() + ": Extracting distribution archive...");
+            public static Default create(Map<String, String> options) throws IOException, InterruptedException, TimeoutException {
+                return new Default(options);
+            }
+
+            private Default(Map<String, String> options) throws IOException, InterruptedException, TimeoutException {
                 distribution = unarchive();
-                System.out.println(address() + ": Distribution archive extracted.");
-                String dataDirOpt = remainingServerOpts.get(STORAGE_DATA);
-                dataDir = Files.createDirectories(
-                        dataDirOpt != null ? Paths.get(dataDirOpt) : distribution.resolve("server").resolve("data")
-                );
-                String logDirOpt = remainingServerOpts.get(LOG_OUTPUT_FILE_DIRECTORY);
-                logsDir = Files.createDirectories(
-                        logDirOpt != null ? Paths.get(logDirOpt) : distribution.resolve("server").resolve("logs")
-                );
-                this.peers = peers;
-                this.remainingServerOpts = remainingServerOpts;
+                System.out.println(address() + ": " + name() + " constructing runner...");
+                this.options = options;
+                Files.createDirectories(storageDataOpt(options));
+                Files.createDirectories(logOutputOpt(options));
                 executor = createProcessExecutor(distribution);
-                System.out.println(name() + ": Runner constructed");
+                System.out.println(address() + ": " + name() + " runner constructed.");
             }
 
             private String name() {
@@ -256,28 +245,25 @@ public class TypeDBClusterRunner implements TypeDBRunner {
             }
 
             @Override
-            public String address() {
-                return host() + ":" + port();
+            public Map<String, String> options() {
+                return options;
             }
 
-            public String host() {
-                return HOST;
-            }
-
-            public int port() {
-                return ports.externalPort();
-            }
-
-            public Address ports() {
-                return ports;
+            @Override
+            public Address address() {
+                return addressOpt(options);
             }
 
             public Set<Address> peers() {
-                return peers;
+                return peersOpt(options);
             }
 
-            public Map<String, String> remainingServerOpts() {
-                return remainingServerOpts;
+            private Path dataDir() {
+                return storageDataOpt(options);
+            }
+
+            private Path logsDir() {
+                return logOutputOpt(options);
             }
 
             @Override
@@ -285,10 +271,10 @@ public class TypeDBClusterRunner implements TypeDBRunner {
                 try {
                     System.out.println(address() + ": " +  name() + " is starting... ");
                     System.out.println(address() + ": Distribution is located at " + distribution.toAbsolutePath());
-                    System.out.println(address() + ": Data directory is located at " + dataDir.toAbsolutePath());
+                    System.out.println(address() + ": Data directory is located at " + dataDir().toAbsolutePath());
                     System.out.println(address() + ": Server bootup command: '" + command() + "'");
                     process = executor.command(command()).start();
-                    boolean started = waitUntilPortUsed(host(), port())
+                    boolean started = waitUntilPortUsed(address().external2())
                             .await(SERVER_STARTUP_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
                     if (!started) {
                         String message = address() + ": Unable to start. ";
@@ -310,38 +296,10 @@ public class TypeDBClusterRunner implements TypeDBRunner {
             }
 
             private List<String> command() {
-                Map<String, String> serverOpts = new HashMap<>();
-                serverOpts.putAll(portOptions(ports));
-                serverOpts.putAll(peerOptions(peers));
-                serverOpts.putAll(remainingServerOpts);
-
                 List<String> cmd = new ArrayList<>();
                 cmd.add("cluster");
-                serverOpts.forEach((key, value) -> cmd.add(key + "=" + value));
+                options.forEach((key, value) -> cmd.add(key + "=" + value));
                 return typeDBCommand(cmd);
-            }
-
-            private Map<String, String> portOptions(Address address) {
-                Map<String, String> options = new HashMap<>();
-                options.put(OPT_ADDR, address.external());
-                options.put(OPT_INTERNAL_ADDR_ZMQ, address.internalZMQ());
-                options.put(OPT_INTERNAL_ADDR_GRPC, address.internalGRPC());
-                return options;
-            }
-
-            private Map<String, String> peerOptions(Set<Address> peers) {
-                Map<String, String> options = new HashMap<>();
-                int index = 0;
-                for (Address peer : peers) {
-                    String addrKey = String.format(OPT_PEERS_ADDR, index);
-                    String intAddrZMQKey = String.format(OPT_PEERS_INTERNAL_ADDR_ZMQ, index);
-                    String intAddrGRPCKey = String.format(OPT_PEERS_INTERNAL_ADDR_GRPC, index);
-                    options.put(addrKey, peer.external());
-                    options.put(intAddrZMQKey, peer.internalZMQ());
-                    options.put(intAddrGRPCKey, peer.internalGRPC());
-                    index++;
-                }
-                return options;
             }
 
             @Override
@@ -366,7 +324,7 @@ public class TypeDBClusterRunner implements TypeDBRunner {
             private void printLogs() {
                 System.out.println(address() + ": ================");
                 System.out.println(address() + ": Logs:");
-                Path logPath = logsDir.resolve("typedb.log").toAbsolutePath();
+                Path logPath = logsDir().resolve("typedb.log").toAbsolutePath();
                 try {
                     executor.command("cat", logPath.toString()).execute();
                 } catch (IOException | InterruptedException | TimeoutException e) {
@@ -375,11 +333,50 @@ public class TypeDBClusterRunner implements TypeDBRunner {
                 }
                 System.out.println(address() + ": ================");
             }
+
+            private Address addressOpt(Map<String, String> options) {
+                return Address.create(options.get(OPT_ADDR), options.get(OPT_INTERNAL_ADDR_ZMQ), options.get(OPT_INTERNAL_ADDR_GRPC));
+            }
+
+            private static Map<String, String> addressOpt(Address address) {
+                Map<String, String> options = new HashMap<>();
+                options.put(OPT_ADDR, address.external());
+                options.put(OPT_INTERNAL_ADDR_ZMQ, address.internalZMQ());
+                options.put(OPT_INTERNAL_ADDR_GRPC, address.internalGRPC());
+                return options;
+            }
+
+            private Set<Address> peersOpt(Map<String, String> options) {
+                throw new UnsupportedOperationException();
+            }
+
+            private static Map<String, String> peersOpt(Set<Address> peers) {
+                Map<String, String> options = new HashMap<>();
+                int index = 0;
+                for (Address peer : peers) {
+                    String addrKey = String.format(OPT_PEERS_ADDR, index);
+                    String intAddrZMQKey = String.format(OPT_PEERS_INTERNAL_ADDR_ZMQ, index);
+                    String intAddrGRPCKey = String.format(OPT_PEERS_INTERNAL_ADDR_GRPC, index);
+                    options.put(addrKey, peer.external());
+                    options.put(intAddrZMQKey, peer.internalZMQ());
+                    options.put(intAddrGRPCKey, peer.internalGRPC());
+                    index++;
+                }
+                return options;
+            }
+
+            private Path storageDataOpt(Map<String, String> options) {
+                return options.get(STORAGE_DATA) != null ? Paths.get(options.get(STORAGE_DATA)) : distribution.resolve("server").resolve("data");
+            }
+
+            private Path logOutputOpt(Map<String, String> options) {
+                return options.get(LOG_OUTPUT_FILE_DIRECTORY) != null ? Paths.get(options.get(LOG_OUTPUT_FILE_DIRECTORY)) : distribution.resolve("server").resolve("logs");
+            }
         }
 
         class Factory {
 
-            protected ServerRunner createServerRunner(Path serverDir, Address address, List<Address> peers) {
+            protected ServerRunner createServerRunner(Path serverDir, Address address, Set<Address> peers) {
                 Map<String, String> options = map(
                         pair(STORAGE_DATA, serverDir.resolve("server/data").toAbsolutePath().toString()),
                         pair(STORAGE_REPLICATION, serverDir.resolve("server/replication").toAbsolutePath().toString()),
@@ -394,5 +391,4 @@ public class TypeDBClusterRunner implements TypeDBRunner {
             }
         }
     }
-
 }

@@ -84,6 +84,7 @@ checkstyle_test(
         "concurrent/*",
         "concurrent/actor/*.java",
         "concurrent/actor/eventloop/*.java",
+        "conf/*.java",
         "exception/*",
         "util/*",
         "yaml/*.java"

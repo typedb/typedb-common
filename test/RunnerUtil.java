@@ -22,6 +22,7 @@ import org.zeroturnaround.exec.ProcessExecutor;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.file.Files;
@@ -99,6 +100,10 @@ class RunnerUtil {
         } else {
             return Arrays.asList("cmd.exe", "/c", "typedb.bat");
         }
+    }
+
+    static CountDownLatch waitUntilPortUsed(InetSocketAddress address) {
+        return waitUntilPortUsed(address.getHostString(), address.getPort());
     }
 
     static CountDownLatch waitUntilPortUsed(String host, int port) {
