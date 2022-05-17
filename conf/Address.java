@@ -1,6 +1,7 @@
 package com.vaticle.typedb.common.conf;
 
 import java.net.InetSocketAddress;
+import java.util.Objects;
 
 import static java.lang.Integer.parseInt;
 
@@ -60,5 +61,23 @@ public class Address {
 
     public InetSocketAddress internalGRPC2() {
         return internalGRPC;
+    }
+
+    @Override
+    public String toString() {
+        return "Address(ext=" + external + ", intZMQ=" + internalZMQ + "intGRPC=" + internalGRPC + ")";
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Address address = (Address) o;
+        return Objects.equals(external, address.external) && Objects.equals(internalZMQ, address.internalZMQ) && Objects.equals(internalGRPC, address.internalGRPC);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(external, internalZMQ, internalGRPC);
     }
 }
