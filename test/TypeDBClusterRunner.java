@@ -43,6 +43,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static com.vaticle.typedb.common.collection.Collections.map;
@@ -75,16 +77,16 @@ public class TypeDBClusterRunner implements TypeDBRunner {
     private final Map<Address, ExecutorService> serverRunnerES;
     private final ServerRunner.Factory serverRunnerFactory;
 
-    public TypeDBClusterRunner(int serverCount) {
-        this(serverCount, new ServerRunner.Factory());
+    public TypeDBClusterRunner(Path clusterRunnerDir, int serverCount) {
+        this(clusterRunnerDir, serverCount, new ServerRunner.Factory());
     }
 
-    public TypeDBClusterRunner(int serverCount, ServerRunner.Factory serverRunnerFactory) {
+    public TypeDBClusterRunner(Path clusterRunnerDir, int serverCount, ServerRunner.Factory serverRunnerFactory) {
         assert serverCount >= 1;
         serverAddrs = allocateAddresses(serverCount);
         this.serverRunnerFactory = serverRunnerFactory;
         serverRunnerES = createServerRunnerES(serverAddrs);
-        serverRunners = createServerRunners(serverAddrs);
+        serverRunners = createServerRunners(clusterRunnerDir, serverAddrs);
     }
 
     private Set<Address> allocateAddresses(int serverCount) {
@@ -109,15 +111,19 @@ public class TypeDBClusterRunner implements TypeDBRunner {
         return executorServices;
     }
 
-    private Map<Address, ServerRunner> createServerRunners(Set<Address> serverAddrs) {
+    private Map<Address, ServerRunner> createServerRunners(Path clusterRunnerDir, Set<Address> serverAddrs) {
         Map<Address, ServerRunner> srvRunners = new ConcurrentHashMap<>();
         for (Address addr: serverAddrs) {
             try {
                 ExecutorService es = serverRunnerES.get(addr);
                 Path srvRunnerDir = clusterRunnerDir.resolve(addr.external()).toAbsolutePath();
-                ServerRunner srvRunner = es.submit(() ->
-                        serverRunnerFactory.createServerRunner(srvRunnerDir, addr, serverAddrs)
-                ).get();
+                Map<String, String> options = map(
+                        pair(STORAGE_DATA, srvRunnerDir.resolve("server/data").toAbsolutePath().toString()),
+                        pair(STORAGE_REPLICATION, srvRunnerDir.resolve("server/replication").toAbsolutePath().toString()),
+                        pair(STORAGE_USER, srvRunnerDir.resolve("server/user").toAbsolutePath().toString()),
+                        pair(LOG_OUTPUT_FILE_DIRECTORY, srvRunnerDir.resolve("server/logs").toAbsolutePath().toString())
+                );
+                ServerRunner srvRunner = es.submit(() -> serverRunnerFactory.createServerRunner(options)).get();
                 srvRunners.put(addr, srvRunner);
             } catch (ExecutionException | InterruptedException e) {
                 throw new RuntimeException(e);
@@ -217,13 +223,13 @@ public class TypeDBClusterRunner implements TypeDBRunner {
                 return create(address, peers, map());
             }
 
-            public static Default create(Address address, Set<Address> peers, Map<String, String> remainingServerOpts)
+            public static Default create(Address address, Set<Address> peers, Map<String, String> remainingOptions)
                     throws IOException, InterruptedException, TimeoutException {
                 Map<String, String> options = new HashMap<>();
                 options.putAll(addressOpt(address));
                 options.putAll(peersOpt(peers));
-                options.putAll(remainingServerOpts);
-                return new Default(options);
+                options.putAll(remainingOptions);
+                return Default.create(options);
             }
 
             public static Default create(Map<String, String> options) throws IOException, InterruptedException, TimeoutException {
@@ -347,7 +353,24 @@ public class TypeDBClusterRunner implements TypeDBRunner {
             }
 
             private Set<Address> peersOpt(Map<String, String> options) {
-                throw new UnsupportedOperationException();
+                Set<String> names = new HashSet<>(); // "--server.peers.{name}.{x}";
+                Pattern namePattern = Pattern.compile("--server.peers.(.+).*$");
+                for (String opt: options.keySet()) {
+                    Matcher nameMatcher = namePattern.matcher(opt);
+                    if (nameMatcher.find()) {
+                        names.add(nameMatcher.group(1));
+                    }
+                }
+                Set<Address> peers = new HashSet<>();
+                for (String name: names) {
+                    Address peer = Address.create(
+                            options.get("--server.peers." + name + ".address"),
+                            options.get("--server.peers." + name + ".internal-address.zeromq"),
+                            options.get("--server.peers." + name + ".internal-address.grpc")
+                    );
+                    peers.add(peer);
+                }
+                return peers;
             }
 
             private static Map<String, String> peersOpt(Set<Address> peers) {
@@ -376,17 +399,11 @@ public class TypeDBClusterRunner implements TypeDBRunner {
 
         class Factory {
 
-            protected ServerRunner createServerRunner(Path serverDir, Address address, Set<Address> peers) {
-                Map<String, String> options = map(
-                        pair(STORAGE_DATA, serverDir.resolve("server/data").toAbsolutePath().toString()),
-                        pair(STORAGE_REPLICATION, serverDir.resolve("server/replication").toAbsolutePath().toString()),
-                        pair(STORAGE_USER, serverDir.resolve("server/user").toAbsolutePath().toString()),
-                        pair(LOG_OUTPUT_FILE_DIRECTORY, serverDir.resolve("server/logs").toAbsolutePath().toString())
-                );
+            protected ServerRunner createServerRunner(Map<String, String> options) {
                 try {
-                    return Default.create(address, new HashSet<>(peers), options);
+                    return Default.create(options);
                 } catch (InterruptedException | TimeoutException | IOException e) {
-                    throw new RuntimeException("Unable to construct runner '" + address.external() + "'");
+                    throw new RuntimeException("Unable to construct runner.");
                 }
             }
         }
