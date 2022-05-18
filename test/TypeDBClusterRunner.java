@@ -73,7 +73,6 @@ public class TypeDBClusterRunner implements TypeDBRunner {
 
     protected final Map<Address, Map<String, String>> serverOptionsMap;
     private final ServerRunner.Factory serverRunnerFactory;
-    private final Map<Address, ExecutorService> serverRunnerES;
     protected final Map<Address, ServerRunner> serverRunners;
 
     public static TypeDBClusterRunner create(Path clusterRunnerDir, int serverCount) {
@@ -116,43 +115,24 @@ public class TypeDBClusterRunner implements TypeDBRunner {
     public TypeDBClusterRunner(Map<Address, Map<String, String>> serverOptionsMap, ServerRunner.Factory serverRunnerFactory) {
         this.serverOptionsMap = serverOptionsMap;
         this.serverRunnerFactory = serverRunnerFactory;
-        serverRunnerES = createServerRunnerES(this.serverOptionsMap.keySet());
         serverRunners = createServerRunners(this.serverOptionsMap);
-    }
-
-    private Map<Address, ExecutorService> createServerRunnerES(Set<Address> serverAddrs) {
-        Map<Address, ExecutorService> executorServices = new ConcurrentHashMap<>();
-        for (Address addr: serverAddrs) {
-            NamedThreadFactory threadFactory = NamedThreadFactory.create(addr.external() + "::server-runner");
-            ExecutorService executorService = Executors.newSingleThreadExecutor(threadFactory);
-            executorServices.put(addr, executorService);
-        }
-        return executorServices;
     }
 
     private Map<Address, ServerRunner> createServerRunners(Map<Address, Map<String, String>> serverOptsMap) {
         Map<Address, ServerRunner> srvRunners = new ConcurrentHashMap<>();
         for (Address addr: serverOptsMap.keySet()) {
-            ExecutorService es = serverRunnerES.get(addr);
             Map<String, String> options = serverOptsMap.get(addr);
-            try {
-                ServerRunner srvRunner = es.submit(() -> serverRunnerFactory.createServerRunner(options)).get();
-                srvRunners.put(addr, srvRunner);
-            } catch (ExecutionException | InterruptedException e) {
-                throw new RuntimeException(e);
-            }
+            ServerRunner srvRunner = serverRunnerFactory.createServerRunner(options);
+            srvRunners.put(addr, srvRunner);
         }
         return srvRunners;
     }
 
     @Override
     public void start() {
-        List<Future<?>> tasks = new ArrayList<>();
         for (ServerRunner runner : serverRunners.values()) {
-            ExecutorService es = serverRunnerES.get(runner.address());
-            tasks.add(es.submit(runner::start));
+            runner.start();
         }
-        join(tasks);
     }
 
     public void start(String externalAddr) {
@@ -161,9 +141,7 @@ public class TypeDBClusterRunner implements TypeDBRunner {
                 .filter(addr2 -> addr2.external().equals(externalAddr))
                 .findAny()
                 .orElseThrow(() -> new RuntimeException("Server '" + externalAddr + "' not found"));
-        Future<?> task = serverRunnerES.get(addr)
-                .submit(() -> serverRunners.get(addr).start());
-        join(task);
+        serverRunners.get(addr).start();
     }
 
     @Override
@@ -177,8 +155,7 @@ public class TypeDBClusterRunner implements TypeDBRunner {
                 .filter(addr2 -> addr2.external().equals(externalAddr))
                 .findAny()
                 .orElseThrow(() -> new RuntimeException("Server '" + externalAddr + "' not found"));
-        Future<?> task = serverRunnerES.get(addr).submit(() -> serverRunners.get(addr).stop());
-        join(task);
+        serverRunners.get(addr).stop();
         try {
             Thread.sleep(10000); // NOTE: add sleep since the port isn't immediately available after stopping the server
         } catch (InterruptedException e) {
@@ -190,23 +167,10 @@ public class TypeDBClusterRunner implements TypeDBRunner {
     public void stop() {
         for (ServerRunner serverRunner : serverRunners.values()) {
             if (!serverRunner.isStopped()) {
-                Future<?> task = serverRunnerES.get(serverRunner.address()).submit(serverRunner::stop);
-                join(task);
+                serverRunner.stop();
             } else {
                 LOG.debug("not stopping server {} - it is already stopped.", serverRunner.address());
             }
-        }
-    }
-
-    private void join(List<Future<?>> futures) {
-        futures.forEach(this::join);
-    }
-
-    private void join(Future<?> future) {
-        try {
-            future.get();
-        } catch (ExecutionException | InterruptedException e) {
-            throw new RuntimeException(e);
         }
     }
 
