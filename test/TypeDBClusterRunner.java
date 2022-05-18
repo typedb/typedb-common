@@ -18,7 +18,6 @@
 
 package com.vaticle.typedb.common.test;
 
-import com.vaticle.typedb.common.concurrent.NamedThreadFactory;
 import com.vaticle.typedb.common.conf.Address;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,10 +36,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.regex.Matcher;
@@ -75,6 +70,8 @@ public class TypeDBClusterRunner implements TypeDBRunner {
     private final ServerRunner.Factory serverRunnerFactory;
     protected final Map<Address, ServerRunner> serverRunners;
 
+    // TODO: improve the "create" constructor
+    // TODO: use Joshua's address allocation strategy
     public static TypeDBClusterRunner create(Path clusterRunnerDir, int serverCount) {
         return create(clusterRunnerDir, serverCount, new ServerRunner.Factory());
     }
@@ -112,7 +109,7 @@ public class TypeDBClusterRunner implements TypeDBRunner {
         return addresses;
     }
 
-    public TypeDBClusterRunner(Map<Address, Map<String, String>> serverOptionsMap, ServerRunner.Factory serverRunnerFactory) {
+    private TypeDBClusterRunner(Map<Address, Map<String, String>> serverOptionsMap, ServerRunner.Factory serverRunnerFactory) {
         this.serverOptionsMap = serverOptionsMap;
         this.serverRunnerFactory = serverRunnerFactory;
         serverRunners = createServerRunners(this.serverOptionsMap);
@@ -135,32 +132,34 @@ public class TypeDBClusterRunner implements TypeDBRunner {
         }
     }
 
-    public void start(String externalAddr) {
-        Address addr = addresses()
-                .stream()
-                .filter(addr2 -> addr2.external().equals(externalAddr))
-                .findAny()
-                .orElseThrow(() -> new RuntimeException("Server '" + externalAddr + "' not found"));
-        serverRunners.get(addr).start();
-    }
-
     @Override
     public boolean isStopped() {
         return serverRunners.values().stream().allMatch(TypeDBRunner::isStopped);
     }
 
-    public void stop(String externalAddr) {
+    public Set<Address> addresses() {
+        return serverOptionsMap.keySet();
+    }
+
+    public Set<String> externalAddresses() {
+        return addresses().stream().map(Address::external).collect(Collectors.toSet());
+    }
+
+    public Map<Address, ServerRunner> serverRunners() {
+        return serverRunners;
+    }
+
+    public ServerRunner serverRunner(String externalAddr) {
         Address addr = addresses()
                 .stream()
                 .filter(addr2 -> addr2.external().equals(externalAddr))
                 .findAny()
-                .orElseThrow(() -> new RuntimeException("Server '" + externalAddr + "' not found"));
-        serverRunners.get(addr).stop();
-        try {
-            Thread.sleep(10000); // NOTE: add sleep since the port isn't immediately available after stopping the server
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+                .orElseThrow(() -> new RuntimeException("Server runner '" + externalAddr + "' not found"));
+        return serverRunner(addr);
+    }
+
+    public ServerRunner serverRunner(Address addr) {
+        return serverRunners.get(addr);
     }
 
     @Override
@@ -172,14 +171,6 @@ public class TypeDBClusterRunner implements TypeDBRunner {
                 LOG.debug("not stopping server {} - it is already stopped.", serverRunner.address());
             }
         }
-    }
-
-    public Set<Address> addresses() {
-        return serverOptionsMap.keySet();
-    }
-
-    public Set<String> externalAddresses() {
-        return addresses().stream().map(Address::external).collect(Collectors.toSet());
     }
 
     public interface ServerRunner extends TypeDBRunner {
@@ -257,7 +248,7 @@ public class TypeDBClusterRunner implements TypeDBRunner {
                 }
             }
 
-            private List<String> command() {
+            public List<String> command() {
                 List<String> cmd = new ArrayList<>();
                 cmd.add("cluster");
                 serverOptions.forEach((key, value) -> cmd.add(key + "=" + value));
@@ -308,6 +299,7 @@ public class TypeDBClusterRunner implements TypeDBRunner {
             }
         }
 
+        // TODO: move this util class somewhere more appropriate
         class Opts {
 
             private static Address addressOpt(Map<String, String> options) {
