@@ -98,7 +98,11 @@ public class TypeDBClusterRunner implements TypeDBRunner {
     @Override
     public void start() {
         for (TypeDBClusterServerRunner runner : serverRunners.values()) {
-            runner.start();
+            if (runner.isStopped()) {
+                runner.start();
+            } else {
+                LOG.debug("not starting server {} - it is already started.", runner.address());
+            }
         }
     }
 
@@ -134,11 +138,11 @@ public class TypeDBClusterRunner implements TypeDBRunner {
 
     @Override
     public void stop() {
-        for (TypeDBClusterServerRunner serverRunner : serverRunners.values()) {
-            if (!serverRunner.isStopped()) {
-                serverRunner.stop();
+        for (TypeDBClusterServerRunner runner : serverRunners.values()) {
+            if (!runner.isStopped()) {
+                runner.stop();
             } else {
-                LOG.debug("not stopping server {} - it is already stopped.", serverRunner.address());
+                LOG.debug("not stopping server {} - it is already stopped.", runner.address());
             }
         }
     }
