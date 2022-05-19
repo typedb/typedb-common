@@ -39,20 +39,20 @@ import java.util.concurrent.TimeoutException;
 
 import static org.junit.Assert.fail;
 
-class RunnerUtil {
+public class RunnerUtil {
 
     private static final String TAR_GZ = ".tar.gz";
     private static final String ZIP = ".zip";
     private static final int PORT_ALLOCATION_MAX_RETRIES = 15;
-    static final int SERVER_STARTUP_TIMEOUT_MILLIS = 30000;
+    public static final int SERVER_STARTUP_TIMEOUT_MILLIS = 30000;
     private static final int SERVER_ALIVE_POLL_INTERVAL_MILLIS = 500;
     private static final int SERVER_ALIVE_POLL_MAX_RETRIES = SERVER_STARTUP_TIMEOUT_MILLIS / SERVER_ALIVE_POLL_INTERVAL_MILLIS;
 
-    static Path unarchive() throws IOException, InterruptedException, TimeoutException {
+    public static Path unarchive() throws IOException, InterruptedException, TimeoutException {
         return unarchive(getArchive());
     }
 
-    static Path unarchive(File archive) throws IOException, TimeoutException, InterruptedException {
+    public static Path unarchive(File archive) throws IOException, TimeoutException, InterruptedException {
         Path runnerDir = Files.createTempDirectory("typedb");
         ProcessExecutor executor = new ProcessExecutor()
                 .directory(Paths.get(".").toAbsolutePath().toFile())
@@ -74,7 +74,7 @@ class RunnerUtil {
         return Files.list(runnerDir).findFirst().get().toAbsolutePath();
     }
 
-    static ProcessExecutor createProcessExecutor(Path distribution) {
+    public static ProcessExecutor createProcessExecutor(Path distribution) {
         return new ProcessExecutor()
                 .directory(distribution.toFile())
                 .redirectOutput(System.out)
@@ -83,18 +83,18 @@ class RunnerUtil {
                 .destroyOnExit();
     }
 
-    static List<String> typeDBCommand(String... c) {
+    public static List<String> typeDBCommand(String... c) {
         return typeDBCommand(Arrays.asList(c));
     }
 
-    static List<String> typeDBCommand(List<String> c) {
+    public static List<String> typeDBCommand(List<String> c) {
         List<String> command = new ArrayList<>();
         command.addAll(bin());
         command.addAll(c);
         return command;
     }
 
-    static List<String> bin() {
+    public static List<String> bin() {
         if (!System.getProperty("os.name").toLowerCase().contains("win")) {
             return Collections.singletonList("typedb");
         } else {
@@ -102,11 +102,11 @@ class RunnerUtil {
         }
     }
 
-    static CountDownLatch waitUntilPortUsed(InetSocketAddress address) {
+    public static CountDownLatch waitUntilPortUsed(InetSocketAddress address) {
         return waitUntilPortUsed(address.getHostString(), address.getPort());
     }
 
-    static CountDownLatch waitUntilPortUsed(String host, int port) {
+    public static CountDownLatch waitUntilPortUsed(String host, int port) {
         CountDownLatch latch = new CountDownLatch(1);
         Timer timer = new Timer();
         timer.scheduleAtFixedRate(new TimerTask() {
@@ -140,7 +140,7 @@ class RunnerUtil {
         return latch;
     }
 
-    static List<Integer> findUnusedPorts(int count) {
+    public static List<Integer> findUnusedPorts(int count) {
         assert count > 0;
         try {
             for (int retries = 0; retries < PORT_ALLOCATION_MAX_RETRIES; retries++) {
@@ -164,7 +164,7 @@ class RunnerUtil {
         }
     }
 
-    static boolean isPortUnused(int port) {
+    public static boolean isPortUnused(int port) {
         try {
             ServerSocket socket = new ServerSocket(port);
             socket.close();

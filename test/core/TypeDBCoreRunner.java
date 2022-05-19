@@ -16,8 +16,9 @@
  *
  */
 
-package com.vaticle.typedb.common.test;
+package com.vaticle.typedb.common.test.core;
 
+import com.vaticle.typedb.common.test.TypeDBRunner;
 import org.zeroturnaround.exec.ProcessExecutor;
 import org.zeroturnaround.exec.ProcessResult;
 import org.zeroturnaround.exec.StartedProcess;
