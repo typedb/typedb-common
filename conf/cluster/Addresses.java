@@ -87,7 +87,13 @@ public class Addresses {
 
     @Override
     public String toString() {
-        return "Address(external=" + external + ", internalZMQ=" + internalZMQ + "internalGRPC=" + internalGRPC + ")";
+        return "Address(external=" +
+                externalString() +
+                ", internalZMQ=" +
+                internalZMQString() +
+                "internalGRPC=" +
+                internalGRPCString() +
+                ")";
     }
 
     @Override
@@ -95,7 +101,9 @@ public class Addresses {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Addresses addresses = (Addresses) o;
-        return Objects.equals(external, addresses.external) && Objects.equals(internalZMQ, addresses.internalZMQ) && Objects.equals(internalGRPC, addresses.internalGRPC);
+        return Objects.equals(external, addresses.external) &&
+                Objects.equals(internalZMQ, addresses.internalZMQ) &&
+                Objects.equals(internalGRPC, addresses.internalGRPC);
     }
 
     @Override
