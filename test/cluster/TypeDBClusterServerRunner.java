@@ -64,8 +64,8 @@ public interface TypeDBClusterServerRunner extends TypeDBRunner {
             distribution = RunnerUtil.unarchive();
             this.serverOptions = serverOptions;
             System.out.println(address() + ": " + name() + " constructing runner...");
-            Files.createDirectories(ClusterServerOpts.storageDataOpt(serverOptions));
-            Files.createDirectories(ClusterServerOpts.logOutputOpt(serverOptions));
+            Files.createDirectories(ClusterServerOpts.storageData(serverOptions));
+            Files.createDirectories(ClusterServerOpts.logOutput(serverOptions));
             executor = createProcessExecutor(distribution);
             System.out.println(address() + ": " + name() + " runner constructed.");
         }
@@ -80,19 +80,19 @@ public interface TypeDBClusterServerRunner extends TypeDBRunner {
 
         @Override
         public Addresses address() {
-            return ClusterServerOpts.addressOpt(serverOptions);
+            return ClusterServerOpts.address(serverOptions);
         }
 
         public Set<Addresses> peers() {
-            return ClusterServerOpts.peersOpt(serverOptions);
+            return ClusterServerOpts.peers(serverOptions);
         }
 
         private Path dataDir() {
-            return ClusterServerOpts.storageDataOpt(serverOptions);
+            return ClusterServerOpts.storageData(serverOptions);
         }
 
         private Path logsDir() {
-            return ClusterServerOpts.logOutputOpt(serverOptions);
+            return ClusterServerOpts.logOutput(serverOptions);
         }
 
         @Override

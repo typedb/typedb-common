@@ -53,8 +53,8 @@ public class TypeDBClusterRunner implements TypeDBRunner {
         Map<Addresses, Map<String, String>> serverOptionsMap = new HashMap<>();
         for (Addresses addr: serverAddrs) {
             Map<String, String> options = new HashMap<>();
-            options.putAll(ClusterServerOpts.addressOpt(addr));
-            options.putAll(ClusterServerOpts.peersOpt(serverAddrs));
+            options.putAll(ClusterServerOpts.address(addr));
+            options.putAll(ClusterServerOpts.peers(serverAddrs));
             Path srvRunnerDir = clusterRunnerDir.resolve(addr.external().toString()).toAbsolutePath();
             options.putAll(
                     map(
