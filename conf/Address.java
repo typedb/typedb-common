@@ -33,10 +33,10 @@ public class Address {
         String[] ext = external.split(":");
         String[] intZMQ = internalZMQ.split(":");
         String[] intGRPC = internalGRPC.split(":");
-        return new Address(ext[0], parseInt(ext[1]), intZMQ[0], parseInt(intZMQ[1]), intGRPC[0], parseInt(intGRPC[1]));
+        return Address.create(ext[0], parseInt(ext[1]), intZMQ[0], parseInt(intZMQ[1]), intGRPC[0], parseInt(intGRPC[1]));
     }
 
-    public Address(
+    public static Address create(
             String externalHost,
             int externalPort,
             String internalHostZMQ,
@@ -44,46 +44,38 @@ public class Address {
             String internalHostGRPC,
             int internalPortGRPC
     ) {
-        this(
+        return create(
                 new InetSocketAddress(externalHost, externalPort),
                 new InetSocketAddress(internalHostZMQ, internalPortZMQ),
                 new InetSocketAddress(internalHostGRPC, internalPortGRPC)
         );
     }
 
-    public Address(InetSocketAddress external, InetSocketAddress internalZMQ, InetSocketAddress internalGRPC) {
+    public static Address create(InetSocketAddress external, InetSocketAddress internalZMQ, InetSocketAddress internalGRPC) {
+        return new Address(external, internalZMQ, internalGRPC);
+    }
+
+    private Address(InetSocketAddress external, InetSocketAddress internalZMQ, InetSocketAddress internalGRPC) {
         this.external = external;
         this.internalZMQ = internalZMQ;
         this.internalGRPC = internalGRPC;
     }
 
-    public String external() {
-        return external.getHostString() + ":" + external.getPort();
-    }
-
-    public InetSocketAddress external2() {
+    public InetSocketAddress external() {
         return external;
     }
 
-    public String internalZMQ() {
-        return internalZMQ.getHostString() + ":" + internalZMQ.getPort();
-    }
-
-    public InetSocketAddress internalZMQ2() {
+    public InetSocketAddress internalZMQ() {
         return internalZMQ;
     }
 
-    public String internalGRPC() {
-        return internalGRPC.getHostString() + ":" + internalGRPC.getPort();
-    }
-
-    public InetSocketAddress internalGRPC2() {
+    public InetSocketAddress internalGRPC() {
         return internalGRPC;
     }
 
     @Override
     public String toString() {
-        return "Address(ext=" + external + ", intZMQ=" + internalZMQ + "intGRPC=" + internalGRPC + ")";
+        return "Address(external=" + external + ", internalZMQ=" + internalZMQ + "internalGRPC=" + internalGRPC + ")";
     }
 
     @Override

@@ -44,7 +44,6 @@ import java.util.stream.Collectors;
 
 import static com.vaticle.typedb.common.collection.Collections.map;
 import static com.vaticle.typedb.common.collection.Collections.pair;
-import static com.vaticle.typedb.common.collection.Collections.set;
 import static com.vaticle.typedb.common.test.RunnerUtil.SERVER_STARTUP_TIMEOUT_MILLIS;
 import static com.vaticle.typedb.common.test.RunnerUtil.createProcessExecutor;
 import static com.vaticle.typedb.common.test.RunnerUtil.typeDBCommand;
@@ -83,7 +82,7 @@ public class TypeDBClusterRunner implements TypeDBRunner {
             Map<String, String> options = new HashMap<>();
             options.putAll(ServerRunner.Opts.addressOpt(addr));
             options.putAll(ServerRunner.Opts.peersOpt(serverAddrs));
-            Path srvRunnerDir = clusterRunnerDir.resolve(addr.external()).toAbsolutePath();
+            Path srvRunnerDir = clusterRunnerDir.resolve(addr.external().toString()).toAbsolutePath();
             options.putAll(
                     map(
                             pair(STORAGE_DATA, srvRunnerDir.resolve("server/data").toAbsolutePath().toString()),
@@ -104,7 +103,7 @@ public class TypeDBClusterRunner implements TypeDBRunner {
             int externalPort = 40000 + i * 1111;
             int internalPortZMQ = 50000 + i * 1111;
             int internalPortGRPC = 60000 + i * 1111;
-            addresses.add(new Address(host, externalPort, host, internalPortZMQ, host, internalPortGRPC));
+            addresses.add(Address.create(host, externalPort, host, internalPortZMQ, host, internalPortGRPC));
         }
         return addresses;
     }
@@ -142,7 +141,7 @@ public class TypeDBClusterRunner implements TypeDBRunner {
     }
 
     public Set<String> externalAddresses() {
-        return addresses().stream().map(Address::external).collect(Collectors.toSet());
+        return addresses().stream().map(addr -> addr.external().toString()).collect(Collectors.toSet());
     }
 
     public Map<Address, ServerRunner> serverRunners() {
@@ -152,7 +151,7 @@ public class TypeDBClusterRunner implements TypeDBRunner {
     public ServerRunner serverRunner(String externalAddr) {
         Address addr = addresses()
                 .stream()
-                .filter(addr2 -> addr2.external().equals(externalAddr))
+                .filter(addr2 -> addr2.external().toString().equals(externalAddr))
                 .findAny()
                 .orElseThrow(() -> new RuntimeException("Server runner '" + externalAddr + "' not found"));
         return serverRunner(addr);
@@ -227,7 +226,7 @@ public class TypeDBClusterRunner implements TypeDBRunner {
                     System.out.println(address() + ": Data directory is located at " + dataDir().toAbsolutePath());
                     System.out.println(address() + ": Server bootup command: '" + command() + "'");
                     process = executor.command(command()).start();
-                    boolean started = waitUntilPortUsed(address().external2())
+                    boolean started = waitUntilPortUsed(address().external())
                             .await(SERVER_STARTUP_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
                     if (!started) {
                         String message = address() + ": Unable to start. ";
@@ -308,9 +307,9 @@ public class TypeDBClusterRunner implements TypeDBRunner {
 
             private static Map<String, String> addressOpt(Address address) {
                 Map<String, String> options = new HashMap<>();
-                options.put(OPT_ADDR, address.external());
-                options.put(OPT_INTERNAL_ADDR_ZMQ, address.internalZMQ());
-                options.put(OPT_INTERNAL_ADDR_GRPC, address.internalGRPC());
+                options.put(OPT_ADDR, address.external().toString());
+                options.put(OPT_INTERNAL_ADDR_ZMQ, address.internalZMQ().toString());
+                options.put(OPT_INTERNAL_ADDR_GRPC, address.internalGRPC().toString());
                 return options;
             }
 
@@ -342,9 +341,9 @@ public class TypeDBClusterRunner implements TypeDBRunner {
                     String addrKey = String.format(OPT_PEERS_ADDR, index);
                     String intAddrZMQKey = String.format(OPT_PEERS_INTERNAL_ADDR_ZMQ, index);
                     String intAddrGRPCKey = String.format(OPT_PEERS_INTERNAL_ADDR_GRPC, index);
-                    options.put(addrKey, peer.external());
-                    options.put(intAddrZMQKey, peer.internalZMQ());
-                    options.put(intAddrGRPCKey, peer.internalGRPC());
+                    options.put(addrKey, peer.external().toString());
+                    options.put(intAddrZMQKey, peer.internalZMQ().toString());
+                    options.put(intAddrGRPCKey, peer.internalGRPC().toString());
                     index++;
                 }
                 return options;
