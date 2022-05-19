@@ -23,20 +23,20 @@ import java.util.Objects;
 
 import static java.lang.Integer.parseInt;
 
-public class Address {
+public class Addresses {
 
     private final InetSocketAddress external;
     private final InetSocketAddress internalZMQ;
     private final InetSocketAddress internalGRPC;
 
-    public static Address create(String external, String internalZMQ, String internalGRPC) {
+    public static Addresses create(String external, String internalZMQ, String internalGRPC) {
         String[] ext = external.split(":");
         String[] intZMQ = internalZMQ.split(":");
         String[] intGRPC = internalGRPC.split(":");
-        return Address.create(ext[0], parseInt(ext[1]), intZMQ[0], parseInt(intZMQ[1]), intGRPC[0], parseInt(intGRPC[1]));
+        return Addresses.create(ext[0], parseInt(ext[1]), intZMQ[0], parseInt(intZMQ[1]), intGRPC[0], parseInt(intGRPC[1]));
     }
 
-    public static Address create(
+    public static Addresses create(
             String externalHost,
             int externalPort,
             String internalHostZMQ,
@@ -51,11 +51,11 @@ public class Address {
         );
     }
 
-    public static Address create(InetSocketAddress external, InetSocketAddress internalZMQ, InetSocketAddress internalGRPC) {
-        return new Address(external, internalZMQ, internalGRPC);
+    public static Addresses create(InetSocketAddress external, InetSocketAddress internalZMQ, InetSocketAddress internalGRPC) {
+        return new Addresses(external, internalZMQ, internalGRPC);
     }
 
-    private Address(InetSocketAddress external, InetSocketAddress internalZMQ, InetSocketAddress internalGRPC) {
+    private Addresses(InetSocketAddress external, InetSocketAddress internalZMQ, InetSocketAddress internalGRPC) {
         this.external = external;
         this.internalZMQ = internalZMQ;
         this.internalGRPC = internalGRPC;
@@ -82,8 +82,8 @@ public class Address {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Address address = (Address) o;
-        return Objects.equals(external, address.external) && Objects.equals(internalZMQ, address.internalZMQ) && Objects.equals(internalGRPC, address.internalGRPC);
+        Addresses addresses = (Addresses) o;
+        return Objects.equals(external, addresses.external) && Objects.equals(internalZMQ, addresses.internalZMQ) && Objects.equals(internalGRPC, addresses.internalGRPC);
     }
 
     @Override

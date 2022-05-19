@@ -18,7 +18,7 @@
 
 package com.vaticle.typedb.common.test;
 
-import com.vaticle.typedb.common.conf.Address;
+import com.vaticle.typedb.common.conf.Addresses;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.zeroturnaround.exec.ProcessExecutor;
@@ -65,9 +65,9 @@ public class TypeDBClusterRunner implements TypeDBRunner {
     private static final String STORAGE_USER = "--storage.user";
     private static final String LOG_OUTPUT_FILE_DIRECTORY = "--log.output.file.directory";
 
-    protected final Map<Address, Map<String, String>> serverOptionsMap;
+    protected final Map<Addresses, Map<String, String>> serverOptionsMap;
     private final ServerRunner.Factory serverRunnerFactory;
-    protected final Map<Address, ServerRunner> serverRunners;
+    protected final Map<Addresses, ServerRunner> serverRunners;
 
     // TODO: improve the "create" constructor
     // TODO: use Joshua's address allocation strategy
@@ -76,9 +76,9 @@ public class TypeDBClusterRunner implements TypeDBRunner {
     }
 
     public static TypeDBClusterRunner create(Path clusterRunnerDir, int serverCount, ServerRunner.Factory serverRunnerFactory) {
-        Set<Address> serverAddrs = allocateAddresses(serverCount);
-        Map<Address, Map<String, String>> serverOptionsMap = new HashMap<>();
-        for (Address addr: serverAddrs) {
+        Set<Addresses> serverAddrs = allocateAddresses(serverCount);
+        Map<Addresses, Map<String, String>> serverOptionsMap = new HashMap<>();
+        for (Addresses addr: serverAddrs) {
             Map<String, String> options = new HashMap<>();
             options.putAll(ServerRunner.Opts.addressOpt(addr));
             options.putAll(ServerRunner.Opts.peersOpt(serverAddrs));
@@ -96,27 +96,27 @@ public class TypeDBClusterRunner implements TypeDBRunner {
         return new TypeDBClusterRunner(serverOptionsMap, serverRunnerFactory);
     }
 
-    private static Set<Address> allocateAddresses(int serverCount) {
-        Set<Address> addresses = new HashSet<>();
+    private static Set<Addresses> allocateAddresses(int serverCount) {
+        Set<Addresses> addresses = new HashSet<>();
         for (int i = 0; i < serverCount; i++) {
             String host = "127.0.0.1";
             int externalPort = 40000 + i * 1111;
             int internalPortZMQ = 50000 + i * 1111;
             int internalPortGRPC = 60000 + i * 1111;
-            addresses.add(Address.create(host, externalPort, host, internalPortZMQ, host, internalPortGRPC));
+            addresses.add(Addresses.create(host, externalPort, host, internalPortZMQ, host, internalPortGRPC));
         }
         return addresses;
     }
 
-    private TypeDBClusterRunner(Map<Address, Map<String, String>> serverOptionsMap, ServerRunner.Factory serverRunnerFactory) {
+    private TypeDBClusterRunner(Map<Addresses, Map<String, String>> serverOptionsMap, ServerRunner.Factory serverRunnerFactory) {
         this.serverOptionsMap = serverOptionsMap;
         this.serverRunnerFactory = serverRunnerFactory;
         serverRunners = createServerRunners(this.serverOptionsMap);
     }
 
-    private Map<Address, ServerRunner> createServerRunners(Map<Address, Map<String, String>> serverOptsMap) {
-        Map<Address, ServerRunner> srvRunners = new ConcurrentHashMap<>();
-        for (Address addr: serverOptsMap.keySet()) {
+    private Map<Addresses, ServerRunner> createServerRunners(Map<Addresses, Map<String, String>> serverOptsMap) {
+        Map<Addresses, ServerRunner> srvRunners = new ConcurrentHashMap<>();
+        for (Addresses addr: serverOptsMap.keySet()) {
             Map<String, String> options = serverOptsMap.get(addr);
             ServerRunner srvRunner = serverRunnerFactory.createServerRunner(options);
             srvRunners.put(addr, srvRunner);
@@ -136,7 +136,7 @@ public class TypeDBClusterRunner implements TypeDBRunner {
         return serverRunners.values().stream().allMatch(TypeDBRunner::isStopped);
     }
 
-    public Set<Address> addresses() {
+    public Set<Addresses> addresses() {
         return serverOptionsMap.keySet();
     }
 
@@ -144,12 +144,12 @@ public class TypeDBClusterRunner implements TypeDBRunner {
         return addresses().stream().map(addr -> addr.external().toString()).collect(Collectors.toSet());
     }
 
-    public Map<Address, ServerRunner> serverRunners() {
+    public Map<Addresses, ServerRunner> serverRunners() {
         return serverRunners;
     }
 
     public ServerRunner serverRunner(String externalAddr) {
-        Address addr = addresses()
+        Addresses addr = addresses()
                 .stream()
                 .filter(addr2 -> addr2.external().toString().equals(externalAddr))
                 .findAny()
@@ -157,7 +157,7 @@ public class TypeDBClusterRunner implements TypeDBRunner {
         return serverRunner(addr);
     }
 
-    public ServerRunner serverRunner(Address addr) {
+    public ServerRunner serverRunner(Addresses addr) {
         return serverRunners.get(addr);
     }
 
@@ -174,7 +174,7 @@ public class TypeDBClusterRunner implements TypeDBRunner {
 
     public interface ServerRunner extends TypeDBRunner {
 
-        Address address();
+        Addresses address();
 
         class Default implements ServerRunner {
 
@@ -202,11 +202,11 @@ public class TypeDBClusterRunner implements TypeDBRunner {
             }
 
             @Override
-            public Address address() {
+            public Addresses address() {
                 return Opts.addressOpt(serverOptions);
             }
 
-            public Set<Address> peers() {
+            public Set<Addresses> peers() {
                 return Opts.peersOpt(serverOptions);
             }
 
@@ -301,19 +301,19 @@ public class TypeDBClusterRunner implements TypeDBRunner {
         // TODO: move this util class somewhere more appropriate
         class Opts {
 
-            private static Address addressOpt(Map<String, String> options) {
-                return Address.create(options.get(OPT_ADDR), options.get(OPT_INTERNAL_ADDR_ZMQ), options.get(OPT_INTERNAL_ADDR_GRPC));
+            private static Addresses addressOpt(Map<String, String> options) {
+                return Addresses.create(options.get(OPT_ADDR), options.get(OPT_INTERNAL_ADDR_ZMQ), options.get(OPT_INTERNAL_ADDR_GRPC));
             }
 
-            private static Map<String, String> addressOpt(Address address) {
+            private static Map<String, String> addressOpt(Addresses addresses) {
                 Map<String, String> options = new HashMap<>();
-                options.put(OPT_ADDR, address.external().toString());
-                options.put(OPT_INTERNAL_ADDR_ZMQ, address.internalZMQ().toString());
-                options.put(OPT_INTERNAL_ADDR_GRPC, address.internalGRPC().toString());
+                options.put(OPT_ADDR, addresses.external().toString());
+                options.put(OPT_INTERNAL_ADDR_ZMQ, addresses.internalZMQ().toString());
+                options.put(OPT_INTERNAL_ADDR_GRPC, addresses.internalGRPC().toString());
                 return options;
             }
 
-            private static Set<Address> peersOpt(Map<String, String> options) {
+            private static Set<Addresses> peersOpt(Map<String, String> options) {
                 Set<String> names = new HashSet<>();
                 Pattern namePattern = Pattern.compile("--server.peers.(.+).*$");
                 for (String opt: options.keySet()) {
@@ -322,9 +322,9 @@ public class TypeDBClusterRunner implements TypeDBRunner {
                         names.add(nameMatcher.group(1));
                     }
                 }
-                Set<Address> peers = new HashSet<>();
+                Set<Addresses> peers = new HashSet<>();
                 for (String name: names) {
-                    Address peer = Address.create(
+                    Addresses peer = Addresses.create(
                             options.get("--server.peers." + name + ".address"),
                             options.get("--server.peers." + name + ".internal-address.zeromq"),
                             options.get("--server.peers." + name + ".internal-address.grpc")
@@ -334,10 +334,10 @@ public class TypeDBClusterRunner implements TypeDBRunner {
                 return peers;
             }
 
-            private static Map<String, String> peersOpt(Set<Address> peers) {
+            private static Map<String, String> peersOpt(Set<Addresses> peers) {
                 Map<String, String> options = new HashMap<>();
                 int index = 0;
-                for (Address peer : peers) {
+                for (Addresses peer : peers) {
                     String addrKey = String.format(OPT_PEERS_ADDR, index);
                     String intAddrZMQKey = String.format(OPT_PEERS_INTERNAL_ADDR_ZMQ, index);
                     String intAddrGRPCKey = String.format(OPT_PEERS_INTERNAL_ADDR_GRPC, index);
