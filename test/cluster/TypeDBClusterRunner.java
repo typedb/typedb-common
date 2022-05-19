@@ -42,8 +42,6 @@ public class TypeDBClusterRunner implements TypeDBRunner {
     private final TypeDBClusterServerRunner.Factory serverRunnerFactory;
     protected final Map<Addresses, TypeDBClusterServerRunner> serverRunners;
 
-    // TODO: improve the "create" constructor
-    // TODO: use Joshua's address allocation strategy
     public static TypeDBClusterRunner create(Path clusterRunnerDir, int serverCount) {
         return create(clusterRunnerDir, serverCount, new TypeDBClusterServerRunner.Factory());
     }
@@ -144,5 +142,4 @@ public class TypeDBClusterRunner implements TypeDBRunner {
             }
         }
     }
-
 }
