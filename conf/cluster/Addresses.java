@@ -65,12 +65,24 @@ public class Addresses {
         return external;
     }
 
+    public String externalString() {
+        return external.getHostString() + ":" + external.getPort();
+    }
+
     public InetSocketAddress internalZMQ() {
         return internalZMQ;
     }
 
+    public String internalZMQString() {
+        return internalZMQ.getHostString() + ":" + internalZMQ.getPort();
+    }
+
     public InetSocketAddress internalGRPC() {
         return internalGRPC;
+    }
+
+    public String internalGRPCString() {
+        return internalGRPC.getHostString() + ":" + internalGRPC.getPort();
     }
 
     @Override

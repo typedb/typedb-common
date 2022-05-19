@@ -48,9 +48,9 @@ class ClusterServerOpts {
 
     static Map<String, String> address(Addresses addresses) {
         Map<String, String> options = new HashMap<>();
-        options.put(ADDR, addresses.external().toString());
-        options.put(INTERNAL_ADDR_ZMQ, addresses.internalZMQ().toString());
-        options.put(INTERNAL_ADDR_GRPC, addresses.internalGRPC().toString());
+        options.put(ADDR, addresses.externalString());
+        options.put(INTERNAL_ADDR_ZMQ, addresses.internalZMQString());
+        options.put(INTERNAL_ADDR_GRPC, addresses.internalGRPCString());
         return options;
     }
 
@@ -81,9 +81,9 @@ class ClusterServerOpts {
             String addrKey = String.format(PEERS_ADDR, index);
             String intAddrZMQKey = String.format(PEERS_INTERNAL_ADDR_ZMQ, index);
             String intAddrGRPCKey = String.format(PEERS_INTERNAL_ADDR_GRPC, index);
-            options.put(addrKey, peer.external().toString());
-            options.put(intAddrZMQKey, peer.internalZMQ().toString());
-            options.put(intAddrGRPCKey, peer.internalGRPC().toString());
+            options.put(addrKey, peer.externalString());
+            options.put(intAddrZMQKey, peer.internalZMQString());
+            options.put(intAddrGRPCKey, peer.internalGRPCString());
             index++;
         }
         return options;

@@ -53,7 +53,7 @@ public class TypeDBClusterRunner implements TypeDBRunner {
             Map<String, String> options = new HashMap<>();
             options.putAll(ClusterServerOpts.address(addr));
             options.putAll(ClusterServerOpts.peers(serverAddrs));
-            Path srvRunnerDir = clusterRunnerDir.resolve(addr.external().toString()).toAbsolutePath();
+            Path srvRunnerDir = clusterRunnerDir.resolve(addr.externalString()).toAbsolutePath();
             options.putAll(
                     map(
                             pair(ClusterServerOpts.STORAGE_DATA, srvRunnerDir.resolve("server/data").toAbsolutePath().toString()),
@@ -116,7 +116,7 @@ public class TypeDBClusterRunner implements TypeDBRunner {
     }
 
     public Set<String> externalAddresses() {
-        return addresses().stream().map(addr -> addr.external().toString()).collect(Collectors.toSet());
+        return addresses().stream().map(Addresses::externalString).collect(Collectors.toSet());
     }
 
     public Map<Addresses, TypeDBClusterServerRunner> serverRunners() {
@@ -126,7 +126,7 @@ public class TypeDBClusterRunner implements TypeDBRunner {
     public TypeDBClusterServerRunner serverRunner(String externalAddr) {
         Addresses addr = addresses()
                 .stream()
-                .filter(addr2 -> addr2.external().toString().equals(externalAddr))
+                .filter(addr2 -> addr2.externalString().equals(externalAddr))
                 .findAny()
                 .orElseThrow(() -> new RuntimeException("Server runner '" + externalAddr + "' not found"));
         return serverRunner(addr);
