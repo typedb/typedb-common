@@ -133,7 +133,7 @@ public interface TypeDBClusterServerRunner extends TypeDBRunner {
 
         @Override
         public boolean isStopped() {
-            return !process.getProcess().isAlive();
+            return process == null || !process.getProcess().isAlive();
         }
 
         @Override
@@ -142,6 +142,7 @@ public interface TypeDBClusterServerRunner extends TypeDBRunner {
                 try {
                     System.out.println(address() + ": Stopping...");
                     process.getProcess().destroyForcibly();
+                    process = null;
                     System.out.println(address() + ": Stopped.");
                 } catch (Exception e) {
                     printLogs();
