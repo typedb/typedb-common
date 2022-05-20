@@ -22,6 +22,8 @@ public interface TypeDBRunner {
 
     void start();
 
+    String address();
+
     boolean isStopped();
 
     void stop();

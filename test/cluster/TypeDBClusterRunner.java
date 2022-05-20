@@ -47,13 +47,13 @@ public class TypeDBClusterRunner implements TypeDBRunner {
     }
 
     public static TypeDBClusterRunner create(Path clusterRunnerDir, int serverCount, TypeDBClusterServerRunner.Factory serverRunnerFactory) {
-        Set<Addresses> serverAddrs = allocateAddresses(serverCount);
+        Set<Addresses> serverAddressesSet = allocateAddressesSet(serverCount);
         Map<Addresses, Map<String, String>> serverOptionsMap = new HashMap<>();
-        for (Addresses addr: serverAddrs) {
+        for (Addresses addrs: serverAddressesSet) {
             Map<String, String> options = new HashMap<>();
-            options.putAll(ClusterServerOpts.address(addr));
-            options.putAll(ClusterServerOpts.peers(serverAddrs));
-            Path srvRunnerDir = clusterRunnerDir.resolve(addr.externalString()).toAbsolutePath();
+            options.putAll(ClusterServerOpts.address(addrs));
+            options.putAll(ClusterServerOpts.peers(serverAddressesSet));
+            Path srvRunnerDir = clusterRunnerDir.resolve(addrs.externalString()).toAbsolutePath();
             options.putAll(
                     map(
                             pair(ClusterServerOpts.STORAGE_DATA, srvRunnerDir.resolve("server/data").toAbsolutePath().toString()),
@@ -62,12 +62,12 @@ public class TypeDBClusterRunner implements TypeDBRunner {
                             pair(ClusterServerOpts.LOG_OUTPUT_FILE_DIRECTORY, srvRunnerDir.resolve("server/logs").toAbsolutePath().toString())
                     )
             );
-            serverOptionsMap.put(addr, options);
+            serverOptionsMap.put(addrs, options);
         }
         return new TypeDBClusterRunner(serverOptionsMap, serverRunnerFactory);
     }
 
-    private static Set<Addresses> allocateAddresses(int serverCount) {
+    private static Set<Addresses> allocateAddressesSet(int serverCount) {
         Set<Addresses> addresses = new HashSet<>();
         for (int i = 0; i < serverCount; i++) {
             String host = "127.0.0.1";
@@ -80,6 +80,7 @@ public class TypeDBClusterRunner implements TypeDBRunner {
     }
 
     private TypeDBClusterRunner(Map<Addresses, Map<String, String>> serverOptionsMap, TypeDBClusterServerRunner.Factory serverRunnerFactory) {
+        assert serverOptionsMap.size() >= 1;
         this.serverOptionsMap = serverOptionsMap;
         this.serverRunnerFactory = serverRunnerFactory;
         serverRunners = createServerRunners(this.serverOptionsMap);
@@ -87,10 +88,10 @@ public class TypeDBClusterRunner implements TypeDBRunner {
 
     private Map<Addresses, TypeDBClusterServerRunner> createServerRunners(Map<Addresses, Map<String, String>> serverOptsMap) {
         Map<Addresses, TypeDBClusterServerRunner> srvRunners = new ConcurrentHashMap<>();
-        for (Addresses addr: serverOptsMap.keySet()) {
-            Map<String, String> options = serverOptsMap.get(addr);
+        for (Addresses addrs: serverOptsMap.keySet()) {
+            Map<String, String> options = serverOptsMap.get(addrs);
             TypeDBClusterServerRunner srvRunner = serverRunnerFactory.createServerRunner(options);
-            srvRunners.put(addr, srvRunner);
+            srvRunners.put(addrs, srvRunner);
         }
         return srvRunners;
     }
@@ -101,7 +102,7 @@ public class TypeDBClusterRunner implements TypeDBRunner {
             if (runner.isStopped()) {
                 runner.start();
             } else {
-                LOG.debug("not starting server {} - it is already started.", runner.address());
+                LOG.debug("not starting server {} - it is already started.", runner.addresses());
             }
         }
     }
@@ -111,12 +112,17 @@ public class TypeDBClusterRunner implements TypeDBRunner {
         return serverRunners.values().stream().allMatch(TypeDBRunner::isStopped);
     }
 
-    public Set<Addresses> addresses() {
+    @Override
+    public String address() {
+        return externalAddresses().stream().findAny().get();
+    }
+
+    public Set<Addresses> addressesSet() {
         return serverOptionsMap.keySet();
     }
 
     public Set<String> externalAddresses() {
-        return addresses().stream().map(Addresses::externalString).collect(Collectors.toSet());
+        return addressesSet().stream().map(Addresses::externalString).collect(Collectors.toSet());
     }
 
     public Map<Addresses, TypeDBClusterServerRunner> serverRunners() {
@@ -124,16 +130,16 @@ public class TypeDBClusterRunner implements TypeDBRunner {
     }
 
     public TypeDBClusterServerRunner serverRunner(String externalAddr) {
-        Addresses addr = addresses()
+        Addresses addrs = addressesSet()
                 .stream()
-                .filter(addr2 -> addr2.externalString().equals(externalAddr))
+                .filter(a -> a.externalString().equals(externalAddr))
                 .findAny()
                 .orElseThrow(() -> new RuntimeException("Server runner '" + externalAddr + "' not found"));
-        return serverRunner(addr);
+        return serverRunner(addrs);
     }
 
-    public TypeDBClusterServerRunner serverRunner(Addresses addr) {
-        return serverRunners.get(addr);
+    public TypeDBClusterServerRunner serverRunner(Addresses addrs) {
+        return serverRunners.get(addrs);
     }
 
     @Override
@@ -142,7 +148,7 @@ public class TypeDBClusterRunner implements TypeDBRunner {
             if (!runner.isStopped()) {
                 runner.stop();
             } else {
-                LOG.debug("not stopping server {} - it is already stopped.", runner.address());
+                LOG.debug("not stopping server {} - it is already stopped.", runner.addresses());
             }
         }
     }

@@ -40,7 +40,7 @@ import static com.vaticle.typedb.common.test.RunnerUtil.createProcessExecutor;
 
 public interface TypeDBClusterServerRunner extends TypeDBRunner {
 
-    Addresses address();
+    Addresses addresses();
 
     class Factory {
 
@@ -63,11 +63,11 @@ public interface TypeDBClusterServerRunner extends TypeDBRunner {
         public Default(Map<String, String> serverOptions) throws IOException, InterruptedException, TimeoutException {
             distribution = RunnerUtil.unarchive();
             this.serverOptions = serverOptions;
-            System.out.println(address() + ": " + name() + " constructing runner...");
+            System.out.println(addresses() + ": " + name() + " constructing runner...");
             Files.createDirectories(ClusterServerOpts.storageData(serverOptions));
             Files.createDirectories(ClusterServerOpts.logOutput(serverOptions));
             executor = createProcessExecutor(distribution);
-            System.out.println(address() + ": " + name() + " runner constructed.");
+            System.out.println(addresses() + ": " + name() + " runner constructed.");
         }
 
         private String name() {
@@ -79,7 +79,12 @@ public interface TypeDBClusterServerRunner extends TypeDBRunner {
         }
 
         @Override
-        public Addresses address() {
+        public String address() {
+            return addresses().externalString();
+        }
+
+        @Override
+        public Addresses addresses() {
             return ClusterServerOpts.address(serverOptions);
         }
 
@@ -98,25 +103,25 @@ public interface TypeDBClusterServerRunner extends TypeDBRunner {
         @Override
         public void start() {
             try {
-                System.out.println(address() + ": " + name() + " is starting... ");
-                System.out.println(address() + ": Distribution is located at " + distribution.toAbsolutePath());
-                System.out.println(address() + ": Data directory is located at " + dataDir().toAbsolutePath());
-                System.out.println(address() + ": Server bootup command: '" + command() + "'");
+                System.out.println(addresses() + ": " + name() + " is starting... ");
+                System.out.println(addresses() + ": Distribution is located at " + distribution.toAbsolutePath());
+                System.out.println(addresses() + ": Data directory is located at " + dataDir().toAbsolutePath());
+                System.out.println(addresses() + ": Server bootup command: '" + command() + "'");
                 process = executor.command(command()).start();
-                boolean started = RunnerUtil.waitUntilPortUsed(address().external())
+                boolean started = RunnerUtil.waitUntilPortUsed(addresses().external())
                         .await(SERVER_STARTUP_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
                 if (!started) {
-                    String message = address() + ": Unable to start. ";
+                    String message = addresses() + ": Unable to start. ";
                     if (process.getFuture().isDone()) {
                         ProcessResult processResult = process.getFuture().get();
-                        message += address() + ": Process exited with code '" + processResult.getExitValue() + "'. ";
+                        message += addresses() + ": Process exited with code '" + processResult.getExitValue() + "'. ";
                         if (processResult.hasOutput()) {
                             message += "Output: " + processResult.outputUTF8();
                         }
                     }
                     throw new RuntimeException(message);
                 } else {
-                    System.out.println(address() + ": Started");
+                    System.out.println(addresses() + ": Started");
                 }
             } catch (Throwable e) {
                 printLogs();
@@ -140,10 +145,10 @@ public interface TypeDBClusterServerRunner extends TypeDBRunner {
         public void stop() {
             if (process != null) {
                 try {
-                    System.out.println(address() + ": Stopping...");
+                    System.out.println(addresses() + ": Stopping...");
                     process.getProcess().destroyForcibly();
                     process = null;
-                    System.out.println(address() + ": Stopped.");
+                    System.out.println(addresses() + ": Stopped.");
                 } catch (Exception e) {
                     printLogs();
                     throw e;
@@ -152,16 +157,16 @@ public interface TypeDBClusterServerRunner extends TypeDBRunner {
         }
 
         private void printLogs() {
-            System.out.println(address() + ": ================");
-            System.out.println(address() + ": Logs:");
+            System.out.println(addresses() + ": ================");
+            System.out.println(addresses() + ": Logs:");
             Path logPath = logsDir().resolve("typedb.log").toAbsolutePath();
             try {
                 executor.command("cat", logPath.toString()).execute();
             } catch (IOException | InterruptedException | TimeoutException e) {
-                System.out.println(address() + ": Unable to print '" + logPath + "'");
+                System.out.println(addresses() + ": Unable to print '" + logPath + "'");
                 e.printStackTrace();
             }
-            System.out.println(address() + ": ================");
+            System.out.println(addresses() + ": ================");
         }
     }
 

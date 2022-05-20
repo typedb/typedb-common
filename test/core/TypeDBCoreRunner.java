@@ -61,6 +61,7 @@ public class TypeDBCoreRunner implements TypeDBRunner {
         return "TypeDB Core";
     }
 
+    @Override
     public String address() {
         return host() + ":" + port();
     }
