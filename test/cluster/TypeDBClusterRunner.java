@@ -130,12 +130,12 @@ public class TypeDBClusterRunner implements TypeDBRunner {
     }
 
     public TypeDBClusterServerRunner serverRunner(String externalAddr) {
-        Addresses addrs = addressesSet()
+        Addresses addresses = addressesSet()
                 .stream()
-                .filter(a -> a.externalString().equals(externalAddr))
+                .filter(addrs -> addrs.externalString().equals(externalAddr))
                 .findAny()
                 .orElseThrow(() -> new RuntimeException("Server runner '" + externalAddr + "' not found"));
-        return serverRunner(addrs);
+        return serverRunner(addresses);
     }
 
     public TypeDBClusterServerRunner serverRunner(Addresses addrs) {
