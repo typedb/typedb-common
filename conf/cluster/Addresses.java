@@ -101,9 +101,9 @@ public class Addresses {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Addresses addresses = (Addresses) o;
-        return Objects.equals(external, addresses.external) &&
-                Objects.equals(internalZMQ, addresses.internalZMQ) &&
-                Objects.equals(internalGRPC, addresses.internalGRPC);
+        return external.equals(addresses.external) &&
+                internalZMQ.equals(addresses.internalZMQ) &&
+                internalGRPC.equals(addresses.internalGRPC);
     }
 
     @Override
