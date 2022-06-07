@@ -33,10 +33,10 @@ class ClusterServerOpts {
     private static final String ADDR = "--server.address";
     private static final String INTERNAL_ADDR_ZMQ = "--server.internal-address.zeromq";
     private static final String INTERNAL_ADDR_GRPC = "--server.internal-address.grpc";
-    private static final Pattern PEERS_PATTERN = Pattern.compile("--server.peers.(.+).*$");
-    private static final String PEERS_ADDR = "--server.peers.server-peer-%d.address";
-    private static final String PEERS_INTERNAL_ADDR_ZMQ = "--server.peers.server-peer-%d.internal-address.zeromq";
-    private static final String PEERS_INTERNAL_ADDR_GRPC = "--server.peers.server-peer-%d.internal-address.grpc";
+    private static final String PEERS = "--server.peers";
+    private static final String PEERS_ADDR = PEERS + ".%s.address";
+    private static final String PEERS_INTERNAL_ADDR_ZMQ = PEERS + ".%s.internal-address.zeromq";
+    private static final String PEERS_INTERNAL_ADDR_GRPC = PEERS + ".%s.internal-address.grpc";
     static final String STORAGE_DATA = "--storage.data";
     static final String STORAGE_REPLICATION = "--storage.replication";
     static final String STORAGE_USER = "--storage.user";
@@ -57,7 +57,7 @@ class ClusterServerOpts {
     static Set<Addresses> peers(Map<String, String> options) {
         Set<String> names = new HashSet<>();
         for (String opt : options.keySet()) {
-            Matcher nameMatcher = PEERS_PATTERN.matcher(opt);
+            Matcher nameMatcher = Pattern.compile(PEERS + ".(.+).*$").matcher(opt);
             if (nameMatcher.find()) {
                 names.add(nameMatcher.group(1));
             }
@@ -65,9 +65,9 @@ class ClusterServerOpts {
         Set<Addresses> peers = new HashSet<>();
         for (String name : names) {
             Addresses peer = Addresses.create(
-                    options.get("--server.peers." + name + ".address"),
-                    options.get("--server.peers." + name + ".internal-address.zeromq"),
-                    options.get("--server.peers." + name + ".internal-address.grpc")
+                    options.get(String.format(PEERS_ADDR, name)),
+                    options.get(String.format(PEERS_INTERNAL_ADDR_ZMQ, name)),
+                    options.get(String.format(PEERS_INTERNAL_ADDR_GRPC, name))
             );
             peers.add(peer);
         }
@@ -78,9 +78,9 @@ class ClusterServerOpts {
         Map<String, String> options = new HashMap<>();
         int index = 0;
         for (Addresses peer : peers) {
-            String addrKey = String.format(PEERS_ADDR, index);
-            String intAddrZMQKey = String.format(PEERS_INTERNAL_ADDR_ZMQ, index);
-            String intAddrGRPCKey = String.format(PEERS_INTERNAL_ADDR_GRPC, index);
+            String addrKey = String.format(PEERS_ADDR, "server-peer-"+index);
+            String intAddrZMQKey = String.format(PEERS_INTERNAL_ADDR_ZMQ, "server-peer-"+index);
+            String intAddrGRPCKey = String.format(PEERS_INTERNAL_ADDR_GRPC, "server-peer-"+index);
             options.put(addrKey, peer.externalString());
             options.put(intAddrZMQKey, peer.internalZMQString());
             options.put(intAddrGRPCKey, peer.internalGRPCString());
