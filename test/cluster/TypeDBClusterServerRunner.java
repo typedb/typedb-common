@@ -45,14 +45,14 @@ public interface TypeDBClusterServerRunner extends TypeDBRunner {
 
         protected TypeDBClusterServerRunner createServerRunner(Map<String, String> options) {
             try {
-                return new Default(options);
+                return new Standalone(options);
             } catch (InterruptedException | TimeoutException | IOException e) {
                 throw new RuntimeException("Unable to construct runner.");
             }
         }
     }
 
-    class Default implements TypeDBClusterServerRunner {
+    class Standalone implements TypeDBClusterServerRunner {
 
         private static final int ARCHIVE_INDEX = 1;
 
@@ -61,7 +61,7 @@ public interface TypeDBClusterServerRunner extends TypeDBRunner {
         private StartedProcess process;
         protected ProcessExecutor executor;
 
-        public Default(Map<String, String> serverOptions) throws IOException, InterruptedException, TimeoutException {
+        public Standalone(Map<String, String> serverOptions) throws IOException, InterruptedException, TimeoutException {
             distribution = unarchive(getArchivePath(ARCHIVE_INDEX));
             this.serverOptions = serverOptions;
             System.out.println(addresses() + ": " + name() + " constructing runner...");
