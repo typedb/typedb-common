@@ -18,7 +18,7 @@
 
 package com.vaticle.typedb.common.test.core;
 
-import com.vaticle.typedb.common.test.RunnerUtil;
+import com.vaticle.typedb.common.test.Util;
 import com.vaticle.typedb.common.test.TypeDBRunner;
 import org.zeroturnaround.exec.ProcessExecutor;
 import org.zeroturnaround.exec.StartedProcess;
@@ -29,11 +29,11 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
 
-import static com.vaticle.typedb.common.test.RunnerUtil.createProcessExecutor;
-import static com.vaticle.typedb.common.test.RunnerUtil.findUnusedPorts;
-import static com.vaticle.typedb.common.test.RunnerUtil.getArchivePath;
-import static com.vaticle.typedb.common.test.RunnerUtil.typeDBCommand;
-import static com.vaticle.typedb.common.test.RunnerUtil.unarchive;
+import static com.vaticle.typedb.common.test.Util.createProcessExecutor;
+import static com.vaticle.typedb.common.test.Util.findUnusedPorts;
+import static com.vaticle.typedb.common.test.Util.getArchivePath;
+import static com.vaticle.typedb.common.test.Util.typeDBCommand;
+import static com.vaticle.typedb.common.test.Util.unarchive;
 
 public class TypeDBCoreRunner implements TypeDBRunner {
 
@@ -82,7 +82,7 @@ public class TypeDBCoreRunner implements TypeDBRunner {
         System.out.println(address() + ": Data directory is located at " + dataDir.toAbsolutePath());
         System.out.println(address() + ": Server bootup command = " + command());
         try {
-            process = RunnerUtil.startProcess(executor, command(), new InetSocketAddress(host(), port()));
+            process = Util.startProcess(executor, command(), new InetSocketAddress(host(), port()));
         } catch (Throwable e) {
             printLogs();
             throw new RuntimeException(e);

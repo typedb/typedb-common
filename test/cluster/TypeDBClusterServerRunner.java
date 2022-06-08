@@ -19,12 +19,11 @@
 package com.vaticle.typedb.common.test.cluster;
 
 import com.vaticle.typedb.common.conf.cluster.Addresses;
-import com.vaticle.typedb.common.test.RunnerUtil;
+import com.vaticle.typedb.common.test.Util;
 import com.vaticle.typedb.common.test.TypeDBRunner;
 import org.zeroturnaround.exec.ProcessExecutor;
 import org.zeroturnaround.exec.StartedProcess;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -34,9 +33,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeoutException;
 
-import static com.vaticle.typedb.common.test.RunnerUtil.createProcessExecutor;
-import static com.vaticle.typedb.common.test.RunnerUtil.getArchivePath;
-import static com.vaticle.typedb.common.test.RunnerUtil.unarchive;
+import static com.vaticle.typedb.common.test.Util.createProcessExecutor;
+import static com.vaticle.typedb.common.test.Util.getArchivePath;
+import static com.vaticle.typedb.common.test.Util.unarchive;
 
 public interface TypeDBClusterServerRunner extends TypeDBRunner {
 
@@ -109,7 +108,7 @@ public interface TypeDBClusterServerRunner extends TypeDBRunner {
             System.out.println(addresses() + ": Data directory is located at " + dataDir().toAbsolutePath());
             System.out.println(addresses() + ": Server bootup command: '" + command() + "'");
             try {
-                process = RunnerUtil.startProcess(executor, command(), addresses().external());
+                process = Util.startProcess(executor, command(), addresses().external());
             } catch (Throwable e) {
                 printLogs();
                 throw new RuntimeException(e);
@@ -120,7 +119,7 @@ public interface TypeDBClusterServerRunner extends TypeDBRunner {
             List<String> cmd = new ArrayList<>();
             cmd.add("cluster");
             serverOptions.forEach((key, value) -> cmd.add(key + "=" + value));
-            return RunnerUtil.typeDBCommand(cmd);
+            return Util.typeDBCommand(cmd);
         }
 
         @Override

@@ -16,20 +16,20 @@
  *
  */
 
-package com.vaticle.typedb.common.test;
+package com.vaticle.typedb.common.test.console;
 
+import com.vaticle.typedb.common.test.Util;
 import org.zeroturnaround.exec.ProcessExecutor;
 import org.zeroturnaround.exec.StartedProcess;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
 
 import static com.vaticle.typedb.common.collection.Collections.list;
-import static com.vaticle.typedb.common.test.RunnerUtil.getArchivePath;
-import static com.vaticle.typedb.common.test.RunnerUtil.unarchive;
+import static com.vaticle.typedb.common.test.Util.getArchivePath;
+import static com.vaticle.typedb.common.test.Util.unarchive;
 
 public class TypeDBConsoleRunner {
 
@@ -63,7 +63,7 @@ public class TypeDBConsoleRunner {
 
     private List<String> command(String... options) {
         List<String> cmd = list((List<String>) list("console"), list(options));
-        return RunnerUtil.typeDBCommand(cmd);
+        return Util.typeDBCommand(cmd);
     }
 
     private String name() {

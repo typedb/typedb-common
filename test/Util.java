@@ -43,7 +43,7 @@ import java.util.concurrent.TimeoutException;
 
 import static org.junit.Assert.fail;
 
-public class RunnerUtil {
+public class Util {
 
     private static final String TAR_GZ = ".tar.gz";
     private static final String ZIP = ".zip";

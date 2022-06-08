@@ -38,6 +38,6 @@ filegroup(
 
 checkstyle_test(
     name = "checkstyle",
-    include = glob(["*", "core/*", "cluster/*"]),
+    include = glob(["*", "*/*"]),
     license_type = "agpl",
 )
