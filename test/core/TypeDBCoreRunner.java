@@ -80,7 +80,7 @@ public class TypeDBCoreRunner implements TypeDBRunner {
             System.out.println(address() + ": " +  name() + "is starting... ");
             System.out.println(address() + ": Distribution is located at " + distribution.toAbsolutePath());
             System.out.println(address() + ": Data directory is located at " + dataDir.toAbsolutePath());
-            System.out.println(address() + ": Bootup command = " + command());
+            System.out.println(address() + ": Server bootup command = " + command());
             process = executor.command(command()).start();
             boolean started = waitUntilPortUsed(host(), port())
                     .await(SERVER_STARTUP_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);

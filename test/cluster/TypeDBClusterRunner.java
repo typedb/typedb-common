@@ -87,7 +87,7 @@ public class TypeDBClusterRunner implements TypeDBRunner {
     }
 
     private Map<Addresses, TypeDBClusterServerRunner> createServerRunners(Map<Addresses, Map<String, String>> serverOptsMap) {
-        Map<Addresses, TypeDBClusterServerRunner> srvRunners = new ConcurrentHashMap<>();
+        Map<Addresses, TypeDBClusterServerRunner> srvRunners = new HashMap<>();
         for (Addresses addrs: serverOptsMap.keySet()) {
             Map<String, String> options = serverOptsMap.get(addrs);
             TypeDBClusterServerRunner srvRunner = serverRunnerFactory.createServerRunner(options);
