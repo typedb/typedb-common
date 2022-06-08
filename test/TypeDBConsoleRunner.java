@@ -28,20 +28,20 @@ import java.util.List;
 import java.util.concurrent.TimeoutException;
 
 import static com.vaticle.typedb.common.collection.Collections.list;
+import static com.vaticle.typedb.common.test.RunnerUtil.getArchivePath;
+import static com.vaticle.typedb.common.test.RunnerUtil.unarchive;
 
 public class TypeDBConsoleRunner {
+
+    private static final int ARCHIVE_INDEX = 2;
 
     protected final Path distribution;
     protected ProcessExecutor executor;
 
     public TypeDBConsoleRunner() throws InterruptedException, TimeoutException, IOException {
         System.out.println("Constructing " + name() + " runner");
-        File archive = archive();
-        if (!archive.exists()) {
-            throw new IllegalArgumentException("Distribution archive missing: " + archive.getAbsolutePath());
-        }
         System.out.println("Extracting " + name() + " distribution archive.");
-        distribution = RunnerUtil.unarchive(archive);
+        distribution = unarchive(getArchivePath(ARCHIVE_INDEX));
         System.out.println(name() + " distribution archive extracted.");
         executor = new ProcessExecutor()
                 .directory(distribution.toFile())
@@ -64,12 +64,6 @@ public class TypeDBConsoleRunner {
     private List<String> command(String... options) {
         List<String> cmd = list((List<String>) list("console"), list(options));
         return RunnerUtil.typeDBCommand(cmd);
-    }
-
-    private File archive() {
-        String[] args = System.getProperty("sun.java.command").split(" ");
-        assert args.length > 2;
-        return new File(args[2]);
     }
 
     private String name() {

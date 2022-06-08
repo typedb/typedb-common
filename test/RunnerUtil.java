@@ -52,18 +52,16 @@ public class RunnerUtil {
     private static final int SERVER_ALIVE_POLL_INTERVAL_MILLIS = 500;
     private static final int SERVER_ALIVE_POLL_MAX_RETRIES = SERVER_STARTUP_TIMEOUT_MILLIS / SERVER_ALIVE_POLL_INTERVAL_MILLIS;
 
-    private static File distributionArchivePath() {
+    public static File getArchivePath(int index) {
         String[] args = System.getProperty("sun.java.command").split(" ");
-        assert args.length > 1;
-        File file = new File(args[1]);
+        if (args.length < index) {
+            throw new IllegalArgumentException("Distribution archive at index '" + index + "' is not defined");
+        }
+        File file = new File(args[index]);
         if (!file.exists()) {
-            throw new IllegalArgumentException("Distribution archive missing: " + file.getAbsolutePath());
+            throw new IllegalArgumentException("Distribution archive '" + file.getAbsolutePath() + "' is missing");
         }
         return file;
-    }
-
-    public static Path unarchive() throws IOException, InterruptedException, TimeoutException {
-        return unarchive(distributionArchivePath());
     }
 
     public static Path unarchive(File archive) throws IOException, TimeoutException, InterruptedException {
@@ -199,9 +197,9 @@ public class RunnerUtil {
         }
     }
 
-    public static ProcessExecutor createProcessExecutor(Path distribution) {
+    public static ProcessExecutor createProcessExecutor(Path directory) {
         return new ProcessExecutor()
-                .directory(distribution.toFile())
+                .directory(directory.toFile())
                 .redirectOutput(System.out)
                 .redirectError(System.err)
                 .readOutput(true)

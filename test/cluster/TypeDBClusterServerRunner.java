@@ -22,22 +22,21 @@ import com.vaticle.typedb.common.conf.cluster.Addresses;
 import com.vaticle.typedb.common.test.RunnerUtil;
 import com.vaticle.typedb.common.test.TypeDBRunner;
 import org.zeroturnaround.exec.ProcessExecutor;
-import org.zeroturnaround.exec.ProcessResult;
 import org.zeroturnaround.exec.StartedProcess;
 
+import java.io.File;
 import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import static com.vaticle.typedb.common.test.RunnerUtil.SERVER_STARTUP_TIMEOUT_MILLIS;
 import static com.vaticle.typedb.common.test.RunnerUtil.createProcessExecutor;
+import static com.vaticle.typedb.common.test.RunnerUtil.getArchivePath;
+import static com.vaticle.typedb.common.test.RunnerUtil.unarchive;
 
 public interface TypeDBClusterServerRunner extends TypeDBRunner {
 
@@ -56,13 +55,15 @@ public interface TypeDBClusterServerRunner extends TypeDBRunner {
 
     class Default implements TypeDBClusterServerRunner {
 
+        private static final int ARCHIVE_INDEX = 1;
+
         protected final Path distribution;
         protected final Map<String, String> serverOptions;
         private StartedProcess process;
         protected ProcessExecutor executor;
 
         public Default(Map<String, String> serverOptions) throws IOException, InterruptedException, TimeoutException {
-            distribution = RunnerUtil.unarchive();
+            distribution = unarchive(getArchivePath(ARCHIVE_INDEX));
             this.serverOptions = serverOptions;
             System.out.println(addresses() + ": " + name() + " constructing runner...");
             Files.createDirectories(ClusterServerOpts.storageData(serverOptions));

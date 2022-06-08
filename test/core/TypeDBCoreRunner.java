@@ -31,10 +31,13 @@ import java.util.concurrent.TimeoutException;
 
 import static com.vaticle.typedb.common.test.RunnerUtil.createProcessExecutor;
 import static com.vaticle.typedb.common.test.RunnerUtil.findUnusedPorts;
+import static com.vaticle.typedb.common.test.RunnerUtil.getArchivePath;
 import static com.vaticle.typedb.common.test.RunnerUtil.typeDBCommand;
 import static com.vaticle.typedb.common.test.RunnerUtil.unarchive;
 
 public class TypeDBCoreRunner implements TypeDBRunner {
+
+    private static final int ARCHIVE_INDEX = 1;
 
     private final Path distribution;
     private final Path dataDir;
@@ -47,7 +50,7 @@ public class TypeDBCoreRunner implements TypeDBRunner {
         port = findUnusedPorts(1).get(0);
         System.out.println(address() + ": Constructing " + name() + " runner");
         System.out.println(address() + ": Extracting distribution archive...");
-        distribution = unarchive();
+        distribution = unarchive(getArchivePath(ARCHIVE_INDEX));
         System.out.println(address() + ": Distribution archive extracted.");
         dataDir = distribution.resolve("server").resolve("data");
         logsDir = distribution.resolve("server").resolve("logs");
