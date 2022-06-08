@@ -18,23 +18,21 @@
 
 package com.vaticle.typedb.common.test.core;
 
+import com.vaticle.typedb.common.test.RunnerUtil;
 import com.vaticle.typedb.common.test.TypeDBRunner;
 import org.zeroturnaround.exec.ProcessExecutor;
-import org.zeroturnaround.exec.ProcessResult;
 import org.zeroturnaround.exec.StartedProcess;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import static com.vaticle.typedb.common.test.RunnerUtil.SERVER_STARTUP_TIMEOUT_MILLIS;
 import static com.vaticle.typedb.common.test.RunnerUtil.createProcessExecutor;
 import static com.vaticle.typedb.common.test.RunnerUtil.findUnusedPorts;
 import static com.vaticle.typedb.common.test.RunnerUtil.typeDBCommand;
 import static com.vaticle.typedb.common.test.RunnerUtil.unarchive;
-import static com.vaticle.typedb.common.test.RunnerUtil.waitUntilPortUsed;
 
 public class TypeDBCoreRunner implements TypeDBRunner {
 
@@ -76,27 +74,12 @@ public class TypeDBCoreRunner implements TypeDBRunner {
 
     @Override
     public void start() {
+        System.out.println(address() + ": " +  name() + "is starting... ");
+        System.out.println(address() + ": Distribution is located at " + distribution.toAbsolutePath());
+        System.out.println(address() + ": Data directory is located at " + dataDir.toAbsolutePath());
+        System.out.println(address() + ": Server bootup command = " + command());
         try {
-            System.out.println(address() + ": " +  name() + "is starting... ");
-            System.out.println(address() + ": Distribution is located at " + distribution.toAbsolutePath());
-            System.out.println(address() + ": Data directory is located at " + dataDir.toAbsolutePath());
-            System.out.println(address() + ": Server bootup command = " + command());
-            process = executor.command(command()).start();
-            boolean started = waitUntilPortUsed(host(), port())
-                    .await(SERVER_STARTUP_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
-            if (!started) {
-                String message = address() + ": Unable to start. ";
-                if (process.getFuture().isDone()) {
-                    ProcessResult processResult = process.getFuture().get();
-                    message += address() + ": Process exited with code '" + processResult.getExitValue() + "'. ";
-                    if (processResult.hasOutput()) {
-                        message += "Output: " + processResult.outputUTF8();
-                    }
-                }
-                throw new RuntimeException(message);
-            } else {
-                System.out.println(address() + ": Started");
-            }
+            process = RunnerUtil.startProcess(executor, command(), new InetSocketAddress(host(), port()));
         } catch (Throwable e) {
             printLogs();
             throw new RuntimeException(e);

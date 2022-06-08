@@ -19,6 +19,8 @@
 package com.vaticle.typedb.common.test;
 
 import org.zeroturnaround.exec.ProcessExecutor;
+import org.zeroturnaround.exec.ProcessResult;
+import org.zeroturnaround.exec.StartedProcess;
 
 import java.io.File;
 import java.io.IOException;
@@ -35,6 +37,8 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import static org.junit.Assert.fail;
@@ -48,8 +52,18 @@ public class RunnerUtil {
     private static final int SERVER_ALIVE_POLL_INTERVAL_MILLIS = 500;
     private static final int SERVER_ALIVE_POLL_MAX_RETRIES = SERVER_STARTUP_TIMEOUT_MILLIS / SERVER_ALIVE_POLL_INTERVAL_MILLIS;
 
+    private static File distributionArchivePath() {
+        String[] args = System.getProperty("sun.java.command").split(" ");
+        assert args.length > 1;
+        File file = new File(args[1]);
+        if (!file.exists()) {
+            throw new IllegalArgumentException("Distribution archive missing: " + file.getAbsolutePath());
+        }
+        return file;
+    }
+
     public static Path unarchive() throws IOException, InterruptedException, TimeoutException {
-        return unarchive(getArchive());
+        return unarchive(distributionArchivePath());
     }
 
     public static Path unarchive(File archive) throws IOException, TimeoutException, InterruptedException {
@@ -74,27 +88,18 @@ public class RunnerUtil {
         return Files.list(runnerDir).findFirst().get().toAbsolutePath();
     }
 
-    public static ProcessExecutor createProcessExecutor(Path distribution) {
-        return new ProcessExecutor()
-                .directory(distribution.toFile())
-                .redirectOutput(System.out)
-                .redirectError(System.err)
-                .readOutput(true)
-                .destroyOnExit();
+    public static List<String> typeDBCommand(String... cmd) {
+        return typeDBCommand(Arrays.asList(cmd));
     }
 
-    public static List<String> typeDBCommand(String... c) {
-        return typeDBCommand(Arrays.asList(c));
-    }
-
-    public static List<String> typeDBCommand(List<String> c) {
+    public static List<String> typeDBCommand(List<String> cmd) {
         List<String> command = new ArrayList<>();
-        command.addAll(bin());
-        command.addAll(c);
+        command.addAll(typeDBBin());
+        command.addAll(cmd);
         return command;
     }
 
-    public static List<String> bin() {
+    public static List<String> typeDBBin() {
         if (!System.getProperty("os.name").toLowerCase().contains("win")) {
             return Collections.singletonList("typedb");
         } else {
@@ -102,11 +107,31 @@ public class RunnerUtil {
         }
     }
 
-    public static CountDownLatch waitUntilPortUsed(InetSocketAddress address) {
+    public static StartedProcess startProcess(ProcessExecutor executor, List<String> command, InetSocketAddress address) throws IOException, ExecutionException, InterruptedException {
+        StartedProcess process = executor.command(command).start();
+        boolean started = waitUntilPortUsed(address)
+                .await(SERVER_STARTUP_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
+        if (!started) {
+            String message = address + ": Unable to start. ";
+            if (process.getFuture().isDone()) {
+                ProcessResult processResult = process.getFuture().get();
+                message += address + ": Process exited with code '" + processResult.getExitValue() + "'. ";
+                if (processResult.hasOutput()) {
+                    message += "Output: " + processResult.outputUTF8();
+                }
+            }
+            throw new RuntimeException(message);
+        } else {
+            System.out.println(address + ": Started");
+        }
+        return process;
+    }
+
+    private static CountDownLatch waitUntilPortUsed(InetSocketAddress address) {
         return waitUntilPortUsed(address.getHostString(), address.getPort());
     }
 
-    public static CountDownLatch waitUntilPortUsed(String host, int port) {
+    private static CountDownLatch waitUntilPortUsed(String host, int port) {
         CountDownLatch latch = new CountDownLatch(1);
         Timer timer = new Timer();
         timer.scheduleAtFixedRate(new TimerTask() {
@@ -164,7 +189,7 @@ public class RunnerUtil {
         }
     }
 
-    public static boolean isPortUnused(int port) {
+    private static boolean isPortUnused(int port) {
         try {
             ServerSocket socket = new ServerSocket(port);
             socket.close();
@@ -174,13 +199,12 @@ public class RunnerUtil {
         }
     }
 
-    private static File getArchive() {
-        String[] args = System.getProperty("sun.java.command").split(" ");
-        assert args.length > 1;
-        File file = new File(args[1]);
-        if (!file.exists()) {
-            throw new IllegalArgumentException("Distribution archive missing: " + file.getAbsolutePath());
-        }
-        return file;
+    public static ProcessExecutor createProcessExecutor(Path distribution) {
+        return new ProcessExecutor()
+                .directory(distribution.toFile())
+                .redirectOutput(System.out)
+                .redirectError(System.err)
+                .readOutput(true)
+                .destroyOnExit();
     }
 }

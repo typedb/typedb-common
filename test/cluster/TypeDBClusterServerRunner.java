@@ -26,6 +26,7 @@ import org.zeroturnaround.exec.ProcessResult;
 import org.zeroturnaround.exec.StartedProcess;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -102,27 +103,12 @@ public interface TypeDBClusterServerRunner extends TypeDBRunner {
 
         @Override
         public void start() {
+            System.out.println(addresses() + ": " + name() + " is starting... ");
+            System.out.println(addresses() + ": Distribution is located at " + distribution.toAbsolutePath());
+            System.out.println(addresses() + ": Data directory is located at " + dataDir().toAbsolutePath());
+            System.out.println(addresses() + ": Server bootup command: '" + command() + "'");
             try {
-                System.out.println(addresses() + ": " + name() + " is starting... ");
-                System.out.println(addresses() + ": Distribution is located at " + distribution.toAbsolutePath());
-                System.out.println(addresses() + ": Data directory is located at " + dataDir().toAbsolutePath());
-                System.out.println(addresses() + ": Server bootup command: '" + command() + "'");
-                process = executor.command(command()).start();
-                boolean started = RunnerUtil.waitUntilPortUsed(addresses().external())
-                        .await(SERVER_STARTUP_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
-                if (!started) {
-                    String message = addresses() + ": Unable to start. ";
-                    if (process.getFuture().isDone()) {
-                        ProcessResult processResult = process.getFuture().get();
-                        message += addresses() + ": Process exited with code '" + processResult.getExitValue() + "'. ";
-                        if (processResult.hasOutput()) {
-                            message += "Output: " + processResult.outputUTF8();
-                        }
-                    }
-                    throw new RuntimeException(message);
-                } else {
-                    System.out.println(addresses() + ": Started");
-                }
+                process = RunnerUtil.startProcess(executor, command(), addresses().external());
             } catch (Throwable e) {
                 printLogs();
                 throw new RuntimeException(e);
