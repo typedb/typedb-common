@@ -92,17 +92,15 @@ public class Util {
 
     public static List<String> typeDBCommand(List<String> cmd) {
         List<String> command = new ArrayList<>();
-        command.addAll(typeDBBin());
+        List<String> result;
+        if (!System.getProperty("os.name").toLowerCase().contains("win")) {
+            result = Collections.singletonList("typedb");
+        } else {
+            result = Arrays.asList("cmd.exe", "/c", "typedb.bat");
+        }
+        command.addAll(result);
         command.addAll(cmd);
         return command;
-    }
-
-    public static List<String> typeDBBin() {
-        if (!System.getProperty("os.name").toLowerCase().contains("win")) {
-            return Collections.singletonList("typedb");
-        } else {
-            return Arrays.asList("cmd.exe", "/c", "typedb.bat");
-        }
     }
 
     public static StartedProcess startProcess(ProcessExecutor executor, List<String> command, InetSocketAddress address) throws IOException, ExecutionException, InterruptedException {
@@ -126,10 +124,6 @@ public class Util {
     }
 
     private static CountDownLatch waitUntilPortUsed(InetSocketAddress address) {
-        return waitUntilPortUsed(address.getHostString(), address.getPort());
-    }
-
-    private static CountDownLatch waitUntilPortUsed(String host, int port) {
         CountDownLatch latch = new CountDownLatch(1);
         Timer timer = new Timer();
         timer.scheduleAtFixedRate(new TimerTask() {
@@ -140,7 +134,7 @@ public class Util {
                 retryNumber++;
                 if (retryNumber % 4 == 0) {
                     System.out.println(String.format("%s: waiting for server to start (%ds)...",
-                            host + ":" + port, retryNumber * SERVER_ALIVE_POLL_INTERVAL_MILLIS / 1000));
+                            address.getHostString() + ":" + address.getPort(), retryNumber * SERVER_ALIVE_POLL_INTERVAL_MILLIS / 1000));
                 }
                 if (canConnectToServer()) {
                     latch.countDown();
@@ -151,11 +145,11 @@ public class Util {
 
             private boolean canConnectToServer() {
                 try {
-                    Socket s = new Socket(host, port);
+                    Socket s = new Socket(address.getHostString(), address.getPort());
                     s.close();
                     return true;
                 } catch (IOException e) {
-                    System.out.println(host + ":" + port + ": Can't yet connect to server...");
+                    System.out.println(address.getHostString() + ":" + address.getPort() + ": Can't yet connect to server...");
                 }
                 return false;
             }
