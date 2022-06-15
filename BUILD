@@ -31,6 +31,7 @@ java_library(
         "concurrent/*.java",
         "concurrent/actor/*.java",
         "concurrent/actor/eventloop/*.java",
+        "conf/*/*.java",
         "exception/*.java",
         "util/*.java",
         "yaml/*.java",
@@ -83,6 +84,7 @@ checkstyle_test(
         "concurrent/*",
         "concurrent/actor/*.java",
         "concurrent/actor/eventloop/*.java",
+        "conf/*/*.java",
         "exception/*",
         "util/*",
         "yaml/*.java"

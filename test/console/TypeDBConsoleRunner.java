@@ -18,21 +18,38 @@
 
 package com.vaticle.typedb.common.test.console;
 
-import com.vaticle.typedb.common.test.Runner;
+import com.vaticle.typedb.common.test.Util;
+import org.zeroturnaround.exec.ProcessExecutor;
 import org.zeroturnaround.exec.StartedProcess;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
 
-public class TypeDBConsoleRunner extends Runner {
+import static com.vaticle.typedb.common.collection.Collections.list;
+import static com.vaticle.typedb.common.test.Util.getArchivePath;
+import static com.vaticle.typedb.common.test.Util.unarchive;
+
+public class TypeDBConsoleRunner {
+
+    private static final int ARCHIVE_INDEX = 2;
+
+    protected final Path distribution;
+    protected ProcessExecutor executor;
 
     public TypeDBConsoleRunner() throws InterruptedException, TimeoutException, IOException {
-        super();
+        System.out.println("Constructing " + name() + " runner");
+        System.out.println("Extracting " + name() + " distribution archive.");
+        distribution = unarchive(getArchivePath(ARCHIVE_INDEX));
+        System.out.println(name() + " distribution archive extracted.");
+        executor = new ProcessExecutor()
+                .directory(distribution.toFile())
+                .redirectOutput(System.out)
+                .redirectError(System.err)
+                .readOutput(true)
+                .destroyOnExit();
+        System.out.println(name() + " runner constructed");
     }
 
     public int run(String... options) {
@@ -45,22 +62,11 @@ public class TypeDBConsoleRunner extends Runner {
     }
 
     private List<String> command(String... options) {
-        List<String> command = new ArrayList<>();
-        command.addAll(getTypeDBBinary());
-        command.add("console");
-        command.addAll(Arrays.asList(options));
-        return command;
+        List<String> cmd = list((List<String>) list("console"), list(options));
+        return Util.typeDBCommand(cmd);
     }
 
-    @Override
-    protected File distributionArchive() {
-        String[] args = System.getProperty("sun.java.command").split(" ");
-        assert args.length > 2;
-        return new File(args[2]);
-    }
-
-    @Override
-    protected String name() {
+    private String name() {
         return "TypeDB Console";
     }
 }
