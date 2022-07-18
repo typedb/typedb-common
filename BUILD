@@ -78,18 +78,28 @@ deploy_maven(
 checkstyle_test(
     name = "checkstyle",
     include = glob([
-        "*",
+        ".bazelrc",
+        ".gitignore",
         ".grabl/automation.yml",
+        "BUILD",
+        "WORKSPACE",
         "collection/*",
         "concurrent/*",
         "concurrent/actor/*.java",
         "concurrent/actor/eventloop/*.java",
         "conf/*/*.java",
+        "deployment.bzl",
         "exception/*",
         "util/*",
         "yaml/*.java"
     ]),
-    license_type = "agpl",
+    license_type = "agpl-header",
+)
+
+checkstyle_test(
+    name = "checkstyle-license",
+    include = ["LICENSE"],
+    license_type = "agpl-fulltext",
 )
 
 # CI targets that are not declared in any BUILD file, but are called externally
