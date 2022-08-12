@@ -54,7 +54,7 @@ public class Util {
 
     public static File getArchivePath(int index) {
         String[] args = System.getProperty("sun.java.command").split(" ");
-        if (args.length <= index) {
+        if (index >= args.length) {
             throw new IllegalArgumentException("Distribution archive at index '" + index + "' is not defined");
         }
         File file = new File(args[index]);
