@@ -101,6 +101,15 @@ public class Collections {
         return new Triple<>(first, second, third);
     }
 
+    public static <T> Set<T> intersection(Set<T> set1, Set<T> set2) {
+        Set<T> intersection = new HashSet<>(set1);
+        intersection.retainAll(set2);
+        return intersection;
+    }
+
+    /**
+     * Optimised set intersection detection when using sorted sets
+     */
     public static <T extends Comparable<T>> boolean hasIntersection(NavigableSet<T> set1, NavigableSet<T> set2) {
         NavigableSet<T> active = set1;
         NavigableSet<T> other = set2;
