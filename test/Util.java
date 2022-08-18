@@ -204,20 +204,19 @@ public class Util {
                 .readOutput(true)
                 .destroyOnExit();
     }
-}
 
     @CommandLine.Command(name = "java")
-    class CLIOptions {
+    private static class CLIOptions {
         @CommandLine.Parameters String mainClass;
         @CommandLine.Option(
-            names = {"--server"},
-            description = "Location of the archive containing a server artifact."
+                names = {"--server"},
+                description = "Location of the archive containing a server artifact."
         )
         private String serverArchive;
 
         @CommandLine.Option(
-            names = {"--console"},
-            description = "Location of the archive containing a console artifact."
+                names = {"--console"},
+                description = "Location of the archive containing a console artifact."
         )
         private String consoleArchive;
 
@@ -251,3 +250,6 @@ public class Util {
             }
         }
     }
+}
+
+
