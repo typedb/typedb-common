@@ -20,7 +20,7 @@ load("@io_bazel_rules_kotlin//kotlin:kotlin.bzl", "kt_jvm_test")
 
 def typedb_java_test(name, server_mac_artifact, server_linux_artifact, server_windows_artifact,
                       console_mac_artifact = None, console_linux_artifact = None, console_windows_artifact = None,
-                      native_libraries_deps = [], deps = [], classpath_sources = [], data = [], args = [], **kwargs):
+                      native_libraries_deps = [], deps = [], classpath_resources = [], data = [], args = [], **kwargs):
     (native_server_artifact_labels, native_server_artifact_paths, native_console_artifact_labels,
         native_console_artifact_paths, native_deps) = create_paths_labels_nativedeps(
            server_mac_artifact, server_linux_artifact, server_windows_artifact,
@@ -30,7 +30,7 @@ def typedb_java_test(name, server_mac_artifact, server_linux_artifact, server_wi
     native.java_test(
         name = name,
         deps = depset(deps + ["@vaticle_typedb_common//test:typedb-runner"]).to_list() + native_deps,
-        classpath_resources = depset(classpath_sources + ["@vaticle_typedb_common//test:logback"]).to_list(),
+        classpath_resources = depset(classpath_resources + ["@vaticle_typedb_common//test:logback"]).to_list(),
         data = data + select(native_server_artifact_labels) + (select(native_console_artifact_labels) if native_console_artifact_labels else []),
         args = ["--server"] + select(native_server_artifact_paths) + ((["--console"] + select(native_console_artifact_paths)) if native_console_artifact_paths else []) + args,
         **kwargs
