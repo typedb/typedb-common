@@ -54,15 +54,14 @@ public interface TypeDBClusterServerRunner extends TypeDBRunner {
 
     class Standalone implements TypeDBClusterServerRunner {
 
-        private static final int ARCHIVE_INDEX = 1;
-
+        private static final String FLAG = "--server";
         protected final Path distribution;
         protected final Map<String, String> serverOptions;
         private StartedProcess process;
         protected ProcessExecutor executor;
 
         public Standalone(Map<String, String> serverOptions) throws IOException, InterruptedException, TimeoutException {
-            distribution = unarchive(getArchivePath(ARCHIVE_INDEX));
+            distribution = unarchive(getArchivePath(FLAG));
             this.serverOptions = serverOptions;
             System.out.println(addresses() + ": " + name() + " constructing runner...");
             Files.createDirectories(ClusterServerOpts.storageData(serverOptions));

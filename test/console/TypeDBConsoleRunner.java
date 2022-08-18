@@ -33,15 +33,14 @@ import static com.vaticle.typedb.common.test.Util.unarchive;
 
 public class TypeDBConsoleRunner {
 
-    private static final int ARCHIVE_INDEX = 2;
-
+    private static final String FLAG = "--console";
     protected final Path distribution;
     protected ProcessExecutor executor;
 
     public TypeDBConsoleRunner() throws InterruptedException, TimeoutException, IOException {
         System.out.println("Constructing " + name() + " runner");
         System.out.println("Extracting " + name() + " distribution archive.");
-        distribution = unarchive(getArchivePath(ARCHIVE_INDEX));
+        distribution = unarchive(getArchivePath(FLAG));
         System.out.println(name() + " distribution archive extracted.");
         executor = new ProcessExecutor()
                 .directory(distribution.toFile())

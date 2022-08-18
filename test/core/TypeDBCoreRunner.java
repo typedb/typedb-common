@@ -37,7 +37,7 @@ import static com.vaticle.typedb.common.test.Util.unarchive;
 
 public class TypeDBCoreRunner implements TypeDBRunner {
 
-    private static final int ARCHIVE_INDEX = 1;
+    private static final String FLAG = "--server";
 
     private final Path distribution;
     private final Path dataDir;
@@ -50,7 +50,7 @@ public class TypeDBCoreRunner implements TypeDBRunner {
         port = findUnusedPorts(1).get(0);
         System.out.println(address() + ": Constructing " + name() + " runner");
         System.out.println(address() + ": Extracting distribution archive...");
-        distribution = unarchive(getArchivePath(ARCHIVE_INDEX));
+        distribution = unarchive(getArchivePath(FLAG));
         System.out.println(address() + ": Distribution archive extracted.");
         dataDir = distribution.resolve("server").resolve("data");
         logsDir = distribution.resolve("server").resolve("logs");
