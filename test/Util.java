@@ -53,20 +53,24 @@ public class Util {
     private static final int SERVER_ALIVE_POLL_INTERVAL_MILLIS = 500;
     private static final int SERVER_ALIVE_POLL_MAX_RETRIES = SERVER_STARTUP_TIMEOUT_MILLIS / SERVER_ALIVE_POLL_INTERVAL_MILLIS;
 
-    public static File getArchivePath(String flag) {
+    public static File getServerArchiveFile() {
         String[] args = System.getProperty("sun.java.command").split(" ");
         Optional<CLIOptions> maybeOptions = CLIOptions.parseCLIOptions(args);
         if (!maybeOptions.isPresent()) {
             throw new IllegalArgumentException("No archives were passed as arguments");
         }
         CLIOptions options = maybeOptions.get();
-        if (flag.equals("--server")) {
-            return new File(options.getServerArchive());
+        return new File(options.getServerArchive());
+    }
+
+    public static File getConsoleArchiveFile() {
+        String[] args = System.getProperty("sun.java.command").split(" ");
+        Optional<CLIOptions> maybeOptions = CLIOptions.parseCLIOptions(args);
+        if (!maybeOptions.isPresent()) {
+            throw new IllegalArgumentException("No archives were passed as arguments");
         }
-        if (flag.equals("--console")) {
-            return new File(options.getConsoleArchive());
-        }
-        throw new IllegalArgumentException("Unrecognised arguments");
+        CLIOptions options = maybeOptions.get();
+        return new File(options.getConsoleArchive());
     }
 
     public static Path unarchive(File archive) throws IOException, TimeoutException, InterruptedException {

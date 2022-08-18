@@ -34,7 +34,7 @@ import java.util.Set;
 import java.util.concurrent.TimeoutException;
 
 import static com.vaticle.typedb.common.test.Util.createProcessExecutor;
-import static com.vaticle.typedb.common.test.Util.getArchivePath;
+import static com.vaticle.typedb.common.test.Util.getServerArchiveFile;
 import static com.vaticle.typedb.common.test.Util.unarchive;
 
 public interface TypeDBClusterServerRunner extends TypeDBRunner {
@@ -54,14 +54,13 @@ public interface TypeDBClusterServerRunner extends TypeDBRunner {
 
     class Standalone implements TypeDBClusterServerRunner {
 
-        private static final String FLAG = "--server";
         protected final Path distribution;
         protected final Map<String, String> serverOptions;
         private StartedProcess process;
         protected ProcessExecutor executor;
 
         public Standalone(Map<String, String> serverOptions) throws IOException, InterruptedException, TimeoutException {
-            distribution = unarchive(getArchivePath(FLAG));
+            distribution = unarchive(getServerArchiveFile());
             this.serverOptions = serverOptions;
             System.out.println(addresses() + ": " + name() + " constructing runner...");
             Files.createDirectories(ClusterServerOpts.storageData(serverOptions));
