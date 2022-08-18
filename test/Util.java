@@ -55,11 +55,11 @@ public class Util {
 
     public static File getArchivePath(String flag) {
         String[] args = System.getProperty("sun.java.command").split(" ");
-        Optional maybeOptions = CLIOptions.parseCLIOptions(args);
+        Optional<CLIOptions> maybeOptions = CLIOptions.parseCLIOptions(args);
         if (!maybeOptions.isPresent()) {
             throw new IllegalArgumentException("No archives were passed as arguments");
         }
-        CLIOptions options = (CLIOptions) maybeOptions.get();
+        CLIOptions options = maybeOptions.get();
         if (flag.equals("--server")) {
             return new File(options.getServerArchive());
         }
@@ -232,15 +232,7 @@ public class Util {
             CommandLine commandLine = new CommandLine(new CLIOptions());
             try {
                 CommandLine.ParseResult result = commandLine.parseArgs(args);
-                if (commandLine.isUsageHelpRequested()) {
-                    commandLine.usage(commandLine.getOut());
-                    return Optional.empty();
-                } else if (commandLine.isVersionHelpRequested()) {
-                    commandLine.printVersionHelp(commandLine.getOut());
-                    return Optional.empty();
-                } else {
-                    return Optional.of(result.asCommandLineList().get(0).getCommand());
-                }
+                return Optional.of(result.asCommandLineList().get(0).getCommand());
             } catch (CommandLine.ParameterException ex) {
                 commandLine.getErr().println(ex.getMessage());
                 if (!CommandLine.UnmatchedArgumentException.printSuggestions(ex, commandLine.getErr())) {
