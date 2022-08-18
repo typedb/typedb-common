@@ -66,7 +66,7 @@ def typedb_kt_test(name, server_mac_artifact, server_linux_artifact, server_wind
 def get_native_dependencies(native_libraries_deps):
     native_dependencies = []
     for dep in native_libraries_deps:
-       native_dependencies = native_deps + native_dep_for_host_platform(dep)
+       native_dependencies = native_dependencies + native_dep_for_host_platform(dep)
     return native_dependencies
 
 
