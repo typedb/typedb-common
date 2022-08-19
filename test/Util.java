@@ -21,6 +21,7 @@ package com.vaticle.typedb.common.test;
 import org.zeroturnaround.exec.ProcessExecutor;
 import org.zeroturnaround.exec.ProcessResult;
 import org.zeroturnaround.exec.StartedProcess;
+import picocli.CommandLine;
 
 import java.io.File;
 import java.io.IOException;
@@ -36,12 +37,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import static org.junit.Assert.fail;
 
 public class Util {
 
@@ -52,16 +53,24 @@ public class Util {
     private static final int SERVER_ALIVE_POLL_INTERVAL_MILLIS = 500;
     private static final int SERVER_ALIVE_POLL_MAX_RETRIES = SERVER_STARTUP_TIMEOUT_MILLIS / SERVER_ALIVE_POLL_INTERVAL_MILLIS;
 
-    public static File getArchivePath(int index) {
+    public static File getServerArchiveFile() {
         String[] args = System.getProperty("sun.java.command").split(" ");
-        if (index >= args.length) {
-            throw new IllegalArgumentException("Distribution archive at index '" + index + "' is not defined");
+        Optional<CLIOptions> maybeOptions = CLIOptions.parseCLIOptions(args);
+        if (!maybeOptions.isPresent()) {
+            throw new IllegalArgumentException("No archives were passed as arguments");
         }
-        File file = new File(args[index]);
-        if (!file.exists()) {
-            throw new IllegalArgumentException("Distribution archive '" + file.getAbsolutePath() + "' is missing");
+        CLIOptions options = maybeOptions.get();
+        return new File(options.getServerArchive());
+    }
+
+    public static File getConsoleArchiveFile() {
+        String[] args = System.getProperty("sun.java.command").split(" ");
+        Optional<CLIOptions> maybeOptions = CLIOptions.parseCLIOptions(args);
+        if (!maybeOptions.isPresent()) {
+            throw new IllegalArgumentException("No archives were passed as arguments");
         }
-        return file;
+        CLIOptions options = maybeOptions.get();
+        return new File(options.getConsoleArchive());
     }
 
     public static Path unarchive(File archive) throws IOException, TimeoutException, InterruptedException {
@@ -199,4 +208,44 @@ public class Util {
                 .readOutput(true)
                 .destroyOnExit();
     }
+
+    @CommandLine.Command(name = "java")
+    private static class CLIOptions {
+        @CommandLine.Parameters String mainClass;
+        @CommandLine.Option(
+                names = {"--server"},
+                description = "Location of the archive containing a server artifact."
+        )
+        private String serverArchive;
+
+        @CommandLine.Option(
+                names = {"--console"},
+                description = "Location of the archive containing a console artifact."
+        )
+        private String consoleArchive;
+
+        public String getServerArchive() {
+            return serverArchive;
+        }
+
+        public String getConsoleArchive() {
+            return consoleArchive;
+        }
+
+        public static Optional<CLIOptions> parseCLIOptions(String[] args) {
+            CommandLine commandLine = new CommandLine(new CLIOptions());
+            try {
+                CommandLine.ParseResult result = commandLine.parseArgs(args);
+                return Optional.of(result.asCommandLineList().get(0).getCommand());
+            } catch (CommandLine.ParameterException ex) {
+                commandLine.getErr().println(ex.getMessage());
+                if (!CommandLine.UnmatchedArgumentException.printSuggestions(ex, commandLine.getErr())) {
+                    ex.getCommandLine().usage(commandLine.getErr());
+                }
+                return Optional.empty();
+            }
+        }
+    }
 }
+
+

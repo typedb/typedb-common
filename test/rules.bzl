@@ -16,42 +16,78 @@
 #
 
 load("@vaticle_dependencies//builder/java:rules.bzl", "native_dep_for_host_platform")
+load("@io_bazel_rules_kotlin//kotlin:kotlin.bzl", "kt_jvm_test")
 
 def typedb_java_test(name, server_mac_artifact, server_linux_artifact, server_windows_artifact,
                       console_mac_artifact = None, console_linux_artifact = None, console_windows_artifact = None,
                       native_libraries_deps = [], deps = [], classpath_resources = [], data = [], args = [], **kwargs):
+
     native_server_artifact_paths, native_server_artifact_labels = native_artifact_paths_and_labels(
-        server_mac_artifact, server_linux_artifact, server_windows_artifact
-    )
-    native_console_artifact_paths, native_console_artifact_labels = [], []
-    if console_mac_artifact and console_linux_artifact and console_windows_artifact:
-        native_console_artifact_paths, native_console_artifact_labels = native_artifact_paths_and_labels(
-            console_mac_artifact, console_linux_artifact, console_windows_artifact
+           server_mac_artifact, server_linux_artifact, server_windows_artifact
+       )
+
+    native_console_artifact_paths, native_console_artifact_labels = native_artifact_paths_and_labels(
+            console_mac_artifact, console_linux_artifact, console_windows_artifact, mandatory = False
         )
-    native_deps = []
-    for dep in native_libraries_deps:
-        native_deps = native_deps + native_dep_for_host_platform(dep)
+
+    native_dependencies = get_native_dependencies(native_libraries_deps)
+
     native.java_test(
         name = name,
-        deps = depset(deps + ["@vaticle_typedb_common//test:typedb-runner"]).to_list() + native_deps,
+        deps = depset(deps + ["@vaticle_typedb_common//test:typedb-runner"]).to_list() + native_dependencies,
         classpath_resources = depset(classpath_resources + ["@vaticle_typedb_common//test:logback"]).to_list(),
         data = data + select(native_server_artifact_labels) + (select(native_console_artifact_labels) if native_console_artifact_labels else []),
-        args = select(native_server_artifact_paths) + (select(native_console_artifact_paths) if native_console_artifact_paths else []) + args,
+        args = ["--server"] + select(native_server_artifact_paths) + ((["--console"] + select(native_console_artifact_paths)) if native_console_artifact_paths else []) + args,
         **kwargs
     )
 
-def native_artifact_paths_and_labels(mac_artifact, linux_artifact, windows_artifact):
-    native_artifacts = {
-       "@vaticle_dependencies//util/platform:is_mac": mac_artifact,
-       "@vaticle_dependencies//util/platform:is_linux": linux_artifact,
-       "@vaticle_dependencies//util/platform:is_windows": windows_artifact,
-    }
-    native_artifact_paths = {}
-    native_artifact_labels = {}
-    for key in native_artifacts.keys():
-        native_artifact_labels[key] = [ native_artifacts[key] ]
-        native_artifact_paths[key] = [ "$(location {})".format(native_artifacts[key]) ]
-    return native_artifact_paths, native_artifact_labels
+def typedb_kt_test(name, server_mac_artifact, server_linux_artifact, server_windows_artifact,
+                        console_mac_artifact = None, console_linux_artifact = None, console_windows_artifact = None,
+                        native_libraries_deps = [], deps = [], data = [], args = [], **kwargs):
+
+    native_server_artifact_paths, native_server_artifact_labels = native_artifact_paths_and_labels(
+           server_mac_artifact, server_linux_artifact, server_windows_artifact
+       )
+
+    native_console_artifact_paths, native_console_artifact_labels = native_artifact_paths_and_labels(
+            console_mac_artifact, console_linux_artifact, console_windows_artifact, mandatory = False
+        )
+
+    native_dependencies = get_native_dependencies(native_libraries_deps)
+
+    kt_jvm_test(
+        name = name,
+        deps = depset(deps + ["@vaticle_typedb_common//test:typedb-runner"]).to_list() + native_dependencies,
+        data = data + select(native_server_artifact_labels) + (select(native_console_artifact_labels) if native_console_artifact_labels else []),
+        args = ["--server"] + select(native_server_artifact_paths) + ((["--console"] + select(native_console_artifact_paths)) if native_console_artifact_paths else []) + args,
+        **kwargs
+    )
+
+def get_native_dependencies(native_libraries_deps):
+    native_dependencies = []
+    for dep in native_libraries_deps:
+       native_dependencies = native_dependencies + native_dep_for_host_platform(dep)
+    return native_dependencies
+
+
+def native_artifact_paths_and_labels(mac_artifact, linux_artifact, windows_artifact, mandatory = True):
+    if mac_artifact and linux_artifact and windows_artifact:
+        native_artifacts = {
+           "@vaticle_dependencies//util/platform:is_mac": mac_artifact,
+           "@vaticle_dependencies//util/platform:is_linux": linux_artifact,
+           "@vaticle_dependencies//util/platform:is_windows": windows_artifact,
+        }
+        native_artifact_paths = {}
+        native_artifact_labels = {}
+        for key in native_artifacts.keys():
+            native_artifact_labels[key] = [ native_artifacts[key] ]
+            native_artifact_paths[key] = [ "$(location {})".format(native_artifacts[key]) ]
+        return native_artifact_paths, native_artifact_labels
+    elif mandatory:
+        fail("Mandatory artifacts weren't available.")
+    else:
+        return [], []
+
 
 def native_typedb_artifact(name, mac_artifact, linux_artifact, windows_artifact, output, **kwargs):
     native.genrule(

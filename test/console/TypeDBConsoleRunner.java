@@ -28,12 +28,10 @@ import java.util.List;
 import java.util.concurrent.TimeoutException;
 
 import static com.vaticle.typedb.common.collection.Collections.list;
-import static com.vaticle.typedb.common.test.Util.getArchivePath;
+import static com.vaticle.typedb.common.test.Util.getConsoleArchiveFile;
 import static com.vaticle.typedb.common.test.Util.unarchive;
 
 public class TypeDBConsoleRunner {
-
-    private static final int ARCHIVE_INDEX = 2;
 
     protected final Path distribution;
     protected ProcessExecutor executor;
@@ -41,7 +39,7 @@ public class TypeDBConsoleRunner {
     public TypeDBConsoleRunner() throws InterruptedException, TimeoutException, IOException {
         System.out.println("Constructing " + name() + " runner");
         System.out.println("Extracting " + name() + " distribution archive.");
-        distribution = unarchive(getArchivePath(ARCHIVE_INDEX));
+        distribution = unarchive(getConsoleArchiveFile());
         System.out.println(name() + " distribution archive extracted.");
         executor = new ProcessExecutor()
                 .directory(distribution.toFile())
