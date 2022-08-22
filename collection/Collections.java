@@ -17,7 +17,6 @@
 
 package com.vaticle.typedb.common.collection;
 
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -27,6 +26,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Set;
+
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 
 public class Collections {
 
@@ -91,6 +93,27 @@ public class Collections {
         List<T> combined = new ArrayList<>(collection);
         for (Collection<T> c : collections) combined.addAll(c);
         return java.util.Collections.unmodifiableList(combined);
+    }
+
+    public static <T> List<List<T>> permutations(List<T> items) {
+        if (items.size() == 0) return singletonList(emptyList());
+        List<List<T>> permutations = singletonList(singletonList(items.get(0)));
+        for (int permutationLength = 1; permutationLength < items.size(); permutationLength++) {
+            T toInsert = items.get(permutationLength);
+            List<List<T>> extendedPermutations = new ArrayList<>();
+            for (List<T> permutation : permutations) {
+                for (int insertIndex = 0; insertIndex < permutation.size(); insertIndex++) {
+                    List<T> copy = new ArrayList<>(permutation);
+                    copy.add(insertIndex, toInsert);
+                    extendedPermutations.add(copy);
+                }
+                List<T> addedAtEnd = new ArrayList<>(permutation);
+                addedAtEnd.add(toInsert);
+                extendedPermutations.add(addedAtEnd);
+            }
+            permutations = extendedPermutations;
+        }
+        return permutations;
     }
 
     public static <A, B> Pair<A, B> pair(A first, B second) {
