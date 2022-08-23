@@ -125,8 +125,19 @@ public class Collections {
     }
 
     public static <T> Set<T> intersection(Set<T> set1, Set<T> set2) {
-        Set<T> intersection = new HashSet<>(set1);
-        intersection.retainAll(set2);
+        Set<T> minSet;
+        Set<T> maxSet;
+        if (set1.size() < set2.size()) {
+            minSet = set1;
+            maxSet = set2;
+        } else {
+            minSet = set2;
+            maxSet = set1;
+        }
+        Set<T> intersection = new HashSet<>();
+        for (T elem: minSet) {
+            if (maxSet.contains(elem)) intersection.add(elem);
+        }
         return intersection;
     }
 
