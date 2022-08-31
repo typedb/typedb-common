@@ -20,15 +20,23 @@ package com.vaticle.typedb.common.collection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
+import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.stream.Collectors;
 
+import static java.util.Collections.emptyIterator;
 import static java.util.Collections.emptyList;
+import static java.util.Collections.reverse;
 import static java.util.Collections.singletonList;
+import static java.util.Collections.sort;
+import static java.util.Collections.swap;
 
 public class Collections {
 
@@ -95,6 +103,75 @@ public class Collections {
         return java.util.Collections.unmodifiableList(combined);
     }
 
+    /**
+     * We implement the C++ STL next_permutation method of lazily generating permutations
+     */
+    public static <T> Iterator<List<T>> permutations(Set<T> items) {
+        if (items.size() == 0) return emptyIterator();
+        else if (items.size() == 1) return singletonList(list(items.iterator().next())).iterator();
+
+        // assign a comparable ordering over the items
+        Map<Integer, T> mapping = new HashMap<>();
+        List<T> sortedItems = items.stream().sorted(Comparator.comparing(Object::toString)).collect(Collectors.toList());
+        int[] itemKeys = new int[sortedItems.size()];
+        for (int i = 0; i < sortedItems.size(); i++) {
+            mapping.put(i, sortedItems.get(i));
+            itemKeys[i] = i;
+        }
+
+        return new Iterator<List<T>>() {
+
+            boolean hasNext = true;
+
+            @Override
+            public boolean hasNext() {
+                if (hasNext) return true;
+
+                // find the longest tail that is decreasing
+                int tailIndex = itemKeys.length - 1;
+                while (itemKeys[tailIndex] < itemKeys[tailIndex - 1]) {
+                    tailIndex--;
+                    if (tailIndex == 0) return false;
+                }
+
+                // swap the next element with the smallest element larger than it in the descending tail
+                for (int swap = itemKeys.length - 1; swap >= tailIndex; swap--) {
+                    if (itemKeys[swap] > itemKeys[tailIndex - 1]) {
+                        swap(itemKeys, swap, tailIndex - 1);
+                        break;
+                    }
+                }
+
+                // reverse the tail to get it back into increasing order and generate lexicographically next permutation
+                for (int i = tailIndex, j = itemKeys.length - 1; i < j; i++, j--) {
+                    swap(itemKeys, i, j);
+                }
+
+                hasNext = true;
+                return true;
+            }
+
+            private void swap(int[] arr, int i, int j) {
+                int tmp = arr[i];
+                arr[i] = arr[j];
+                arr[j] = tmp;
+            }
+
+            @Override
+            public List<T> next() {
+                if (!hasNext()) throw new NoSuchElementException();
+                // convert the keys back into the items
+                List<T> permutation = new ArrayList<>(items.size());
+                for (int index : itemKeys) {
+                    permutation.add(mapping.get(index));
+                }
+                hasNext = false;
+                return permutation;
+            }
+        };
+    }
+
+
     public static <T> List<List<T>> permutations(List<T> items) {
         if (items.size() == 0) return singletonList(emptyList());
         List<List<T>> permutations = singletonList(singletonList(items.get(0)));
@@ -135,7 +212,7 @@ public class Collections {
             maxSet = set1;
         }
         Set<T> intersection = new HashSet<>();
-        for (T elem: minSet) {
+        for (T elem : minSet) {
             if (maxSet.contains(elem)) intersection.add(elem);
         }
         return intersection;
