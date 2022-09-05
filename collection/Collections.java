@@ -17,7 +17,6 @@
 
 package com.vaticle.typedb.common.collection;
 
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -27,6 +26,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Set;
+
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 
 public class Collections {
 
@@ -93,6 +95,27 @@ public class Collections {
         return java.util.Collections.unmodifiableList(combined);
     }
 
+    public static <T> List<List<T>> permutations(List<T> items) {
+        if (items.size() == 0) return singletonList(emptyList());
+        List<List<T>> permutations = singletonList(singletonList(items.get(0)));
+        for (int permutationLength = 1; permutationLength < items.size(); permutationLength++) {
+            T toInsert = items.get(permutationLength);
+            List<List<T>> extendedPermutations = new ArrayList<>();
+            for (List<T> permutation : permutations) {
+                for (int insertIndex = 0; insertIndex < permutation.size(); insertIndex++) {
+                    List<T> copy = new ArrayList<>(permutation);
+                    copy.add(insertIndex, toInsert);
+                    extendedPermutations.add(copy);
+                }
+                List<T> addedAtEnd = new ArrayList<>(permutation);
+                addedAtEnd.add(toInsert);
+                extendedPermutations.add(addedAtEnd);
+            }
+            permutations = extendedPermutations;
+        }
+        return permutations;
+    }
+
     public static <A, B> Pair<A, B> pair(A first, B second) {
         return new Pair<>(first, second);
     }
@@ -101,6 +124,26 @@ public class Collections {
         return new Triple<>(first, second, third);
     }
 
+    public static <T> Set<T> intersection(Set<T> set1, Set<T> set2) {
+        Set<T> minSet;
+        Set<T> maxSet;
+        if (set1.size() < set2.size()) {
+            minSet = set1;
+            maxSet = set2;
+        } else {
+            minSet = set2;
+            maxSet = set1;
+        }
+        Set<T> intersection = new HashSet<>();
+        for (T elem: minSet) {
+            if (maxSet.contains(elem)) intersection.add(elem);
+        }
+        return intersection;
+    }
+
+    /**
+     * Optimised set intersection detection when using sorted sets
+     */
     public static <T extends Comparable<T>> boolean hasIntersection(NavigableSet<T> set1, NavigableSet<T> set2) {
         NavigableSet<T> active = set1;
         NavigableSet<T> other = set2;
