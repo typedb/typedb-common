@@ -126,29 +126,34 @@ public class Collections {
             @Override
             public boolean hasNext() {
                 if (hasNext) return true;
-
                 // find the longest tail that is decreasing
                 int tailIndex = itemKeys.length - 1;
                 while (itemKeys[tailIndex] < itemKeys[tailIndex - 1]) {
                     tailIndex--;
                     if (tailIndex == 0) return false;
                 }
+                swapPreviousWithLarger(tailIndex);
+                reverseTail(tailIndex);
+                // itemKeys contains the lexicographical next permutation
+                hasNext = true;
+                return true;
+            }
 
-                // swap the next element with the smallest element larger than it in the descending tail
+            // swap the previous element with the smallest element larger than it in the descending tail
+            private void swapPreviousWithLarger(int tailIndex) {
                 for (int swap = itemKeys.length - 1; swap >= tailIndex; swap--) {
                     if (itemKeys[swap] > itemKeys[tailIndex - 1]) {
                         swap(itemKeys, swap, tailIndex - 1);
                         break;
                     }
                 }
+            }
 
-                // reverse the tail to get it back into increasing order and generate lexicographically next permutation
+            // reverse the tail to get it back into increasing order
+            private void reverseTail(int tailIndex) {
                 for (int i = tailIndex, j = itemKeys.length - 1; i < j; i++, j--) {
                     swap(itemKeys, i, j);
                 }
-
-                hasNext = true;
-                return true;
             }
 
             private void swap(int[] arr, int i, int j) {
