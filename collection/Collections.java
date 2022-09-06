@@ -20,20 +20,12 @@ package com.vaticle.typedb.common.collection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
-import java.util.NoSuchElementException;
 import java.util.Set;
-import java.util.stream.Collectors;
-
-import static java.util.Collections.emptyIterator;
-import static java.util.Collections.emptyList;
-import static java.util.Collections.singletonList;
 
 public class Collections {
 
