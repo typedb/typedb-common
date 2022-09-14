@@ -12,7 +12,6 @@ import java.util.stream.Collectors;
 
 import static com.vaticle.typedb.common.collection.Collections.list;
 import static java.util.Collections.emptyIterator;
-import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 
 public class Permutations {
