@@ -89,25 +89,4 @@ public class Permutations {
             }
         };
     }
-
-    public static <T> List<List<T>> permutations(List<T> items) {
-        if (items.size() == 0) return singletonList(emptyList());
-        List<List<T>> permutations = singletonList(singletonList(items.get(0)));
-        for (int permutationLength = 1; permutationLength < items.size(); permutationLength++) {
-            T toInsert = items.get(permutationLength);
-            List<List<T>> extendedPermutations = new ArrayList<>();
-            for (List<T> permutation : permutations) {
-                for (int insertIndex = 0; insertIndex < permutation.size(); insertIndex++) {
-                    List<T> copy = new ArrayList<>(permutation);
-                    copy.add(insertIndex, toInsert);
-                    extendedPermutations.add(copy);
-                }
-                List<T> addedAtEnd = new ArrayList<>(permutation);
-                addedAtEnd.add(toInsert);
-                extendedPermutations.add(addedAtEnd);
-            }
-            permutations = extendedPermutations;
-        }
-        return permutations;
-    }
 }
