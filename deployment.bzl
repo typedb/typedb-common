@@ -17,5 +17,5 @@
 
 deployment = {
   'github.organisation': 'vaticle',
-  'github.repository': 'common'
+  'github.repository': 'typedb-common'
 }
