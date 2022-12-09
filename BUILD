@@ -27,11 +27,15 @@ load("//:deployment.bzl", deployment_github = "deployment")
 java_library(
     name = "common",
     srcs = glob([
+        "test/*.java",
+        "test/cluster/*.java",
+        "test/console/*.java",
+        "test/core/*.java",
         "collection/*.java",
         "concurrent/*.java",
         "concurrent/actor/*.java",
         "concurrent/actor/eventloop/*.java",
-        "conf/*/*.java",
+        "conf/cluster/*.java",
         "exception/*.java",
         "util/*.java",
         "yaml/*.java",
