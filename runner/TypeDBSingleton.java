@@ -13,20 +13,19 @@
  *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- *
  */
 
-package com.vaticle.typedb.common.test;
+package com.vaticle.typedb.common.runner;
 
-public interface TypeDBRunner {
+public class TypeDBSingleton {
 
-    void start();
+    private static TypeDBRunner typeDBRunner;
 
-    String address();
+    public static void setTypeDBRunner(TypeDBRunner instance) {
+        typeDBRunner = instance;
+    }
 
-    boolean isStopped();
-
-    void stop();
-
-
+    public static TypeDBRunner getTypeDBRunner() {
+        return typeDBRunner;
+    }
 }
