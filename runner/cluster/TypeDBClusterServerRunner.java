@@ -16,11 +16,11 @@
  *
  */
 
-package com.vaticle.typedb.common.test.cluster;
+package com.vaticle.typedb.common.runner.cluster;
 
 import com.vaticle.typedb.common.conf.cluster.Addresses;
-import com.vaticle.typedb.common.test.Util;
-import com.vaticle.typedb.common.test.TypeDBRunner;
+import com.vaticle.typedb.common.runner.Util;
+import com.vaticle.typedb.common.runner.TypeDBRunner;
 import org.zeroturnaround.exec.ProcessExecutor;
 import org.zeroturnaround.exec.StartedProcess;
 
@@ -33,9 +33,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeoutException;
 
-import static com.vaticle.typedb.common.test.Util.createProcessExecutor;
-import static com.vaticle.typedb.common.test.Util.getServerArchiveFile;
-import static com.vaticle.typedb.common.test.Util.unarchive;
+import static com.vaticle.typedb.common.runner.Util.createProcessExecutor;
+import static com.vaticle.typedb.common.runner.Util.getServerArchiveFile;
+import static com.vaticle.typedb.common.runner.Util.unarchive;
 
 public interface TypeDBClusterServerRunner extends TypeDBRunner {
 

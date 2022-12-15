@@ -16,10 +16,10 @@
  *
  */
 
-package com.vaticle.typedb.common.test.cluster;
+package com.vaticle.typedb.common.runner.cluster;
 
 import com.vaticle.typedb.common.conf.cluster.Addresses;
-import com.vaticle.typedb.common.test.TypeDBRunner;
+import com.vaticle.typedb.common.runner.TypeDBRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,7 +28,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import static com.vaticle.typedb.common.collection.Collections.map;
