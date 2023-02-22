@@ -38,14 +38,16 @@ public class TypeDBClusterRunner implements TypeDBRunner {
     private static final Logger LOG = LoggerFactory.getLogger(TypeDBClusterRunner.class);
 
     protected final Map<Addresses, Map<String, String>> serverOptionsMap;
+    private final TypeDBClusterServerRunner.Factory serverRunnerFactory;
     protected final Map<Addresses, TypeDBClusterServerRunner> serverRunners;
 
     public static TypeDBClusterRunner create(Path clusterRunnerDir, int serverCount) {
-        return create(clusterRunnerDir, serverCount, new HashMap<>());
+        return create(clusterRunnerDir, serverCount, new HashMap<>(),
+                new TypeDBClusterServerRunner.Factory());
     }
 
-    public static TypeDBClusterRunner create(Path clusterRunnerDir, int serverCount,
-                                             Map<String, String> serverOptions) {
+    public static TypeDBClusterRunner create(Path clusterRunnerDir, int serverCount, Map<String, String> serverOptions,
+                                             TypeDBClusterServerRunner.Factory serverRunnerFactory) {
         Set<Addresses> serverAddressesSet = allocateAddressesSet(serverCount);
         Map<Addresses, Map<String, String>> serverOptionsMap = new HashMap<>();
         for (Addresses addrs: serverAddressesSet) {
@@ -64,7 +66,7 @@ public class TypeDBClusterRunner implements TypeDBRunner {
             );
             serverOptionsMap.put(addrs, options);
         }
-        return new TypeDBClusterRunner(serverOptionsMap);
+        return new TypeDBClusterRunner(serverOptionsMap, serverRunnerFactory);
     }
 
     private static Set<Addresses> allocateAddressesSet(int serverCount) {
@@ -79,9 +81,10 @@ public class TypeDBClusterRunner implements TypeDBRunner {
         return addresses;
     }
 
-    private TypeDBClusterRunner(Map<Addresses, Map<String, String>> serverOptionsMap) {
+    private TypeDBClusterRunner(Map<Addresses, Map<String, String>> serverOptionsMap, TypeDBClusterServerRunner.Factory serverRunnerFactory) {
         assert serverOptionsMap.size() >= 1;
         this.serverOptionsMap = serverOptionsMap;
+        this.serverRunnerFactory = serverRunnerFactory;
         serverRunners = createServerRunners(this.serverOptionsMap);
     }
 
@@ -89,7 +92,7 @@ public class TypeDBClusterRunner implements TypeDBRunner {
         Map<Addresses, TypeDBClusterServerRunner> srvRunners = new HashMap<>();
         for (Addresses addrs: serverOptsMap.keySet()) {
             Map<String, String> options = serverOptsMap.get(addrs);
-            TypeDBClusterServerRunner srvRunner = TypeDBClusterServerRunner.Factory.createServerRunner(options);
+            TypeDBClusterServerRunner srvRunner = serverRunnerFactory.createServerRunner(options);
             srvRunners.put(addrs, srvRunner);
         }
         return srvRunners;
