@@ -43,7 +43,7 @@ public interface TypeDBClusterServerRunner extends TypeDBRunner {
 
     class Factory {
 
-        protected TypeDBClusterServerRunner createServerRunner(Map<String, String> options) {
+        protected static TypeDBClusterServerRunner createServerRunner(Map<String, String> options) {
             try {
                 return new Standalone(options);
             } catch (InterruptedException | TimeoutException | IOException e) {
