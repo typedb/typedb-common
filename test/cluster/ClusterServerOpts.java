@@ -16,7 +16,7 @@
  *
  */
 
-package com.vaticle.typedb.common.runner.cluster;
+package com.vaticle.typedb.common.test.cluster;
 
 import com.vaticle.typedb.common.conf.cluster.Addresses;
 

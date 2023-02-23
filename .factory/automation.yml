@@ -59,7 +59,7 @@ build:
         export DEPLOY_MAVEN_USERNAME=$REPO_VATICLE_USERNAME
         export DEPLOY_MAVEN_PASSWORD=$REPO_VATICLE_PASSWORD
         bazel run --define version=$(git rev-parse HEAD) //:deploy-maven -- snapshot
-        bazel run --define version=$(git rev-parse HEAD) //runner:deploy-maven -- snapshot
+        bazel run --define version=$(git rev-parse HEAD) //test:deploy-maven -- snapshot
     deploy-apt-snapshot:
       filter:
         owner: vaticle
@@ -103,7 +103,7 @@ release:
         export DEPLOY_MAVEN_USERNAME=$REPO_VATICLE_USERNAME
         export DEPLOY_MAVEN_PASSWORD=$REPO_VATICLE_PASSWORD
         bazel run --define version=$(cat VERSION) //:deploy-maven -- release
-        bazel run --define version=$(cat VERSION) //runner:deploy-maven -- release
+        bazel run --define version=$(cat VERSION) //test:deploy-maven -- release
     deploy-apt-release:
       image: vaticle-ubuntu-22.04
       dependencies: [deploy-github]
