@@ -34,8 +34,8 @@ def typedb_java_test(name, server_mac_artifact, server_linux_artifact, server_wi
 
     native.java_test(
         name = name,
-        deps = depset(deps + ["@vaticle_typedb_common//test:typedb-runner"]).to_list() + native_dependencies,
-        classpath_resources = depset(classpath_resources + ["@vaticle_typedb_common//test:logback"]).to_list(),
+        deps = depset(deps + ["@vaticle_typedb_common//runner:typedb-runner"]).to_list() + native_dependencies,
+        classpath_resources = depset(classpath_resources + ["@vaticle_typedb_common//runner:logback"]).to_list(),
         data = data + select(native_server_artifact_labels) + (select(native_console_artifact_labels) if native_console_artifact_labels else []),
         args = ["--server"] + select(native_server_artifact_paths) + ((["--console"] + select(native_console_artifact_paths)) if native_console_artifact_paths else []) + args,
         **kwargs
@@ -57,7 +57,7 @@ def typedb_kt_test(name, server_mac_artifact, server_linux_artifact, server_wind
 
     kt_jvm_test(
         name = name,
-        deps = depset(deps + ["@vaticle_typedb_common//test:typedb-runner"]).to_list() + native_dependencies,
+        deps = depset(deps + ["@vaticle_typedb_common//runner:typedb-runner"]).to_list() + native_dependencies,
         data = data + select(native_server_artifact_labels) + (select(native_console_artifact_labels) if native_console_artifact_labels else []),
         args = ["--server"] + select(native_server_artifact_paths) + ((["--console"] + select(native_console_artifact_paths)) if native_console_artifact_paths else []) + args,
         **kwargs

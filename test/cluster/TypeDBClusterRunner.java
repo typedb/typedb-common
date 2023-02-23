@@ -46,6 +46,10 @@ public class TypeDBClusterRunner implements TypeDBRunner {
                 new TypeDBClusterServerRunner.Factory());
     }
 
+    public static TypeDBClusterRunner create(Path clusterRunnerDir, int serverCount, Map<String, String> serverOptions) {
+        return create(clusterRunnerDir, serverCount, serverOptions, new TypeDBClusterServerRunner.Factory());
+    }
+
     public static TypeDBClusterRunner create(Path clusterRunnerDir, int serverCount, Map<String, String> serverOptions,
                                              TypeDBClusterServerRunner.Factory serverRunnerFactory) {
         Set<Addresses> serverAddressesSet = allocateAddressesSet(serverCount);
