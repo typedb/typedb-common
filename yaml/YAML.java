@@ -46,7 +46,7 @@ public abstract class YAML {
         } else if (yaml instanceof java.util.List) return List.wrap((java.util.List<Object>) yaml);
         else if (yaml instanceof java.lang.String) return new String((java.lang.String) yaml);
         else if (yaml instanceof java.lang.Integer) return new Int((int) yaml);
-        else if (yaml instanceof java.lang.Float) return new Float((float) yaml);
+        else if (yaml instanceof java.lang.Double) return new Double((double) yaml);
         else if (yaml instanceof java.lang.Boolean) return new Boolean((boolean) yaml);
         else throw new IllegalStateException();
     }
@@ -83,12 +83,12 @@ public abstract class YAML {
         throw classCastException(getClass(), Int.class);
     }
 
-    public boolean isFloat() {
+    public boolean isDouble() {
         return false;
     }
 
-    public Float asFloat() {
-        throw classCastException(getClass(), Float.class);
+    public Double asDouble() {
+        throw classCastException(getClass(), Double.class);
     }
 
     public boolean isBoolean() {
@@ -252,31 +252,31 @@ public abstract class YAML {
         }
     }
 
-    public static class Float extends YAML {
+    public static class Double extends YAML {
 
-        private final float value;
+        private final double value;
 
-        private Float(float value) {
+        private Double(double value) {
             this.value = value;
         }
 
-        public float value() {
+        public double value() {
             return value;
         }
 
         @Override
-        public boolean isFloat() {
+        public boolean isDouble() {
             return true;
         }
 
         @Override
-        public Float asFloat() {
+        public Double asDouble() {
             return this;
         }
 
         @Override
         public java.lang.String toString() {
-            return value + "[float]";
+            return value + "[double]";
         }
     }
 
