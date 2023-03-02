@@ -42,14 +42,21 @@ public class TypeDBClusterRunner implements TypeDBRunner {
     protected final Map<Addresses, TypeDBClusterServerRunner> serverRunners;
 
     public static TypeDBClusterRunner create(Path clusterRunnerDir, int serverCount) {
-        return create(clusterRunnerDir, serverCount, new TypeDBClusterServerRunner.Factory());
+        return create(clusterRunnerDir, serverCount, new HashMap<>(),
+                new TypeDBClusterServerRunner.Factory());
     }
 
-    public static TypeDBClusterRunner create(Path clusterRunnerDir, int serverCount, TypeDBClusterServerRunner.Factory serverRunnerFactory) {
+    public static TypeDBClusterRunner create(Path clusterRunnerDir, int serverCount, Map<String, String> serverOptions) {
+        return create(clusterRunnerDir, serverCount, serverOptions, new TypeDBClusterServerRunner.Factory());
+    }
+
+    public static TypeDBClusterRunner create(Path clusterRunnerDir, int serverCount, Map<String, String> serverOptions,
+                                             TypeDBClusterServerRunner.Factory serverRunnerFactory) {
         Set<Addresses> serverAddressesSet = allocateAddressesSet(serverCount);
         Map<Addresses, Map<String, String>> serverOptionsMap = new HashMap<>();
         for (Addresses addrs: serverAddressesSet) {
             Map<String, String> options = new HashMap<>();
+            options.putAll(serverOptions);
             options.putAll(ClusterServerOpts.address(addrs));
             options.putAll(ClusterServerOpts.peers(serverAddressesSet));
             Path srvRunnerDir = clusterRunnerDir.resolve(addrs.externalString()).toAbsolutePath();
@@ -70,9 +77,9 @@ public class TypeDBClusterRunner implements TypeDBRunner {
         Set<Addresses> addresses = new HashSet<>();
         for (int i = 0; i < serverCount; i++) {
             String host = "127.0.0.1";
-            int externalPort = 40000 + i * 1111;
-            int internalPortZMQ = 50000 + i * 1111;
-            int internalPortGRPC = 60000 + i * 1111;
+            int externalPort = 30000 + i * 1111;
+            int internalPortZMQ = 40000 + i * 1111;
+            int internalPortGRPC = 50000 + i * 1111;
             addresses.add(Addresses.create(host, externalPort, host, internalPortZMQ, host, internalPortGRPC));
         }
         return addresses;
