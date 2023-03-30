@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeoutException;
 
 import static com.vaticle.typedb.common.test.Util.createProcessExecutor;
@@ -130,7 +131,9 @@ public interface TypeDBClusterServerRunner extends TypeDBRunner {
             if (process != null) {
                 try {
                     System.out.println(addresses() + ": Stopping...");
+                    CompletableFuture<Process> future = process.getProcess().onExit();
                     process.getProcess().destroyForcibly();
+                    future.get();
                     process = null;
                     System.out.println(addresses() + ": Stopped.");
                 } catch (Exception e) {
