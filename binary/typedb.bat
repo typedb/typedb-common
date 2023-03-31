@@ -15,8 +15,8 @@ REM You should have received a copy of the GNU Affero General Public License
 REM along with this program.  If not, see <https://www.gnu.org/licenses/>.
 REM
 
-SET "TYPEDB_HOME=%cd%"
-
+SET "TYPEDB_HOME=%~dp0"
+IF %TYPEDB_HOME:~-1%==\ SET TYPEDB_HOME=%TYPEDB_HOME:~0,-1%
 
 where java >NUL 2>NUL
 if %ERRORLEVEL% GEQ 1 (
@@ -51,8 +51,8 @@ goto exiterror
 :startconsole
 
 set "G_CP=%TYPEDB_HOME%\console\conf\;%TYPEDB_HOME%\console\lib\*"
-if exist .\console\ (
-  java %CONSOLE_JAVAOPTS% -cp "%G_CP%" -Dtypedb.dir="%TYPEDB_HOME%" com.vaticle.typedb.console.TypeDBConsole %2 %3 %4 %5 %6 %7 %8 %9
+if exist "%TYPEDB_HOME%\console\" (
+  start java %CONSOLE_JAVAOPTS% -cp "%G_CP%" -Dtypedb.dir="%TYPEDB_HOME%" com.vaticle.typedb.console.TypeDBConsole %2 %3 %4 %5 %6 %7 %8 %9
   goto exit
 ) else (
   echo TypeDB Console is not included in this TypeDB distribution^.
@@ -63,10 +63,11 @@ if exist .\console\ (
 :startserver
 
 set "G_CP=%TYPEDB_HOME%\server\conf\;%TYPEDB_HOME%\server\lib\common\*;%TYPEDB_HOME%\server\lib\prod\*"
+echo "%G_CP%"
+echo "%TYPEDB_HOME%"
 
-
-if exist .\server\ (
-  java %SERVER_JAVAOPTS% -cp "%G_CP%" -Dtypedb.dir="%TYPEDB_HOME%" com.vaticle.typedb.core.server.TypeDBServer %2 %3 %4 %5 %6 %7 %8 %9
+if exist "%TYPEDB_HOME%\server\" (
+  start java %SERVER_JAVAOPTS% -cp "%G_CP%" -Dtypedb.dir="%TYPEDB_HOME%" com.vaticle.typedb.core.server.TypeDBServer %2 %3 %4 %5 %6 %7 %8 %9
   goto exit
 ) else (
   echo TypeDB Server is not included in this TypeDB distribution^.
@@ -78,8 +79,8 @@ if exist .\server\ (
 
 set "G_CP=%TYPEDB_HOME%\server\conf\;%TYPEDB_HOME%\server\lib\common\*;%TYPEDB_HOME%\server\lib\prod\*"
 
-if exist .\server\ (
-  java %SERVER_JAVAOPTS% -cp "%G_CP%" -Dtypedb.dir="%TYPEDB_HOME%" com.vaticle.typedb.cluster.server.TypeDBClusterServer %2 %3 %4 %5 %6 %7 %8 %9
+if exist "%TYPEDB_HOME%\server\" (
+  start java %SERVER_JAVAOPTS% -cp "%G_CP%" -Dtypedb.dir="%TYPEDB_HOME%" com.vaticle.typedb.cluster.server.TypeDBClusterServer %2 %3 %4 %5 %6 %7 %8 %9
   goto exit
 ) else (
   echo TypeDB Cluster is not included in this TypeDB distribution^.
