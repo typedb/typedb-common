@@ -132,13 +132,13 @@ public interface TypeDBClusterServerRunner extends TypeDBRunner {
                 try {
                     System.out.println(addresses() + ": Stopping...");
                     CompletableFuture<Process> future = process.getProcess().onExit();
-                    process.getProcess().destroyForcibly();
+                    process.getProcess().destroy();
                     future.get();
                     process = null;
                     System.out.println(addresses() + ": Stopped.");
                 } catch (Exception e) {
                     printLogs();
-                    throw e;
+//                    throw e;
                 }
             }
         }

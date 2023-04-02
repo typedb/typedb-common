@@ -20,13 +20,16 @@ package com.vaticle.typedb.common.test.cluster;
 
 import com.vaticle.typedb.common.conf.cluster.Addresses;
 import com.vaticle.typedb.common.test.TypeDBRunner;
+import com.vaticle.typedb.common.test.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -54,6 +57,7 @@ public class TypeDBClusterRunner implements TypeDBRunner {
                                              TypeDBClusterServerRunner.Factory serverRunnerFactory) {
         Set<Addresses> serverAddressesSet = allocateAddressesSet(serverCount);
         Map<Addresses, Map<String, String>> serverOptionsMap = new HashMap<>();
+        clusterRunnerDir = clusterRunnerDir.resolve(java.util.UUID.randomUUID().toString());
         for (Addresses addrs: serverAddressesSet) {
             Map<String, String> options = new HashMap<>();
             options.putAll(serverOptions);
@@ -76,10 +80,11 @@ public class TypeDBClusterRunner implements TypeDBRunner {
     private static Set<Addresses> allocateAddressesSet(int serverCount) {
         Set<Addresses> addresses = new HashSet<>();
         for (int i = 0; i < serverCount; i++) {
+            List<Integer> ports = Util.findUnusedPorts(3);
             String host = "127.0.0.1";
-            int externalPort = 30000 + i * 1111;
-            int internalPortZMQ = 40000 + i * 1111;
-            int internalPortGRPC = 50000 + i * 1111;
+            int externalPort = ports.get(0);
+            int internalPortZMQ = ports.get(1);
+            int internalPortGRPC = ports.get(2);
             addresses.add(Addresses.create(host, externalPort, host, internalPortZMQ, host, internalPortGRPC));
         }
         return addresses;
