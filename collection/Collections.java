@@ -100,6 +100,14 @@ public class Collections {
         return new Triple<>(first, second, third);
     }
 
+    @SafeVarargs
+    public static <T> boolean containsAll(Collection<T> collection, T... values) {
+        for (T value : values) {
+            if (!collection.contains(value)) return false;
+        }
+        return true;
+    }
+
     public static <T> Set<T> intersection(Set<T> set1, Set<T> set2) {
         Set<T> minSet;
         Set<T> maxSet;
