@@ -25,6 +25,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
+import java.util.Objects;
 import java.util.Set;
 
 public class Collections {
@@ -106,6 +107,13 @@ public class Collections {
             if (!collection.contains(value)) return false;
         }
         return true;
+    }
+
+    public static <T> boolean arrayContains(T[] values, T value) {
+        for (final T v : values) {
+            if (Objects.equals(value, v)) return true;
+        }
+        return false;
     }
 
     public static <T> Set<T> intersection(Set<T> set1, Set<T> set2) {
