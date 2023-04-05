@@ -117,7 +117,7 @@ public interface TypeDBClusterServerRunner extends TypeDBRunner {
         public List<String> command() {
             List<String> cmd = new ArrayList<>();
             cmd.add("cluster");
-            serverOptions.forEach((key, value) -> cmd.add(key + "=" + value));
+            serverOptions.forEach((key, value) -> cmd.add(value.isEmpty() ? key : key + "=" + value));
             return Util.typeDBCommand(cmd);
         }
 
@@ -131,14 +131,12 @@ public interface TypeDBClusterServerRunner extends TypeDBRunner {
             if (process != null) {
                 try {
                     System.out.println(addresses() + ": Stopping...");
-                    CompletableFuture<Process> future = process.getProcess().onExit();
-                    process.getProcess().destroy();
-                    future.get();
+                    process.getProcess().destroyForcibly();
                     process = null;
                     System.out.println(addresses() + ": Stopped.");
                 } catch (Exception e) {
                     printLogs();
-//                    throw e;
+                    throw e;
                 }
             }
         }
