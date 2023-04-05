@@ -31,7 +31,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeoutException;
 
 import static com.vaticle.typedb.common.test.Util.createProcessExecutor;
@@ -117,7 +116,7 @@ public interface TypeDBClusterServerRunner extends TypeDBRunner {
         public List<String> command() {
             List<String> cmd = new ArrayList<>();
             cmd.add("cluster");
-            serverOptions.forEach((key, value) -> cmd.add(value.isEmpty() ? key : key + "=" + value));
+            serverOptions.forEach((key, value) -> cmd.add(key + "=" + value));
             return Util.typeDBCommand(cmd);
         }
 
