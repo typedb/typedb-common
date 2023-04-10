@@ -28,5 +28,5 @@ public interface TypeDBRunner {
 
     void stop();
 
-
+    void destroy();
 }

@@ -24,12 +24,13 @@ import com.vaticle.typedb.common.test.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -43,6 +44,7 @@ public class TypeDBClusterRunner implements TypeDBRunner {
     protected final Map<Addresses, Map<String, String>> serverOptionsMap;
     private final TypeDBClusterServerRunner.Factory serverRunnerFactory;
     protected final Map<Addresses, TypeDBClusterServerRunner> serverRunners;
+    private static Path runnerPath;
 
     public static TypeDBClusterRunner create(Path clusterRunnerDir, int serverCount) {
         return create(clusterRunnerDir, serverCount, new HashMap<>(),
@@ -57,6 +59,7 @@ public class TypeDBClusterRunner implements TypeDBRunner {
                                              TypeDBClusterServerRunner.Factory serverRunnerFactory) {
         Set<Addresses> serverAddressesSet = allocateAddressesSet(serverCount);
         Map<Addresses, Map<String, String>> serverOptionsMap = new HashMap<>();
+        runnerPath = clusterRunnerDir;
         clusterRunnerDir = clusterRunnerDir.resolve(java.util.UUID.randomUUID().toString());
         for (Addresses addrs: serverAddressesSet) {
             Map<String, String> options = new HashMap<>();
@@ -161,6 +164,18 @@ public class TypeDBClusterRunner implements TypeDBRunner {
             } else {
                 LOG.debug("not stopping server {} - it is already stopped.", runner.addresses());
             }
+        }
+    }
+
+    @Override
+    public void destroy() {
+        stop();
+        try {
+            Files.delete(runnerPath);
+        }
+        catch (IOException e) {
+            System.out.println("Unable to delete distribution " + runnerPath.toAbsolutePath());
+            e.printStackTrace();
         }
     }
 }

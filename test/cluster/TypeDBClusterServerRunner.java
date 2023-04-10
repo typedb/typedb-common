@@ -140,6 +140,18 @@ public interface TypeDBClusterServerRunner extends TypeDBRunner {
             }
         }
 
+        @Override
+        public void destroy() {
+            stop();
+            try {
+                Files.delete(distribution);
+            }
+            catch (IOException e) {
+                System.out.println("Unable to delete distribution " + distribution.toAbsolutePath());
+                e.printStackTrace();
+            }
+        }
+
         private void printLogs() {
             System.out.println(addresses() + ": ================");
             System.out.println(addresses() + ": Logs:");

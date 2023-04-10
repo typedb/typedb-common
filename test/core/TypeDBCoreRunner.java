@@ -25,6 +25,7 @@ import org.zeroturnaround.exec.StartedProcess;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
@@ -113,6 +114,18 @@ public class TypeDBCoreRunner implements TypeDBRunner {
                 printLogs();
                 throw e;
             }
+        }
+    }
+
+    @Override
+    public void destroy() {
+        stop();
+        try {
+            Files.delete(distribution);
+        }
+        catch (IOException e) {
+            System.out.println("Unable to delete distribution " + distribution.toAbsolutePath());
+            e.printStackTrace();
         }
     }
 
