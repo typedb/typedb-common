@@ -96,7 +96,7 @@ public class Util {
     public static void deleteDirectoryContents(Path directory) throws IOException {
         Path finalDirectory = directory.toAbsolutePath();
         if (!finalDirectory.toFile().exists()) return;
-        Files.walkFileTree(finalDirectory, new SimpleFileVisitor<>() {
+        Files.walkFileTree(finalDirectory, new SimpleFileVisitor<Path>() {
             @Override
             public FileVisitResult visitFile(Path path, BasicFileAttributes attrs) throws IOException {
                 if (path.toFile().exists()) {
