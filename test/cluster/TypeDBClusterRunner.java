@@ -24,8 +24,6 @@ import com.vaticle.typedb.common.test.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -51,11 +49,11 @@ public class TypeDBClusterRunner implements TypeDBRunner {
                 new TypeDBClusterServerRunner.Factory());
     }
 
-    public static TypeDBClusterRunner create(Path clusterRunnerDir, int serverCount, Map<String, String> serverOptions) {
-        return create(clusterRunnerDir, serverCount, serverOptions, new TypeDBClusterServerRunner.Factory());
+    public static TypeDBClusterRunner create(Path clusterRunnerDir, int serverCount, Map<String, String> extraOptions) {
+        return create(clusterRunnerDir, serverCount, extraOptions, new TypeDBClusterServerRunner.Factory());
     }
 
-    public static TypeDBClusterRunner create(Path clusterRunnerDir, int serverCount, Map<String, String> serverOptions,
+    public static TypeDBClusterRunner create(Path clusterRunnerDir, int serverCount, Map<String, String> extraOptions,
                                              TypeDBClusterServerRunner.Factory serverRunnerFactory) {
         Set<Addresses> serverAddressesSet = allocateAddressesSet(serverCount);
         Map<Addresses, Map<String, String>> serverOptionsMap = new HashMap<>();
@@ -63,7 +61,7 @@ public class TypeDBClusterRunner implements TypeDBRunner {
         clusterRunnerDir = clusterRunnerDir.resolve(java.util.UUID.randomUUID().toString());
         for (Addresses addrs: serverAddressesSet) {
             Map<String, String> options = new HashMap<>();
-            options.putAll(serverOptions);
+            options.putAll(extraOptions);
             options.putAll(ClusterServerOpts.address(addrs));
             options.putAll(ClusterServerOpts.peers(serverAddressesSet));
             Path srvRunnerDir = clusterRunnerDir.resolve(addrs.externalString()).toAbsolutePath();
@@ -168,14 +166,16 @@ public class TypeDBClusterRunner implements TypeDBRunner {
     }
 
     @Override
-    public void destroy() {
-        stop();
-        try {
-            Files.delete(runnerPath);
+    public void deleteFiles() {
+        for (TypeDBRunner runner : serverRunners.values()) {
+            runner.deleteFiles();
         }
-        catch (IOException e) {
-            System.out.println("Unable to delete distribution " + runnerPath.toAbsolutePath());
-            e.printStackTrace();
+    }
+
+    @Override
+    public void reset() {
+        for (TypeDBRunner runner : serverRunners.values()) {
+            runner.reset();
         }
     }
 }

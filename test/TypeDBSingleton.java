@@ -25,6 +25,19 @@ public class TypeDBSingleton {
         typeDBRunner = instance;
     }
 
+    public static void resetTypeDBRunner() {
+        if (typeDBRunner != null) {
+            typeDBRunner.reset();
+        }
+    }
+
+    public static void deleteTypeDBRunner() {
+        if (typeDBRunner != null) {
+            typeDBRunner.deleteFiles();
+            typeDBRunner = null;
+        }
+    }
+
     public static TypeDBRunner getTypeDBRunner() {
         return typeDBRunner;
     }

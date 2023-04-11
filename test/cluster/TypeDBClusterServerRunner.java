@@ -28,9 +28,11 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeoutException;
 
 import static com.vaticle.typedb.common.test.Util.createProcessExecutor;
@@ -63,8 +65,8 @@ public interface TypeDBClusterServerRunner extends TypeDBRunner {
             distribution = unarchive(getServerArchiveFile());
             this.serverOptions = serverOptions;
             System.out.println(addresses() + ": " + name() + " constructing runner...");
-            Files.createDirectories(ClusterServerOpts.storageData(serverOptions));
-            Files.createDirectories(ClusterServerOpts.logOutput(serverOptions));
+            Files.createDirectories(dataDir());
+            Files.createDirectories(logsDir());
             executor = createProcessExecutor(distribution);
             System.out.println(addresses() + ": " + name() + " runner constructed.");
         }
@@ -93,6 +95,10 @@ public interface TypeDBClusterServerRunner extends TypeDBRunner {
 
         private Path dataDir() {
             return ClusterServerOpts.storageData(serverOptions);
+        }
+
+        private Path replicationDir() {
+            return ClusterServerOpts.storageReplication(serverOptions);
         }
 
         private Path logsDir() {
@@ -130,26 +136,42 @@ public interface TypeDBClusterServerRunner extends TypeDBRunner {
             if (process != null) {
                 try {
                     System.out.println(addresses() + ": Stopping...");
-                    process.getProcess().destroyForcibly();
+                    CompletableFuture<Process> future = process.getProcess().onExit();
+                    process.getProcess().destroy();
+                    future.get();
                     process = null;
                     System.out.println(addresses() + ": Stopped.");
                 } catch (Exception e) {
+                    System.out.println("Unable to destroy runner.");
                     printLogs();
-                    throw e;
                 }
             }
         }
 
         @Override
-        public void destroy() {
+        public void deleteFiles() {
             stop();
             try {
-                Files.delete(distribution);
+                Util.deleteDirectoryContents(distribution);
             }
             catch (IOException e) {
                 System.out.println("Unable to delete distribution " + distribution.toAbsolutePath());
                 e.printStackTrace();
             }
+        }
+
+        @Override
+        public void reset() {
+            stop();
+            List<Path> paths = Arrays.asList(dataDir(), logsDir(), replicationDir());
+            paths.forEach(path -> {
+                try {
+                    Util.deleteDirectoryContents(path);
+                } catch (IOException e) {
+                    System.out.println("Unable to delete " + path.toAbsolutePath());
+                    e.printStackTrace();
+                }
+            });
         }
 
         private void printLogs() {
