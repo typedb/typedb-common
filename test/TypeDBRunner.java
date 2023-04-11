@@ -28,5 +28,7 @@ public interface TypeDBRunner {
 
     void stop();
 
+    void deleteFiles();
 
+    void reset();
 }

@@ -29,7 +29,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -43,24 +42,26 @@ public class TypeDBClusterRunner implements TypeDBRunner {
     protected final Map<Addresses, Map<String, String>> serverOptionsMap;
     private final TypeDBClusterServerRunner.Factory serverRunnerFactory;
     protected final Map<Addresses, TypeDBClusterServerRunner> serverRunners;
+    private static Path runnerPath;
 
     public static TypeDBClusterRunner create(Path clusterRunnerDir, int serverCount) {
         return create(clusterRunnerDir, serverCount, new HashMap<>(),
                 new TypeDBClusterServerRunner.Factory());
     }
 
-    public static TypeDBClusterRunner create(Path clusterRunnerDir, int serverCount, Map<String, String> serverOptions) {
-        return create(clusterRunnerDir, serverCount, serverOptions, new TypeDBClusterServerRunner.Factory());
+    public static TypeDBClusterRunner create(Path clusterRunnerDir, int serverCount, Map<String, String> extraOptions) {
+        return create(clusterRunnerDir, serverCount, extraOptions, new TypeDBClusterServerRunner.Factory());
     }
 
-    public static TypeDBClusterRunner create(Path clusterRunnerDir, int serverCount, Map<String, String> serverOptions,
+    public static TypeDBClusterRunner create(Path clusterRunnerDir, int serverCount, Map<String, String> extraOptions,
                                              TypeDBClusterServerRunner.Factory serverRunnerFactory) {
         Set<Addresses> serverAddressesSet = allocateAddressesSet(serverCount);
         Map<Addresses, Map<String, String>> serverOptionsMap = new HashMap<>();
+        runnerPath = clusterRunnerDir;
         clusterRunnerDir = clusterRunnerDir.resolve(java.util.UUID.randomUUID().toString());
         for (Addresses addrs: serverAddressesSet) {
             Map<String, String> options = new HashMap<>();
-            options.putAll(serverOptions);
+            options.putAll(extraOptions);
             options.putAll(ClusterServerOpts.address(addrs));
             options.putAll(ClusterServerOpts.peers(serverAddressesSet));
             Path srvRunnerDir = clusterRunnerDir.resolve(addrs.externalString()).toAbsolutePath();
@@ -161,6 +162,20 @@ public class TypeDBClusterRunner implements TypeDBRunner {
             } else {
                 LOG.debug("not stopping server {} - it is already stopped.", runner.addresses());
             }
+        }
+    }
+
+    @Override
+    public void deleteFiles() {
+        for (TypeDBRunner runner : serverRunners.values()) {
+            runner.deleteFiles();
+        }
+    }
+
+    @Override
+    public void reset() {
+        for (TypeDBRunner runner : serverRunners.values()) {
+            runner.reset();
         }
     }
 }

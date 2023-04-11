@@ -28,9 +28,12 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -75,12 +78,7 @@ public class Util {
 
     public static Path unarchive(File archive) throws IOException, TimeoutException, InterruptedException {
         Path runnerDir = Files.createTempDirectory("typedb");
-        ProcessExecutor executor = new ProcessExecutor()
-                .directory(Paths.get(".").toAbsolutePath().toFile())
-                .redirectOutput(System.out)
-                .redirectError(System.err)
-                .readOutput(true)
-                .destroyOnExit();
+        ProcessExecutor executor = createProcessExecutor(Paths.get(".").toAbsolutePath());
         if (archive.toString().endsWith(TAR_GZ)) {
             executor.command("tar", "-xf", archive.toString(),
                     "-C", runnerDir.toString()).execute();
@@ -93,6 +91,31 @@ public class Util {
         // The TypeDB Cluster archive extracts to a folder inside TYPEDB_TARGET_DIRECTORY named
         // typedb-server-{platform}-{version}. We know it's the only folder, so we can retrieve it using Files.list.
         return Files.list(runnerDir).findFirst().get().toAbsolutePath();
+    }
+
+    public static void deleteDirectoryContents(Path directory) throws IOException {
+        Path finalDirectory = directory.toAbsolutePath();
+        if (!finalDirectory.toFile().exists()) return;
+        Files.walkFileTree(finalDirectory, new SimpleFileVisitor<Path>() {
+            @Override
+            public FileVisitResult visitFile(Path path, BasicFileAttributes attrs) throws IOException {
+                if (path.toFile().exists()) {
+                    Files.delete(path);
+                }
+                return FileVisitResult.CONTINUE;
+            }
+            @Override
+            public FileVisitResult postVisitDirectory(Path dir, IOException e) throws IOException {
+                if (e == null) {
+                    if (dir.toFile().exists() && dir.toAbsolutePath() != finalDirectory.toAbsolutePath()) {
+                        Files.delete(dir);
+                    }
+                } else {
+                    throw e;
+                }
+                return FileVisitResult.CONTINUE;
+            }
+        });
     }
 
     public static List<String> typeDBCommand(String... cmd) {

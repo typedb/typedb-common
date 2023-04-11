@@ -93,6 +93,10 @@ class ClusterServerOpts {
         return Paths.get(options.get(STORAGE_DATA));
     }
 
+    static Path storageReplication(Map<String, String> options) {
+        return Paths.get(options.get(STORAGE_REPLICATION));
+    }
+
     static Path logOutput(Map<String, String> options) {
         return Paths.get(options.get(LOG_OUTPUT_FILE_DIRECTORY));
     }

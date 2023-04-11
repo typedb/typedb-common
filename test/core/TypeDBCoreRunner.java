@@ -26,7 +26,9 @@ import org.zeroturnaround.exec.StartedProcess;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeoutException;
 
 import static com.vaticle.typedb.common.test.Util.createProcessExecutor;
@@ -99,7 +101,7 @@ public class TypeDBCoreRunner implements TypeDBRunner {
 
     @Override
     public boolean isStopped() {
-        return !process.getProcess().isAlive();
+        return process == null || !process.getProcess().isAlive();
     }
 
     @Override
@@ -107,14 +109,45 @@ public class TypeDBCoreRunner implements TypeDBRunner {
         if (process != null) {
             try {
                 System.out.println(address() + ": Stopping...");
-                process.getProcess().destroyForcibly();
+                CompletableFuture<Process> processFuture = process.getProcess().onExit();
+                process.getProcess().destroy();
+                processFuture.get();
+                process = null;
                 System.out.println(address() + ": Stopped.");
             } catch (Exception e) {
+                System.out.println("Unable to destroy runner.");
                 printLogs();
-                throw e;
             }
         }
     }
+
+
+    @Override
+    public void deleteFiles() {
+        stop();
+        try {
+            Util.deleteDirectoryContents(distribution);
+        }
+        catch (IOException e) {
+            System.out.println("Unable to delete distribution " + distribution.toAbsolutePath());
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void reset() {
+        stop();
+        List<Path> paths = Arrays.asList(dataDir, logsDir);
+        paths.forEach(path -> {
+            try {
+                Util.deleteDirectoryContents(path);
+            } catch (IOException e) {
+                System.out.println("Unable to delete " + path.toAbsolutePath());
+                e.printStackTrace();
+            }
+        });
+    }
+
 
     private void printLogs() {
         System.out.println(address() + ": ================");
