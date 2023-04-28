@@ -62,7 +62,7 @@ public class Collections {
     }
 
     @SafeVarargs
-    public static <T> Set<T> set(Collection<T> collection, Collection<T>... collections) {
+    public static <T> Set<T> concatToSet(Collection<T> collection, Collection<T>... collections) {
         Set<T> combined = new HashSet<>(collection);
         for (Collection<T> c : collections) combined.addAll(c);
         return java.util.Collections.unmodifiableSet(combined);
@@ -87,7 +87,7 @@ public class Collections {
     }
 
     @SafeVarargs
-    public static <T> List<T> list(Collection<T> collection, Collection<T>... collections) {
+    public static <T> List<T> concatToList(Collection<T> collection, Collection<T>... collections) {
         List<T> combined = new ArrayList<>(collection);
         for (Collection<T> c : collections) combined.addAll(c);
         return java.util.Collections.unmodifiableList(combined);
