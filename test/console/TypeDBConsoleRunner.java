@@ -27,6 +27,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
 
+import static com.vaticle.typedb.common.collection.Collections.concatToList;
 import static com.vaticle.typedb.common.collection.Collections.list;
 import static com.vaticle.typedb.common.test.Util.getConsoleArchiveFile;
 import static com.vaticle.typedb.common.test.Util.unarchive;
@@ -60,7 +61,7 @@ public class TypeDBConsoleRunner {
     }
 
     private List<String> command(String... options) {
-        List<String> cmd = list((List<String>) list("console"), list(options));
+        List<String> cmd = concatToList(list("console"), list(options));
         return Util.typeDBCommand(cmd);
     }
 
