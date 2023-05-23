@@ -53,7 +53,7 @@ deploy_github(
     repository = deployment_github['github.repository'],
     title = "TypeDB Common",
     title_append_version = True,
-    release_description = "//:RELEASE_TEMPLATE.md",
+    release_description = "//:LATEST_RELEASE_NOTES.md",
     draft = False,
 )
 
