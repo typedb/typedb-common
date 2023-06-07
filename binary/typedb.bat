@@ -62,7 +62,7 @@ if exist "%TYPEDB_HOME%\console\" (
 
 :startserver
 
-set "G_CP=%TYPEDB_HOME%\server\conf\;%TYPEDB_HOME%\server\lib\common\*;%TYPEDB_HOME%\server\lib\prod\*"
+set "G_CP=%TYPEDB_HOME%\server\conf\;%TYPEDB_HOME%\server\lib\*"
 echo "%G_CP%"
 echo "%TYPEDB_HOME%"
 
@@ -77,7 +77,7 @@ if exist "%TYPEDB_HOME%\server\" (
 
 :startcluster
 
-set "G_CP=%TYPEDB_HOME%\server\conf\;%TYPEDB_HOME%\server\lib\common\*;%TYPEDB_HOME%\server\lib\prod\*"
+set "G_CP=%TYPEDB_HOME%\server\conf\;%TYPEDB_HOME%\server\lib\*"
 
 if exist "%TYPEDB_HOME%\server\" (
   start java %SERVER_JAVAOPTS% -cp "%G_CP%" -Dtypedb.dir="%TYPEDB_HOME%" com.vaticle.typedb.cluster.server.TypeDBClusterServer %2 %3 %4 %5 %6 %7 %8 %9
