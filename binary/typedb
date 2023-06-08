@@ -63,9 +63,9 @@ elif [[ "$1" = "server" ]] || [[ "$1" = "cluster" ]]; then
 
     TYPEDB_SERVER_DIR="${TYPEDB_HOME}/server"
     TYPEDB_SERVER_LIB_DIR="${TYPEDB_SERVER_DIR}/lib"
-    TYPEDB_CLUSTER_SERVER_JAR=("${TYPEDB_SERVER_LIB_DIR}"/common/com-vaticle-typedb-typedb-cluster-server-*.jar)
+    TYPEDB_CLUSTER_SERVER_JAR=("${TYPEDB_SERVER_LIB_DIR}"/com-vaticle-typedb-typedb-cluster-server-*.jar)
 
-    CLASSPATH="${TYPEDB_SERVER_DIR}/conf/:${TYPEDB_SERVER_LIB_DIR}/common/*"
+    CLASSPATH="${TYPEDB_SERVER_DIR}/conf/:${TYPEDB_SERVER_LIB_DIR}/*"
 
     if [[ "$1" = "server" ]]; then
         TYPEDB_ALL_NAME="TypeDB (All)"
@@ -98,15 +98,9 @@ elif [[ "$1" = "server" ]] || [[ "$1" = "cluster" ]]; then
 
     # exec replaces current shell process with java so no commands after these ones will ever get executed
     if [ $DEBUG ]; then
-        case "$(uname -s)" in
-            Darwin) CLASSPATH="${CLASSPATH}:$TYPEDB_SERVER_LIB_DIR/dev/*" ;;
-            *) echo "WARNING: Debug mode RocksDB is not available in this platform. Fallback to production mode."
-               CLASSPATH="${CLASSPATH}:$TYPEDB_SERVER_LIB_DIR/prod/*" ;;
-        esac
         exec $JAVA_BIN ${JAVAOPTS} -ea -cp "${CLASSPATH}" -Dtypedb.dir="${TYPEDB_HOME}" \
             ${TYPEDB_SERVER_CLASS} "${@:2}"
     else
-        CLASSPATH="${CLASSPATH}:$TYPEDB_SERVER_LIB_DIR/prod/*"
         exec $JAVA_BIN ${JAVAOPTS} -cp "${CLASSPATH}" -Dtypedb.dir="${TYPEDB_HOME}" \
             ${TYPEDB_SERVER_CLASS} "${@:2}"
     fi
