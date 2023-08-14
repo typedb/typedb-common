@@ -40,7 +40,7 @@ class ClusterServerOpts {
     static final String STORAGE_DATA = "--storage.data";
     static final String STORAGE_REPLICATION = "--storage.replication";
     static final String STORAGE_USER = "--storage.user";
-    static final String LOG_OUTPUT_FILE_DIRECTORY = "--log.output.file.directory";
+    static final String LOG_OUTPUT_FILE_DIRECTORY = "--log.output.file.base-dir";
 
     static Addresses address(Map<String, String> options) {
         return Addresses.create(options.get(ADDR), options.get(INTERNAL_ADDR_ZMQ), options.get(INTERNAL_ADDR_GRPC));
