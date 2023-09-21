@@ -68,7 +68,7 @@ public class TypeDBCoreRunner implements TypeDBRunner {
     }
 
     public String host() {
-        return "127.0.0.1";
+        return "localhost";
     }
 
     public int port() {
