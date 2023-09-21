@@ -46,7 +46,7 @@ exit_if_java_not_found
 if [ -z "$1" ]; then
     echo "Missing argument. Possible commands are:"
     echo "  Server:          typedb server [--help]"
-    echo "  Cluster:            typedb enterprise [--help]"
+    echo "  Enterprise:            typedb enterprise [--help]"
     echo "  Console:         typedb console [--help]"
     exit 1
 elif [ "$1" = "console" ]; then
@@ -63,7 +63,7 @@ elif [[ "$1" = "server" ]] || [[ "$1" = "enterprise" ]]; then
 
     TYPEDB_SERVER_DIR="${TYPEDB_HOME}/server"
     TYPEDB_SERVER_LIB_DIR="${TYPEDB_SERVER_DIR}/lib"
-    TYPEDB_CLUSTER_SERVER_JAR=("${TYPEDB_SERVER_LIB_DIR}"/com-vaticle-typedb-typedb-enterprise-server-*.jar)
+    TYPEDB_ENTERPRISE_SERVER_JAR=("${TYPEDB_SERVER_LIB_DIR}"/com-vaticle-typedb-typedb-enterprise-server-*.jar)
 
     CLASSPATH="${TYPEDB_SERVER_DIR}/conf/:${TYPEDB_SERVER_LIB_DIR}/*"
 
@@ -72,16 +72,16 @@ elif [[ "$1" = "server" ]] || [[ "$1" = "enterprise" ]]; then
         TYPEDB_SERVER_NAME="TypeDB (Server)"
         TYPEDB_SERVER_CLASS=com.vaticle.typedb.core.server.TypeDBServer
 
-        if [[ -f "$TYPEDB_CLUSTER_SERVER_JAR" ]]; then
+        if [[ -f "$TYPEDB_ENTERPRISE_SERVER_JAR" ]]; then
             echo "$TYPEDB_SERVER_NAME is not found. Make sure to install or download $TYPEDB_SERVER_NAME or $TYPEDB_ALL_NAME."
             exit 1
         fi
     else
-        TYPEDB_ALL_NAME="TypeDB Cluster (All)"
-        TYPEDB_SERVER_NAME="TypeDB Cluster (Server)"
-        TYPEDB_SERVER_CLASS=com.vaticle.typedb.enterprise.server.TypeDBClusterServer
+        TYPEDB_ALL_NAME="TypeDB Enterprise (All)"
+        TYPEDB_SERVER_NAME="TypeDB Enterprise (Server)"
+        TYPEDB_SERVER_CLASS=com.vaticle.typedb.enterprise.server.TypeDBEnterpriseServer
 
-        if [[ ! -f "$TYPEDB_CLUSTER_SERVER_JAR" ]]; then
+        if [[ ! -f "$TYPEDB_ENTERPRISE_SERVER_JAR" ]]; then
             echo "$TYPEDB_SERVER_NAME is not found. Make sure to install or download $TYPEDB_SERVER_NAME or $TYPEDB_ALL_NAME."
             exit 1
         fi
@@ -107,7 +107,7 @@ elif [[ "$1" = "server" ]] || [[ "$1" = "enterprise" ]]; then
 else
     echo "Invalid argument: $1. Possible commands are: "
     echo "  Server:          typedb server [--help]"
-    echo "  Cluster:         typedb enterprise [--help]"
+    echo "  Enterprise:         typedb enterprise [--help]"
     echo "  Console:         typedb console [--help]"
     exit 1
 fi
