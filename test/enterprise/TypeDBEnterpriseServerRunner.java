@@ -16,9 +16,9 @@
  *
  */
 
-package com.vaticle.typedb.common.test.cluster;
+package com.vaticle.typedb.common.test.enterprise;
 
-import com.vaticle.typedb.common.conf.cluster.Addresses;
+import com.vaticle.typedb.common.conf.enterprise.Addresses;
 import com.vaticle.typedb.common.test.Util;
 import com.vaticle.typedb.common.test.TypeDBRunner;
 import org.zeroturnaround.exec.ProcessExecutor;
@@ -39,13 +39,13 @@ import static com.vaticle.typedb.common.test.Util.createProcessExecutor;
 import static com.vaticle.typedb.common.test.Util.getServerArchiveFile;
 import static com.vaticle.typedb.common.test.Util.unarchive;
 
-public interface TypeDBClusterServerRunner extends TypeDBRunner {
+public interface TypeDBEnterpriseServerRunner extends TypeDBRunner {
 
     Addresses addresses();
 
     class Factory {
 
-        protected TypeDBClusterServerRunner createServerRunner(Map<String, String> options) {
+        protected TypeDBEnterpriseServerRunner createServerRunner(Map<String, String> options) {
             try {
                 return new Standalone(options);
             } catch (InterruptedException | TimeoutException | IOException e) {
@@ -54,7 +54,7 @@ public interface TypeDBClusterServerRunner extends TypeDBRunner {
         }
     }
 
-    class Standalone implements TypeDBClusterServerRunner {
+    class Standalone implements TypeDBEnterpriseServerRunner {
 
         protected final Path distribution;
         protected final Map<String, String> serverOptions;
@@ -72,7 +72,7 @@ public interface TypeDBClusterServerRunner extends TypeDBRunner {
         }
 
         private String name() {
-            return "TypeDB Cluster";
+            return "TypeDB Enterprise";
         }
 
         public Map<String, String> options() {
@@ -86,23 +86,23 @@ public interface TypeDBClusterServerRunner extends TypeDBRunner {
 
         @Override
         public Addresses addresses() {
-            return ClusterServerOpts.address(serverOptions);
+            return EnterpriseServerOpts.address(serverOptions);
         }
 
         public Set<Addresses> peers() {
-            return ClusterServerOpts.peers(serverOptions);
+            return EnterpriseServerOpts.peers(serverOptions);
         }
 
         private Path dataDir() {
-            return ClusterServerOpts.storageData(serverOptions);
+            return EnterpriseServerOpts.storageData(serverOptions);
         }
 
         private Path replicationDir() {
-            return ClusterServerOpts.storageReplication(serverOptions);
+            return EnterpriseServerOpts.storageReplication(serverOptions);
         }
 
         private Path logsDir() {
-            return ClusterServerOpts.logOutput(serverOptions);
+            return EnterpriseServerOpts.logOutput(serverOptions);
         }
 
         @Override
@@ -121,7 +121,7 @@ public interface TypeDBClusterServerRunner extends TypeDBRunner {
 
         public List<String> command() {
             List<String> cmd = new ArrayList<>();
-            cmd.add("cluster");
+            cmd.add("enterprise");
             serverOptions.forEach((key, value) -> cmd.add(key + "=" + value));
             return Util.typeDBCommand(cmd);
         }

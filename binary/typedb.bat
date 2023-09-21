@@ -30,12 +30,12 @@ if %ERRORLEVEL% GEQ 1 (
 if "%1" == "" goto missingargument
 
 if "%1" == "console" goto startconsole
-if "%1" == "cluster" goto startcluster
+if "%1" == "enterprise" goto startenterprise
 if "%1" == "server"  goto startserver
 
 echo   Invalid argument: %1. Possible commands are:
 echo   Server:          typedb server [--help]
-echo   Cluster:         typedb cluster [--help]
+echo   Enterprise:         typedb enterprise [--help]
 echo   Console:         typedb console [--help]
 goto exiterror
 
@@ -43,7 +43,7 @@ goto exiterror
 
  echo   Missing argument. Possible commands are:
  echo   Server:          typedb server [--help]
- echo   Cluster:         typedb cluster [--help]
+ echo   Enterprise:         typedb enterprise [--help]
  echo   Console:         typedb console [--help]
 
 goto exiterror
@@ -75,16 +75,16 @@ if exist "%TYPEDB_HOME%\server\" (
   goto exiterror
 )
 
-:startcluster
+:startenterprise
 
 set "G_CP=%TYPEDB_HOME%\server\conf\;%TYPEDB_HOME%\server\lib\*"
 
 if exist "%TYPEDB_HOME%\server\" (
-  start java %SERVER_JAVAOPTS% -cp "%G_CP%" -Dtypedb.dir="%TYPEDB_HOME%" com.vaticle.typedb.cluster.server.TypeDBClusterServer %2 %3 %4 %5 %6 %7 %8 %9
+  start java %SERVER_JAVAOPTS% -cp "%G_CP%" -Dtypedb.dir="%TYPEDB_HOME%" com.vaticle.typedb.enterprise.server.TypeDBEnterpriseServer %2 %3 %4 %5 %6 %7 %8 %9
   goto exit
 ) else (
-  echo TypeDB Cluster is not included in this TypeDB distribution^.
-  echo You may want to install TypeDB Cluster or TypeDB Cluster ^(all^)^.
+  echo TypeDB Enterprise is not included in this TypeDB distribution^.
+  echo You may want to install TypeDB Enterprise ^(all^)^.
   goto exiterror
 )
 

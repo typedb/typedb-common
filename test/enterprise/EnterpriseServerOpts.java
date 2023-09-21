@@ -16,9 +16,9 @@
  *
  */
 
-package com.vaticle.typedb.common.test.cluster;
+package com.vaticle.typedb.common.test.enterprise;
 
-import com.vaticle.typedb.common.conf.cluster.Addresses;
+import com.vaticle.typedb.common.conf.enterprise.Addresses;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -29,7 +29,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-class ClusterServerOpts {
+class EnterpriseServerOpts {
     private static final String ADDR = "--server.address";
     private static final String INTERNAL_ADDR_ZMQ = "--server.internal-address.zeromq";
     private static final String INTERNAL_ADDR_GRPC = "--server.internal-address.grpc";
