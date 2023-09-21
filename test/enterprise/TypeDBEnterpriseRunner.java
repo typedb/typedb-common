@@ -16,9 +16,9 @@
  *
  */
 
-package com.vaticle.typedb.common.test.cluster;
+package com.vaticle.typedb.common.test.enterprise;
 
-import com.vaticle.typedb.common.conf.cluster.Addresses;
+import com.vaticle.typedb.common.conf.enterprise.Addresses;
 import com.vaticle.typedb.common.test.TypeDBRunner;
 import com.vaticle.typedb.common.test.Util;
 import org.slf4j.Logger;
@@ -35,47 +35,47 @@ import java.util.stream.Collectors;
 import static com.vaticle.typedb.common.collection.Collections.map;
 import static com.vaticle.typedb.common.collection.Collections.pair;
 
-public class TypeDBClusterRunner implements TypeDBRunner {
+public class TypeDBEnterpriseRunner implements TypeDBRunner {
 
-    private static final Logger LOG = LoggerFactory.getLogger(TypeDBClusterRunner.class);
+    private static final Logger LOG = LoggerFactory.getLogger(TypeDBEnterpriseRunner.class);
 
     protected final Map<Addresses, Map<String, String>> serverOptionsMap;
-    private final TypeDBClusterServerRunner.Factory serverRunnerFactory;
-    protected final Map<Addresses, TypeDBClusterServerRunner> serverRunners;
+    private final TypeDBEnterpriseServerRunner.Factory serverRunnerFactory;
+    protected final Map<Addresses, TypeDBEnterpriseServerRunner> serverRunners;
     private static Path runnerPath;
 
-    public static TypeDBClusterRunner create(Path clusterRunnerDir, int serverCount) {
-        return create(clusterRunnerDir, serverCount, new HashMap<>(),
-                new TypeDBClusterServerRunner.Factory());
+    public static TypeDBEnterpriseRunner create(Path enterpriseRunnerDir, int serverCount) {
+        return create(enterpriseRunnerDir, serverCount, new HashMap<>(),
+                new TypeDBEnterpriseServerRunner.Factory());
     }
 
-    public static TypeDBClusterRunner create(Path clusterRunnerDir, int serverCount, Map<String, String> extraOptions) {
-        return create(clusterRunnerDir, serverCount, extraOptions, new TypeDBClusterServerRunner.Factory());
+    public static TypeDBEnterpriseRunner create(Path enterpriseRunnerDir, int serverCount, Map<String, String> extraOptions) {
+        return create(enterpriseRunnerDir, serverCount, extraOptions, new TypeDBEnterpriseServerRunner.Factory());
     }
 
-    public static TypeDBClusterRunner create(Path clusterRunnerDir, int serverCount, Map<String, String> extraOptions,
-                                             TypeDBClusterServerRunner.Factory serverRunnerFactory) {
+    public static TypeDBEnterpriseRunner create(Path enterpriseRunnerDir, int serverCount, Map<String, String> extraOptions,
+                                             TypeDBEnterpriseServerRunner.Factory serverRunnerFactory) {
         Set<Addresses> serverAddressesSet = allocateAddressesSet(serverCount);
         Map<Addresses, Map<String, String>> serverOptionsMap = new HashMap<>();
-        runnerPath = clusterRunnerDir;
-        clusterRunnerDir = clusterRunnerDir.resolve(java.util.UUID.randomUUID().toString());
+        runnerPath = enterpriseRunnerDir;
+        enterpriseRunnerDir = enterpriseRunnerDir.resolve(java.util.UUID.randomUUID().toString());
         for (Addresses addrs: serverAddressesSet) {
             Map<String, String> options = new HashMap<>();
             options.putAll(extraOptions);
-            options.putAll(ClusterServerOpts.address(addrs));
-            options.putAll(ClusterServerOpts.peers(serverAddressesSet));
-            Path srvRunnerDir = clusterRunnerDir.resolve(addrs.externalString()).toAbsolutePath();
+            options.putAll(EnterpriseServerOpts.address(addrs));
+            options.putAll(EnterpriseServerOpts.peers(serverAddressesSet));
+            Path srvRunnerDir = enterpriseRunnerDir.resolve(addrs.externalString()).toAbsolutePath();
             options.putAll(
                     map(
-                            pair(ClusterServerOpts.STORAGE_DATA, srvRunnerDir.resolve("server/data").toAbsolutePath().toString()),
-                            pair(ClusterServerOpts.STORAGE_REPLICATION, srvRunnerDir.resolve("server/replication").toAbsolutePath().toString()),
-                            pair(ClusterServerOpts.STORAGE_USER, srvRunnerDir.resolve("server/user").toAbsolutePath().toString()),
-                            pair(ClusterServerOpts.LOG_OUTPUT_FILE_DIRECTORY, srvRunnerDir.resolve("server/logs").toAbsolutePath().toString())
+                            pair(EnterpriseServerOpts.STORAGE_DATA, srvRunnerDir.resolve("server/data").toAbsolutePath().toString()),
+                            pair(EnterpriseServerOpts.STORAGE_REPLICATION, srvRunnerDir.resolve("server/replication").toAbsolutePath().toString()),
+                            pair(EnterpriseServerOpts.STORAGE_USER, srvRunnerDir.resolve("server/user").toAbsolutePath().toString()),
+                            pair(EnterpriseServerOpts.LOG_OUTPUT_FILE_DIRECTORY, srvRunnerDir.resolve("server/logs").toAbsolutePath().toString())
                     )
             );
             serverOptionsMap.put(addrs, options);
         }
-        return new TypeDBClusterRunner(serverOptionsMap, serverRunnerFactory);
+        return new TypeDBEnterpriseRunner(serverOptionsMap, serverRunnerFactory);
     }
 
     private static Set<Addresses> allocateAddressesSet(int serverCount) {
@@ -91,18 +91,18 @@ public class TypeDBClusterRunner implements TypeDBRunner {
         return addresses;
     }
 
-    private TypeDBClusterRunner(Map<Addresses, Map<String, String>> serverOptionsMap, TypeDBClusterServerRunner.Factory serverRunnerFactory) {
+    private TypeDBEnterpriseRunner(Map<Addresses, Map<String, String>> serverOptionsMap, TypeDBEnterpriseServerRunner.Factory serverRunnerFactory) {
         assert serverOptionsMap.size() >= 1;
         this.serverOptionsMap = serverOptionsMap;
         this.serverRunnerFactory = serverRunnerFactory;
         serverRunners = createServerRunners(this.serverOptionsMap);
     }
 
-    private Map<Addresses, TypeDBClusterServerRunner> createServerRunners(Map<Addresses, Map<String, String>> serverOptsMap) {
-        Map<Addresses, TypeDBClusterServerRunner> srvRunners = new HashMap<>();
+    private Map<Addresses, TypeDBEnterpriseServerRunner> createServerRunners(Map<Addresses, Map<String, String>> serverOptsMap) {
+        Map<Addresses, TypeDBEnterpriseServerRunner> srvRunners = new HashMap<>();
         for (Addresses addrs: serverOptsMap.keySet()) {
             Map<String, String> options = serverOptsMap.get(addrs);
-            TypeDBClusterServerRunner srvRunner = serverRunnerFactory.createServerRunner(options);
+            TypeDBEnterpriseServerRunner srvRunner = serverRunnerFactory.createServerRunner(options);
             srvRunners.put(addrs, srvRunner);
         }
         return srvRunners;
@@ -110,7 +110,7 @@ public class TypeDBClusterRunner implements TypeDBRunner {
 
     @Override
     public void start() {
-        for (TypeDBClusterServerRunner runner : serverRunners.values()) {
+        for (TypeDBEnterpriseServerRunner runner : serverRunners.values()) {
             if (runner.isStopped()) {
                 runner.start();
             } else {
@@ -137,11 +137,11 @@ public class TypeDBClusterRunner implements TypeDBRunner {
         return addressesSet().stream().map(Addresses::externalString).collect(Collectors.toSet());
     }
 
-    public Map<Addresses, TypeDBClusterServerRunner> serverRunners() {
+    public Map<Addresses, TypeDBEnterpriseServerRunner> serverRunners() {
         return serverRunners;
     }
 
-    public TypeDBClusterServerRunner serverRunner(String externalAddr) {
+    public TypeDBEnterpriseServerRunner serverRunner(String externalAddr) {
         Addresses addresses = addressesSet()
                 .stream()
                 .filter(addrs -> addrs.externalString().equals(externalAddr))
@@ -150,13 +150,13 @@ public class TypeDBClusterRunner implements TypeDBRunner {
         return serverRunner(addresses);
     }
 
-    public TypeDBClusterServerRunner serverRunner(Addresses addrs) {
+    public TypeDBEnterpriseServerRunner serverRunner(Addresses addrs) {
         return serverRunners.get(addrs);
     }
 
     @Override
     public void stop() {
-        for (TypeDBClusterServerRunner runner : serverRunners.values()) {
+        for (TypeDBEnterpriseServerRunner runner : serverRunners.values()) {
             if (!runner.isStopped()) {
                 runner.stop();
             } else {

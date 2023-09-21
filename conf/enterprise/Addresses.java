@@ -16,7 +16,7 @@
  *
  */
 
-package com.vaticle.typedb.common.conf.cluster;
+package com.vaticle.typedb.common.conf.enterprise;
 
 import java.net.InetSocketAddress;
 import java.util.Objects;
