@@ -82,7 +82,7 @@ public class TypeDBClusterRunner implements TypeDBRunner {
         Set<Addresses> addresses = new HashSet<>();
         List<Integer> ports = Util.findUnusedPorts(serverCount * 3);
         for (int i = 0; i < serverCount; i++) {
-            String host = "127.0.0.1";
+            String host = "localhost";
             int externalPort = ports.get(3 * i);
             int internalPortZMQ = ports.get(3 * i + 1);
             int internalPortGRPC = ports.get(3 * i + 2);
