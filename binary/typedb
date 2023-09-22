@@ -107,7 +107,7 @@ elif [[ "$1" = "server" ]] || [[ "$1" = "enterprise" ]]; then
 else
     echo "Invalid argument: $1. Possible commands are: "
     echo "  Server:          typedb server [--help]"
-    echo "  Enterprise:         typedb enterprise [--help]"
+    echo "  Enterprise:      typedb enterprise [--help]"
     echo "  Console:         typedb console [--help]"
     exit 1
 fi

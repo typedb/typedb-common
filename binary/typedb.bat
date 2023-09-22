@@ -35,7 +35,7 @@ if "%1" == "server"  goto startserver
 
 echo   Invalid argument: %1. Possible commands are:
 echo   Server:          typedb server [--help]
-echo   Enterprise:         typedb enterprise [--help]
+echo   Enterprise:      typedb enterprise [--help]
 echo   Console:         typedb console [--help]
 goto exiterror
 
