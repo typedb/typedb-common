@@ -27,9 +27,7 @@ java_library(
     srcs = glob(["*.java", "*/*.java"]),
     deps = [
         "//:common",
-        "@maven//:commons_io_commons_io",
         "@maven//:info_picocli_picocli",
-        "@maven//:junit_junit",
         "@maven//:org_zeroturnaround_zt_exec",
         "@maven//:org_slf4j_slf4j_api"
     ],

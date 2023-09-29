@@ -37,8 +37,6 @@ java_library(
         "yaml/*.java",
     ]),
     deps = [
-        "@maven//:com_google_code_findbugs_jsr305",
-        "@maven//:org_slf4j_slf4j_api",
         "@maven//:org_yaml_snakeyaml",
     ],
     visibility = ["//visibility:public"],
