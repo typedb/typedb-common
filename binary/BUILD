@@ -59,17 +59,15 @@ assemble_apt(
     empty_dirs = [
         "var/log/typedb/",
     ],
-    depends = [
-        "openjdk-11-jre"
-    ],
-    permissions = {
-        "var/log/typedb/": "0777",
-    },
+    empty_dirs_permission = "0777",
     symlinks = {
         "usr/local/bin/typedb": "/opt/typedb/core/typedb",
         "opt/typedb/core/server/logs": "/var/log/typedb/",
         "usr/lib/systemd/system/typedb.service": "/opt/typedb/core/typedb.service",
     },
+    depends = [
+        "openjdk-11-jre"
+    ],
 )
 
 deploy_apt(

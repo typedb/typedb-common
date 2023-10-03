@@ -43,7 +43,7 @@ goto exiterror
 
  echo   Missing argument. Possible commands are:
  echo   Server:          typedb server [--help]
- echo   Enterprise:         typedb enterprise [--help]
+ echo   Enterprise:      typedb enterprise [--help]
  echo   Console:         typedb console [--help]
 
 goto exiterror
