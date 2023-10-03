@@ -46,7 +46,7 @@ exit_if_java_not_found
 if [ -z "$1" ]; then
     echo "Missing argument. Possible commands are:"
     echo "  Server:          typedb server [--help]"
-    echo "  Enterprise:            typedb enterprise [--help]"
+    echo "  Enterprise:      typedb enterprise [--help]"
     echo "  Console:         typedb console [--help]"
     exit 1
 elif [ "$1" = "console" ]; then
