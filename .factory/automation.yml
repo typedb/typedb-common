@@ -97,5 +97,4 @@ release:
         cat VERSION
         export DEPLOY_APT_USERNAME=$REPO_VATICLE_USERNAME
         export DEPLOY_APT_PASSWORD=$REPO_VATICLE_PASSWORD
-        sudo ln -s /usr/share/pyshared/lsb_release.py /opt/pyenv/versions/3.7.9/lib/python3.7/site-packages/lsb_release.py
         bazel run --define version=$(cat VERSION) //binary:deploy-apt -- release
