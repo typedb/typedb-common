@@ -205,11 +205,18 @@ public class Util {
                         break;
                     }
                 }
-                if (ports.size() == count) return ports;
+                if (ports.size() == count) {
+                    // We sleep to make sure the ports are released correctly
+                    // This is an alternative to using SO_REUSEADDR option for the server sockets, which ZMQ does not support
+                    Thread.sleep(100);
+                    return ports;
+                }
             }
             throw new RuntimeException("Failed to allocate ports within  " + PORT_ALLOCATION_MAX_RETRIES + " retries");
         } catch (IOException e) {
             throw new RuntimeException("Error while searching for unused port.");
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
     }
 
