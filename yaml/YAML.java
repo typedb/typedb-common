@@ -40,8 +40,9 @@ public abstract class YAML {
     }
 
     private static YAML wrap(Object yaml) {
-        if (yaml instanceof java.util.Map) {
-            assert ((java.util.Map<Object, Object>) yaml).keySet().stream().allMatch(key -> key instanceof java.lang.String);
+        if (yaml == null) return null;
+        else if (yaml instanceof java.util.Map) {
+            assert ((java.util.Map<Object, Object>) yaml).keySet().stream().allMatch(key -> key == null || key instanceof java.lang.String);
             return Map.wrap((java.util.Map<java.lang.String, Object>) yaml);
         } else if (yaml instanceof java.util.List) return List.wrap((java.util.List<Object>) yaml);
         else if (yaml instanceof java.lang.String) return new String((java.lang.String) yaml);
@@ -115,9 +116,6 @@ public abstract class YAML {
         private static Map wrap(java.util.Map<java.lang.String, Object> source) {
             java.util.Map<java.lang.String, YAML> map = new LinkedHashMap<>();
             for (java.lang.String key : source.keySet()) {
-                if (source.get(key) == null) {
-                    throw new IllegalArgumentException("Illegal null value for key: " + key + ".");
-                }
                 map.put(key, YAML.wrap(source.get(key)));
             }
             return new Map(map);
@@ -154,6 +152,7 @@ public abstract class YAML {
 
         @Override
         public Map asMap() {
+            System.out.println();
             return this;
         }
     }
@@ -169,9 +168,6 @@ public abstract class YAML {
         static List wrap(java.util.List<Object> source) {
             java.util.List<YAML> yamlList = new ArrayList<>();
             for (Object e : source) {
-                if (e == null) {
-                    throw new IllegalArgumentException("Illegal null value encountered in list.");
-                }
                 yamlList.add(YAML.wrap(e));
             }
             return new List(yamlList);
