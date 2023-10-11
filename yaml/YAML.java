@@ -42,7 +42,7 @@ public abstract class YAML {
     private static YAML wrap(Object yaml) {
         if (yaml == null) return null;
         else if (yaml instanceof java.util.Map) {
-            assert ((java.util.Map<Object, Object>) yaml).keySet().stream().allMatch(key -> key == null || key instanceof java.lang.String);
+            assert ((java.util.Map<Object, Object>) yaml).keySet().stream().allMatch(key -> key instanceof java.lang.String);
             return Map.wrap((java.util.Map<java.lang.String, Object>) yaml);
         } else if (yaml instanceof java.util.List) return List.wrap((java.util.List<Object>) yaml);
         else if (yaml instanceof java.lang.String) return new String((java.lang.String) yaml);
