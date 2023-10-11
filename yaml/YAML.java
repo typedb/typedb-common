@@ -152,7 +152,6 @@ public abstract class YAML {
 
         @Override
         public Map asMap() {
-            System.out.println();
             return this;
         }
     }
