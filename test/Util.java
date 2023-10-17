@@ -236,6 +236,7 @@ public class Util {
                 .redirectOutput(System.out)
                 .redirectError(System.err)
                 .readOutput(true)
+                .environment("JAVA_HOME", System.getProperty("java.home"))
                 .destroyOnExit();
     }
 
