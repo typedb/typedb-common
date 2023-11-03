@@ -39,6 +39,7 @@ assemble_targz(
     additional_files = {
         "//binary:typedb.service": "typedb.service",
     },
+    visibility = ["//visibility:public"]
 )
 
 assemble_targz(
@@ -47,34 +48,6 @@ assemble_targz(
         "//binary:typedb.bat": "typedb.bat",
     },
     visibility = ["//visibility:public"]
-)
-
-assemble_apt(
-    name = "assemble-linux-apt",
-    package_name = "typedb-bin",
-    maintainer = "Vaticle <community@vaticle.com>",
-    description = "TypeDB (binaries)",
-    archives = [":assemble-bash-targz", ":assemble-apt-targz"],
-    installation_dir = "/opt/typedb/core/",
-    empty_dirs = [
-        "var/log/typedb/",
-    ],
-    empty_dirs_permission = "0777",
-    symlinks = {
-        "usr/local/bin/typedb": "/opt/typedb/core/typedb",
-        "opt/typedb/core/server/logs": "/var/log/typedb/",
-        "usr/lib/systemd/system/typedb.service": "/opt/typedb/core/typedb.service",
-    },
-    depends = [
-        "openjdk-11-jre"
-    ],
-)
-
-deploy_apt(
-    name = "deploy-apt",
-    target = ":assemble-linux-apt",
-    snapshot = deployment['apt.snapshot'],
-    release = deployment['apt.release']
 )
 
 checkstyle_test(
