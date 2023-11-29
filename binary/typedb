@@ -90,10 +90,10 @@ else case "$1" in
         fi
 
         IDX=0
-        EXTRAOPTS=
+        EXTRA_OPTS=
         while [[ "${@:IDX}" ]]; do
             case ${@:IDX:1} in
-                --debug) EXTRAOPTS=-ea
+                --debug) EXTRA_OPTS=-ea
                 break;
             esac
             IDX=$((IDX+1))
@@ -102,7 +102,7 @@ else case "$1" in
         CLASSPATH="${TYPEDB_SERVER_DIR}/conf/:${TYPEDB_SERVER_LIB_DIR}/*"
 
         # exec replaces current shell process with java so no commands after these ones will ever get executed
-        exec ${JAVA_BIN} ${JAVAOPTS} ${EXTRAOPTS} -cp "${CLASSPATH}" -Dtypedb.dir="${TYPEDB_HOME}" ${TYPEDB_SERVER_CLASS} "${@:2}"
+        exec ${JAVA_BIN} ${JAVAOPTS} ${EXTRA_OPTS} -cp "${CLASSPATH}" -Dtypedb.dir="${TYPEDB_HOME}" ${TYPEDB_SERVER_CLASS} "${@:2}"
         ;;
 
     "")
