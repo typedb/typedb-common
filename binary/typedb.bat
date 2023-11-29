@@ -20,33 +20,24 @@ IF %TYPEDB_HOME:~-1%==\ SET TYPEDB_HOME=%TYPEDB_HOME:~0,-1%
 
 where java >NUL 2>NUL
 if %ERRORLEVEL% GEQ 1 (
-    echo Java is not installed on this machine.
-    echo TypeDB needs Java 11+ in order to run. See the following setup guide: http://docs.vaticle.com/docs/get-started/setup-guide
-    pause
-    exit 1
+  echo Java is not installed on this machine. TypeDB needs Java 11+ in order to run.
+  pause
+  exit 1
 )
 
 
 if "%1" == "" goto missingargument
 
 if "%1" == "console" goto startconsole
-if "%1" == "enterprise" goto startenterprise
 if "%1" == "server"  goto startserver
 
 echo   Invalid argument: %1. Possible commands are:
-echo   Server:          typedb server [--help]
-echo   Enterprise:      typedb enterprise [--help]
-echo   Console:         typedb console [--help]
-goto exiterror
+goto print_usage
 
 :missingargument
 
  echo   Missing argument. Possible commands are:
- echo   Server:          typedb server [--help]
- echo   Enterprise:      typedb enterprise [--help]
- echo   Console:         typedb console [--help]
-
-goto exiterror
+goto print_usage
 
 :startconsole
 
@@ -56,11 +47,15 @@ if exist "%TYPEDB_HOME%\console\" (
   goto exit
 ) else (
   echo TypeDB Console is not included in this TypeDB distribution^.
-  echo You may want to install TypeDB Console or TypeDB ^(all^)^.
+  echo You may want to install TypeDB Console^.
   goto exiterror
 )
 
 :startserver
+
+if exist "%TYPEDB_HOME%\server\com-vaticle-typedb-typedb-enterprise-server-*.jar" (
+  goto startenterprise
+)
 
 set "G_CP=%TYPEDB_HOME%\server\conf\;%TYPEDB_HOME%\server\lib\*"
 echo "%G_CP%"
@@ -70,9 +65,7 @@ if exist "%TYPEDB_HOME%\server\" (
   start java %SERVER_JAVAOPTS% -cp "%G_CP%" -Dtypedb.dir="%TYPEDB_HOME%" com.vaticle.typedb.core.server.TypeDBServer %2 %3 %4 %5 %6 %7 %8 %9
   goto exit
 ) else (
-  echo TypeDB Server is not included in this TypeDB distribution^.
-  echo You may want to install TypeDB Server or TypeDB ^(all^)^.
-  goto exiterror
+  goto server_not_found
 )
 
 :startenterprise
@@ -83,14 +76,24 @@ if exist "%TYPEDB_HOME%\server\" (
   start java %SERVER_JAVAOPTS% -cp "%G_CP%" -Dtypedb.dir="%TYPEDB_HOME%" com.vaticle.typedb.enterprise.server.TypeDBEnterpriseServer %2 %3 %4 %5 %6 %7 %8 %9
   goto exit
 ) else (
-  echo TypeDB Enterprise is not included in this TypeDB distribution^.
-  echo You may want to install TypeDB Enterprise ^(all^)^.
-  goto exiterror
+  goto server_not_found
 )
 
+:server_not_found
+echo TypeDB Server is not included in this TypeDB distribution^.
+echo You may want to install TypeDB^.
+goto exiterror
 
 :exit
 exit /b 0
+
+:print_usage
+if exist "%TYPEDB_HOME%\server\" (
+  echo   Server:          typedb server [--help]
+)
+if exist "%TYPEDB_HOME%\console\" (
+  echo   Console:         typedb console [--help]
+)
 
 :exiterror
 exit /b 1
