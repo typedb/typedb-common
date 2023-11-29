@@ -86,13 +86,13 @@ if exist "%TYPEDB_HOME%\server\" (
   goto server_not_found
 )
 
-:exit
-exit /b 0
-
 :server_not_found
 echo TypeDB Server is not included in this TypeDB distribution^.
 echo You may want to install TypeDB^.
 goto exiterror
+
+:exit
+exit /b 0
 
 :print_usage
 if exist "%TYPEDB_HOME%\server\" (
@@ -101,7 +101,6 @@ if exist "%TYPEDB_HOME%\server\" (
 if exist "%TYPEDB_HOME%\console\" (
   echo   Console:         typedb console [--help]
 )
-goto exiterror
 
 :exiterror
 exit /b 1
