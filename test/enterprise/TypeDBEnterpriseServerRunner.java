@@ -121,7 +121,7 @@ public interface TypeDBEnterpriseServerRunner extends TypeDBRunner {
 
         public List<String> command() {
             List<String> cmd = new ArrayList<>();
-            cmd.add("enterprise");
+            cmd.add("server");
             serverOptions.forEach((key, value) -> cmd.add(key + "=" + value));
             return Util.typeDBCommand(cmd);
         }
