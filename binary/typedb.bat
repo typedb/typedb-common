@@ -43,7 +43,7 @@ goto print_usage
 
 set "G_CP=%TYPEDB_HOME%\console\conf\;%TYPEDB_HOME%\console\lib\*"
 if exist "%TYPEDB_HOME%\console\" (
-  start java %CONSOLE_JAVAOPTS% -cp "%G_CP%" -Dtypedb.dir="%TYPEDB_HOME%" com.vaticle.typedb.console.TypeDBConsole %2 %3 %4 %5 %6 %7 %8 %9
+  java %CONSOLE_JAVAOPTS% -cp "%G_CP%" -Dtypedb.dir="%TYPEDB_HOME%" com.vaticle.typedb.console.TypeDBConsole %2 %3 %4 %5 %6 %7 %8 %9
   goto exit
 ) else (
   echo TypeDB Console is not included in this TypeDB distribution^.
@@ -62,7 +62,11 @@ echo "%G_CP%"
 echo "%TYPEDB_HOME%"
 
 if exist "%TYPEDB_HOME%\server\" (
-  start java %SERVER_JAVAOPTS% -cp "%G_CP%" -Dtypedb.dir="%TYPEDB_HOME%" com.vaticle.typedb.core.server.TypeDBServer %2 %3 %4 %5 %6 %7 %8 %9
+  if "%2"=="--help" (
+    java %SERVER_JAVAOPTS% -cp "%G_CP%" -Dtypedb.dir="%TYPEDB_HOME%" com.vaticle.typedb.core.server.TypeDBServer %2 %3 %4 %5 %6 %7 %8 %9
+  ) else (
+    start java %SERVER_JAVAOPTS% -cp "%G_CP%" -Dtypedb.dir="%TYPEDB_HOME%" com.vaticle.typedb.core.server.TypeDBServer %2 %3 %4 %5 %6 %7 %8 %9
+  )
   goto exit
 ) else (
   goto server_not_found
@@ -73,19 +77,23 @@ if exist "%TYPEDB_HOME%\server\" (
 set "G_CP=%TYPEDB_HOME%\server\conf\;%TYPEDB_HOME%\server\lib\*"
 
 if exist "%TYPEDB_HOME%\server\" (
-  start java %SERVER_JAVAOPTS% -cp "%G_CP%" -Dtypedb.dir="%TYPEDB_HOME%" com.vaticle.typedb.enterprise.server.TypeDBEnterpriseServer %2 %3 %4 %5 %6 %7 %8 %9
+  if "%2"=="--help" (
+    java %SERVER_JAVAOPTS% -cp "%G_CP%" -Dtypedb.dir="%TYPEDB_HOME%" com.vaticle.typedb.enterprise.server.TypeDBEnterpriseServer %2 %3 %4 %5 %6 %7 %8 %9
+  ) else (
+    start java %SERVER_JAVAOPTS% -cp "%G_CP%" -Dtypedb.dir="%TYPEDB_HOME%" com.vaticle.typedb.enterprise.server.TypeDBEnterpriseServer %2 %3 %4 %5 %6 %7 %8 %9
+  )
   goto exit
 ) else (
   goto server_not_found
 )
 
+:exit
+exit /b 0
+
 :server_not_found
 echo TypeDB Server is not included in this TypeDB distribution^.
 echo You may want to install TypeDB^.
 goto exiterror
-
-:exit
-exit /b 0
 
 :print_usage
 if exist "%TYPEDB_HOME%\server\" (
@@ -94,6 +102,7 @@ if exist "%TYPEDB_HOME%\server\" (
 if exist "%TYPEDB_HOME%\console\" (
   echo   Console:         typedb console [--help]
 )
+goto exiterror
 
 :exiterror
 exit /b 1
