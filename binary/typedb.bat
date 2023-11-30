@@ -64,7 +64,7 @@ if exist "%TYPEDB_HOME%\server\" (
   if "%2"=="--help" (
     java %SERVER_JAVAOPTS% -cp "%G_CP%" -Dtypedb.dir="%TYPEDB_HOME%" com.vaticle.typedb.core.server.TypeDBServer %2 %3 %4 %5 %6 %7 %8 %9
   ) else (
-    start cmd /c java %SERVER_JAVAOPTS% -cp "%G_CP%" -Dtypedb.dir="%TYPEDB_HOME%" com.vaticle.typedb.core.server.TypeDBServer %2 %3 %4 %5 %6 %7 %8 %9 ^|^| pause
+    start java %SERVER_JAVAOPTS% -cp "%G_CP%" -Dtypedb.dir="%TYPEDB_HOME%" com.vaticle.typedb.core.server.TypeDBServer %2 %3 %4 %5 %6 %7 %8 %9
   )
   goto exit
 ) else (
@@ -79,20 +79,20 @@ if exist "%TYPEDB_HOME%\server\" (
   if "%2"=="--help" (
     java %SERVER_JAVAOPTS% -cp "%G_CP%" -Dtypedb.dir="%TYPEDB_HOME%" com.vaticle.typedb.cloud.server.TypeDBCloudServer %2 %3 %4 %5 %6 %7 %8 %9
   ) else (
-    start cmd /c java %SERVER_JAVAOPTS% -cp "%G_CP%" -Dtypedb.dir="%TYPEDB_HOME%" com.vaticle.typedb.cloud.server.TypeDBCloudServer %2 %3 %4 %5 %6 %7 %8 %9 ^|^| pause
+    start java %SERVER_JAVAOPTS% -cp "%G_CP%" -Dtypedb.dir="%TYPEDB_HOME%" com.vaticle.typedb.cloud.server.TypeDBCloudServer %2 %3 %4 %5 %6 %7 %8 %9
   )
   goto exit
 ) else (
   goto server_not_found
 )
 
+:exit
+exit /b 0
+
 :server_not_found
 echo TypeDB Server is not included in this TypeDB distribution^.
 echo You may want to install TypeDB^.
 goto exiterror
-
-:exit
-exit /b 0
 
 :print_usage
 if exist "%TYPEDB_HOME%\server\" (
@@ -101,6 +101,7 @@ if exist "%TYPEDB_HOME%\server\" (
 if exist "%TYPEDB_HOME%\console\" (
   echo   Console:         typedb console [--help]
 )
+goto exiterror
 
 :exiterror
 exit /b 1
