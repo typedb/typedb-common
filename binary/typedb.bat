@@ -64,7 +64,7 @@ if exist "%TYPEDB_HOME%\server\" (
   if "%2"=="--help" (
     java %SERVER_JAVAOPTS% -cp "%G_CP%" -Dtypedb.dir="%TYPEDB_HOME%" com.vaticle.typedb.core.server.TypeDBServer %2 %3 %4 %5 %6 %7 %8 %9
   ) else (
-    start java %SERVER_JAVAOPTS% -cp "%G_CP%" -Dtypedb.dir="%TYPEDB_HOME%" com.vaticle.typedb.core.server.TypeDBServer %2 %3 %4 %5 %6 %7 %8 %9
+    start cmd /c java %SERVER_JAVAOPTS% -cp "%G_CP%" -Dtypedb.dir="%TYPEDB_HOME%" com.vaticle.typedb.core.server.TypeDBServer %2 %3 %4 %5 %6 %7 %8 %9 ^|^| pause
   )
   goto exit
 ) else (
@@ -79,7 +79,7 @@ if exist "%TYPEDB_HOME%\server\" (
   if "%2"=="--help" (
     java %SERVER_JAVAOPTS% -cp "%G_CP%" -Dtypedb.dir="%TYPEDB_HOME%" com.vaticle.typedb.cloud.server.TypeDBCloudServer %2 %3 %4 %5 %6 %7 %8 %9
   ) else (
-    start java %SERVER_JAVAOPTS% -cp "%G_CP%" -Dtypedb.dir="%TYPEDB_HOME%" com.vaticle.typedb.cloud.server.TypeDBCloudServer %2 %3 %4 %5 %6 %7 %8 %9
+    start cmd /c java %SERVER_JAVAOPTS% -cp "%G_CP%" -Dtypedb.dir="%TYPEDB_HOME%" com.vaticle.typedb.cloud.server.TypeDBCloudServer %2 %3 %4 %5 %6 %7 %8 %9 ^|^| pause
   )
   goto exit
 ) else (
