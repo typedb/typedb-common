@@ -24,6 +24,11 @@ fi
 [[ $(readlink $0) ]] && path=$(readlink $0) || path=$0
 TYPEDB_HOME=$(cd "$(dirname "${path}")" && pwd -P)
 
+TYPEDB_SERVER_DIR="${TYPEDB_HOME}/server"
+
+SERVER_PRESENT=$([[ -d "$TYPEDB_SERVER_DIR" ]] && echo yes)
+CONSOLE_PRESENT=$([[ -d "${TYPEDB_HOME}/console" ]] && echo yes)
+
 # ================================================
 # common helper functions
 # ================================================
@@ -37,78 +42,78 @@ exit_if_java_not_found() {
     fi
 }
 
+print_usage() {
+    if [[ $SERVER_PRESENT ]]; then
+        echo "  Server:          typedb server [--help]"
+    fi
+    if [[ $CONSOLE_PRESENT ]]; then
+        echo "  Console:         typedb console [--help]"
+    fi
+}
+
 # =============================================
 # main routine
 # =============================================
 
 exit_if_java_not_found
 
-if [ -z "$1" ]; then
-    echo "Missing argument. Possible commands are:"
-    echo "  Server:          typedb server [--help]"
-    echo "  Enterprise:      typedb enterprise [--help]"
-    echo "  Console:         typedb console [--help]"
+if [[ ! $SERVER_PRESENT && ! $CONSOLE_PRESENT ]]; then
+    echo "TypeDB Console and Server are not installed!"
     exit 1
-elif [ "$1" = "console" ]; then
-    if [ -d "${TYPEDB_HOME}/console" ]; then
+
+else case "$1" in
+    console)
+        if [[ ! $CONSOLE_PRESENT ]]; then
+            echo "TypeDB Console not found. Make sure to install or download TypeDB Console."
+            exit 1
+        fi
+
         SERVICE_LIB_CP="console/lib/*"
         CLASSPATH="${TYPEDB_HOME}/${SERVICE_LIB_CP}:${TYPEDB_HOME}/console/conf/"
-    # exec replaces current shell process with java so no commands after this one will ever get executed
-        exec $JAVA_BIN ${JAVAOPTS} -cp "${CLASSPATH}" -Dtypedb.dir="${TYPEDB_HOME}" com.vaticle.typedb.console.TypeDBConsole "${@:2}"
-    else
-        echo "TypeDB Console is not found. Make sure to install or download TypeDB Console or TypeDB (all)."
-        exit 1
-    fi
-elif [[ "$1" = "server" ]] || [[ "$1" = "enterprise" ]]; then
+        # exec replaces current shell process with java so no commands after this one will ever get executed
+        exec ${JAVA_BIN} ${JAVAOPTS} -cp "${CLASSPATH}" -Dtypedb.dir="${TYPEDB_HOME}" com.vaticle.typedb.console.TypeDBConsole "${@:2}"
+        ;;
 
-    TYPEDB_SERVER_DIR="${TYPEDB_HOME}/server"
-    TYPEDB_SERVER_LIB_DIR="${TYPEDB_SERVER_DIR}/lib"
-    TYPEDB_ENTERPRISE_SERVER_JAR=("${TYPEDB_SERVER_LIB_DIR}"/com-vaticle-typedb-typedb-enterprise-server-*.jar)
+    server)
+        if [[ ! $SERVER_PRESENT ]]; then
+            echo "TypeDB Server not found. Make sure to install or download TypeDB."
+            exit 1
+        fi
 
-    CLASSPATH="${TYPEDB_SERVER_DIR}/conf/:${TYPEDB_SERVER_LIB_DIR}/*"
-
-    if [[ "$1" = "server" ]]; then
-        TYPEDB_ALL_NAME="TypeDB (All)"
-        TYPEDB_SERVER_NAME="TypeDB (Server)"
-        TYPEDB_SERVER_CLASS=com.vaticle.typedb.core.server.TypeDBServer
+        TYPEDB_SERVER_LIB_DIR="${TYPEDB_SERVER_DIR}/lib"
+        TYPEDB_ENTERPRISE_SERVER_JAR=("${TYPEDB_SERVER_LIB_DIR}"/com-vaticle-typedb-typedb-enterprise-server-*.jar)
 
         if [[ -f "$TYPEDB_ENTERPRISE_SERVER_JAR" ]]; then
-            echo "$TYPEDB_SERVER_NAME is not found. Make sure to install or download $TYPEDB_SERVER_NAME or $TYPEDB_ALL_NAME."
-            exit 1
+            TYPEDB_SERVER_CLASS=com.vaticle.typedb.enterprise.server.TypeDBEnterpriseServer
+        else
+            TYPEDB_SERVER_CLASS=com.vaticle.typedb.core.server.TypeDBServer
         fi
-    else
-        TYPEDB_ALL_NAME="TypeDB Enterprise (All)"
-        TYPEDB_SERVER_NAME="TypeDB Enterprise (Server)"
-        TYPEDB_SERVER_CLASS=com.vaticle.typedb.enterprise.server.TypeDBEnterpriseServer
 
-        if [[ ! -f "$TYPEDB_ENTERPRISE_SERVER_JAR" ]]; then
-            echo "$TYPEDB_SERVER_NAME is not found. Make sure to install or download $TYPEDB_SERVER_NAME or $TYPEDB_ALL_NAME."
-            exit 1
-        fi
-    fi
+        IDX=0
+        EXTRAOPTS=
+        while [[ "${@:IDX}" ]]; do
+            case ${@:IDX:1} in
+                --debug) EXTRAOPTS=-ea
+                break;
+            esac
+            IDX=$((IDX+1))
+        done
 
-    IDX=0
-    while [[ "${@:IDX}" ]]; do
-        case ${@:IDX:1} in
-            --debug) DEBUG=yes;
-            break;
-        esac
-        IDX=$((IDX+1))
-    done
+        CLASSPATH="${TYPEDB_SERVER_DIR}/conf/:${TYPEDB_SERVER_LIB_DIR}/*"
 
-    # exec replaces current shell process with java so no commands after these ones will ever get executed
-    if [ $DEBUG ]; then
-        exec $JAVA_BIN ${JAVAOPTS} -ea -cp "${CLASSPATH}" -Dtypedb.dir="${TYPEDB_HOME}" \
-            ${TYPEDB_SERVER_CLASS} "${@:2}"
-    else
-        exec $JAVA_BIN ${JAVAOPTS} -cp "${CLASSPATH}" -Dtypedb.dir="${TYPEDB_HOME}" \
-            ${TYPEDB_SERVER_CLASS} "${@:2}"
-    fi
-else
-    echo "Invalid argument: $1. Possible commands are: "
-    echo "  Server:          typedb server [--help]"
-    echo "  Enterprise:      typedb enterprise [--help]"
-    echo "  Console:         typedb console [--help]"
-    exit 1
+        # exec replaces current shell process with java so no commands after these ones will ever get executed
+        exec ${JAVA_BIN} ${JAVAOPTS} ${EXTRAOPTS} -cp "${CLASSPATH}" -Dtypedb.dir="${TYPEDB_HOME}" ${TYPEDB_SERVER_CLASS} "${@:2}"
+        ;;
+
+    "")
+        echo "Missing argument. Possible commands are:"
+        print_usage
+        exit 1
+        ;;
+    *)
+        echo "Invalid argument: $1. Possible commands are: "
+        print_usage
+        exit 1
+        ;;
+    esac
 fi
-
