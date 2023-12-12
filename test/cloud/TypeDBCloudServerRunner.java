@@ -16,9 +16,9 @@
  *
  */
 
-package com.vaticle.typedb.common.test.enterprise;
+package com.vaticle.typedb.common.test.cloud;
 
-import com.vaticle.typedb.common.conf.enterprise.Addresses;
+import com.vaticle.typedb.common.conf.cloud.Addresses;
 import com.vaticle.typedb.common.test.Util;
 import com.vaticle.typedb.common.test.TypeDBRunner;
 import org.zeroturnaround.exec.ProcessExecutor;
@@ -39,13 +39,13 @@ import static com.vaticle.typedb.common.test.Util.createProcessExecutor;
 import static com.vaticle.typedb.common.test.Util.getServerArchiveFile;
 import static com.vaticle.typedb.common.test.Util.unarchive;
 
-public interface TypeDBEnterpriseServerRunner extends TypeDBRunner {
+public interface TypeDBCloudServerRunner extends TypeDBRunner {
 
     Addresses addresses();
 
     class Factory {
 
-        protected TypeDBEnterpriseServerRunner createServerRunner(Map<String, String> options) {
+        protected TypeDBCloudServerRunner createServerRunner(Map<String, String> options) {
             try {
                 return new Standalone(options);
             } catch (InterruptedException | TimeoutException | IOException e) {
@@ -54,7 +54,7 @@ public interface TypeDBEnterpriseServerRunner extends TypeDBRunner {
         }
     }
 
-    class Standalone implements TypeDBEnterpriseServerRunner {
+    class Standalone implements TypeDBCloudServerRunner {
 
         protected final Path distribution;
         protected final Map<String, String> serverOptions;
@@ -72,7 +72,7 @@ public interface TypeDBEnterpriseServerRunner extends TypeDBRunner {
         }
 
         private String name() {
-            return "TypeDB Enterprise";
+            return "TypeDB Cloud";
         }
 
         public Map<String, String> options() {
@@ -86,23 +86,23 @@ public interface TypeDBEnterpriseServerRunner extends TypeDBRunner {
 
         @Override
         public Addresses addresses() {
-            return EnterpriseServerOpts.address(serverOptions);
+            return CloudServerOpts.address(serverOptions);
         }
 
         public Set<Addresses> peers() {
-            return EnterpriseServerOpts.peers(serverOptions);
+            return CloudServerOpts.peers(serverOptions);
         }
 
         private Path dataDir() {
-            return EnterpriseServerOpts.storageData(serverOptions);
+            return CloudServerOpts.storageData(serverOptions);
         }
 
         private Path replicationDir() {
-            return EnterpriseServerOpts.storageReplication(serverOptions);
+            return CloudServerOpts.storageReplication(serverOptions);
         }
 
         private Path logsDir() {
-            return EnterpriseServerOpts.logOutput(serverOptions);
+            return CloudServerOpts.logOutput(serverOptions);
         }
 
         @Override

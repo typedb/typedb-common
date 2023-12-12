@@ -31,7 +31,7 @@ java_library(
         "concurrent/*.java",
         "concurrent/actor/*.java",
         "concurrent/actor/eventloop/*.java",
-        "conf/enterprise/*.java",
+        "conf/cloud/*.java",
         "exception/*.java",
         "util/*.java",
         "yaml/*.java",
