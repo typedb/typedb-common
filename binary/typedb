@@ -81,10 +81,10 @@ else case "$1" in
         fi
 
         TYPEDB_SERVER_LIB_DIR="${TYPEDB_SERVER_DIR}/lib"
-        TYPEDB_ENTERPRISE_SERVER_JAR=("${TYPEDB_SERVER_LIB_DIR}"/com-vaticle-typedb-typedb-enterprise-server-*.jar)
+        TYPEDB_CLOUD_SERVER_JAR=("${TYPEDB_SERVER_LIB_DIR}"/com-vaticle-typedb-typedb-cloud-server-*.jar)
 
-        if [[ -f "$TYPEDB_ENTERPRISE_SERVER_JAR" ]]; then
-            TYPEDB_SERVER_CLASS=com.vaticle.typedb.enterprise.server.TypeDBEnterpriseServer
+        if [[ -f "$TYPEDB_CLOUD_SERVER_JAR" ]]; then
+            TYPEDB_SERVER_CLASS=com.vaticle.typedb.cloud.server.TypeDBCloudServer
         else
             TYPEDB_SERVER_CLASS=com.vaticle.typedb.core.server.TypeDBServer
         fi

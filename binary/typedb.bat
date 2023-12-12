@@ -52,8 +52,8 @@ if exist "%TYPEDB_HOME%\console\" (
 
 :startserver
 
-if exist "%TYPEDB_HOME%\server\com-vaticle-typedb-typedb-enterprise-server-*.jar" (
-  goto startenterprise
+if exist "%TYPEDB_HOME%\server\com-vaticle-typedb-typedb-cloud-server-*.jar" (
+  goto startcloud
 )
 
 set "G_CP=%TYPEDB_HOME%\server\conf\;%TYPEDB_HOME%\server\lib\*"
@@ -71,15 +71,15 @@ if exist "%TYPEDB_HOME%\server\" (
   goto server_not_found
 )
 
-:startenterprise
+:startcloud
 
 set "G_CP=%TYPEDB_HOME%\server\conf\;%TYPEDB_HOME%\server\lib\*"
 
 if exist "%TYPEDB_HOME%\server\" (
   if "%2"=="--help" (
-    java %SERVER_JAVAOPTS% -cp "%G_CP%" -Dtypedb.dir="%TYPEDB_HOME%" com.vaticle.typedb.enterprise.server.TypeDBEnterpriseServer %2 %3 %4 %5 %6 %7 %8 %9
+    java %SERVER_JAVAOPTS% -cp "%G_CP%" -Dtypedb.dir="%TYPEDB_HOME%" com.vaticle.typedb.cloud.server.TypeDBCloudServer %2 %3 %4 %5 %6 %7 %8 %9
   ) else (
-    start cmd /c java %SERVER_JAVAOPTS% -cp "%G_CP%" -Dtypedb.dir="%TYPEDB_HOME%" com.vaticle.typedb.enterprise.server.TypeDBEnterpriseServer %2 %3 %4 %5 %6 %7 %8 %9 ^|^| pause
+    start cmd /c java %SERVER_JAVAOPTS% -cp "%G_CP%" -Dtypedb.dir="%TYPEDB_HOME%" com.vaticle.typedb.cloud.server.TypeDBCloudServer %2 %3 %4 %5 %6 %7 %8 %9 ^|^| pause
   )
   goto exit
 ) else (
