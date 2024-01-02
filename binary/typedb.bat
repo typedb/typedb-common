@@ -35,7 +35,7 @@ goto print_usage
 
 :missingargument
 
- echo   Missing argument. Possible commands are:
+echo   Missing argument. Possible commands are:
 goto print_usage
 
 :startconsole
@@ -105,3 +105,4 @@ goto exiterror
 
 :exiterror
 exit /b 1
+
