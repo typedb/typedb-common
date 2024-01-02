@@ -78,6 +78,7 @@ checkstyle_test(
     include = glob([
         ".bazelrc",
         ".gitignore",
+        ".gitattributes",
         ".factory/automation.yml",
         "BUILD",
         "WORKSPACE",
