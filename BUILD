@@ -77,6 +77,7 @@ checkstyle_test(
     name = "checkstyle",
     include = glob([
         ".bazelrc",
+        ".gitattributes",
         ".gitignore",
         ".gitattributes",
         ".factory/automation.yml",
