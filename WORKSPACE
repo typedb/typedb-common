@@ -79,9 +79,9 @@ load("@vaticle_bazel_distribution//github:deps.bzl", github_deps = "deps")
 github_deps()
 
 # Load @vaticle_bazel_distribution_cloudsmith
-load("@vaticle_bazel_distribution//common/cloudsmith:deps.bzl", cloudsmith_deps = "deps")
+load("@vaticle_bazel_distribution//common/uploader:deps.bzl", cloudsmith_deps = "deps")
 cloudsmith_deps()
-load("@vaticle_bazel_distribution_cloudsmith//:requirements.bzl", install_cloudsmith_deps = "install_deps")
+load("@vaticle_bazel_distribution_uploader//:requirements.bzl", install_cloudsmith_deps = "install_deps")
 install_cloudsmith_deps()
 
 ################################
