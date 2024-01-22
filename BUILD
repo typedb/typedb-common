@@ -109,5 +109,6 @@ filegroup(
         "@vaticle_dependencies//tool/release/notes:create",
         "@vaticle_dependencies//tool/sonarcloud:code-analysis",
         "@vaticle_dependencies//tool/unuseddeps:unused-deps",
+        "@vaticle_dependencies//tool/sync:dependencies",
     ]
 )
