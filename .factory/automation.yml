@@ -59,7 +59,6 @@ build:
         export DEPLOY_MAVEN_USERNAME=$REPO_TYPEDB_USERNAME
         export DEPLOY_MAVEN_PASSWORD=$REPO_TYPEDB_PASSWORD
         bazel run --define version=$(git rev-parse HEAD) //:deploy-maven -- snapshot
-        bazel run --define version=$(git rev-parse HEAD) //test:deploy-maven -- snapshot
     sync-dependencies:
       image: vaticle-ubuntu-22.04
       filter:
@@ -88,7 +87,6 @@ release:
         export DEPLOY_MAVEN_USERNAME=$REPO_TYPEDB_USERNAME
         export DEPLOY_MAVEN_PASSWORD=$REPO_TYPEDB_PASSWORD
         bazel run --define version=$(cat VERSION) //:deploy-maven -- release
-        bazel run --define version=$(cat VERSION) //test:deploy-maven -- release
     sync-dependencies-release:
       image: vaticle-ubuntu-22.04
       filter:
